@@ -13,9 +13,20 @@ import Turnstile
 import BCrypt
 import Sanitized
 
+extension Stripe {
+    
+    func createStandaloneAccount(for customer: Customer, from source: Token, on account: String) throws -> StripeCustomer {
+        guard let customerId = customer.id?.int else {
+            throw Abort.custom(status: .internalServerError, message: "Missing customer id for customer. \(customer.prettyString)")
+        }
+        
+        return try Stripe.shared.createNormalAccount(email: customer.email, source: source.id, local_id: customerId, on: account)
+    }
+}
+
 final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["email", "name", "password", "defaultShipping"]
+    static var permitted: [String] = ["email", "name", "password", "default_shipping_id"]
     
     var id: Node?
     var exists = false
@@ -25,12 +36,12 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     let password: String
     let salt: BCryptSalt
 
-    var defaultShipping: Node?
+    var default_shipping_id: Node?
     var stripe_id: String?
     
     init(node: Node, in context: Context) throws {
         id = try? node.extract("id")
-        defaultShipping = try? node.extract("default_shipping")
+        default_shipping_id = try? node.extract("default_shipping_id")
         
         // Name and email are always mandatory
         email = try node.extract("email")
@@ -54,15 +65,17 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
             "email" : .string(email),
             "password" : .string(password),
             "salt" : .string(salt.string)
-        ]).add(objects: ["stripe_id" : stripe_id,
-                         "id" : id,
-                         "default_shipping" : defaultShipping])
+        ]).add(objects: [
+            "id" : id,
+            "stripe_id" : stripe_id,
+             "default_shipping_id" : default_shipping_id
+        ])
     }
     
     func postValidate() throws {
-        if defaultShipping != nil {
-            guard (try? defaultShippingAddress().first()) ?? nil != nil else {
-                throw ModelError.missingLink(from: Customer.self, to: Shipping.self, id: defaultShipping?.int)
+        if default_shipping_id != nil {
+            guard (try? defaultShipping().first()) ?? nil != nil else {
+                throw ModelError.missingLink(from: Customer.self, to: CustomerAddress.self, id: default_shipping_id?.int)
             }
         }
     }
@@ -75,7 +88,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
             box.string("email")
             box.string("password")
             box.string("salt")
-            box.int("default_shipping", optional: false)
+            box.int("default_shipping_id", optional: false)
         }
     }
     
@@ -85,16 +98,12 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
 }
 
 extension Customer {
-    
-    func reviews() -> Children<Review> {
-        return fix_children()
-    }
 
-    func defaultShippingAddress() throws -> Parent<Shipping> {
-        return try parent(defaultShipping)
+    func defaultShipping() throws -> Parent<CustomerAddress> {
+        return try parent(default_shipping_id)
     }
     
-    func shippingAddresses() -> Children<Shipping> {
+    func shippingAddresses() -> Children<CustomerAddress> {
         return fix_children()
     }
     
@@ -138,19 +147,6 @@ extension Customer: User {
     
     static func register(credentials: Credentials) throws -> Auth.User {
         throw Abort.custom(status: .badRequest, message: "Register not supported.")
-    }
-}
-
-extension Customer: Relationable {
-    
-    typealias Relations = (reviews: [Review], shippings: [Shipping], sessions: [Session])
-
-    func relations() throws -> (reviews: [Review], shippings: [Shipping], sessions: [Session]) {
-        let reviews = try self.reviews().all()
-        let shippingAddresess = try self.shippingAddresses().all()
-        let sessions = try self.sessions().all()
-        
-        return (reviews, shippingAddresess, sessions)
     }
 }
 

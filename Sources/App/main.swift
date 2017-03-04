@@ -16,4 +16,7 @@ import Auth
 
 let drop = Droplet.create()
 
+drop.resource("makers", MakerController())
+drop.resource("customers", CustomerController())
+
 drop.run()

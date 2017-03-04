@@ -1,5 +1,5 @@
 //
-//  UserAuthMiddleware.swift
+//  MakerAuthMiddleware.swift
 //  subber-api
 //
 //  Created by Hakon Hanesand on 11/10/16.
@@ -14,13 +14,13 @@ import Cache
 import Auth
 import Vapor
 
-private let cookieName = "vapor-user-auth"
-private let storageName = "userSubject"
+private let cookieName = "maker-auth"
+private let storageName = "makerSubject"
 private let cookieTimeout: TimeInterval = 7 * 24 * 60 * 60
 
 extension Request {
     
-    func userSubject() throws -> Subject {
+    func makerSubject() throws -> Subject {
         guard let subject = storage[storageName] as? Subject else {
             throw AuthError.noSubject
         }
@@ -29,15 +29,15 @@ extension Request {
     }
 }
 
-class UserAuthMiddleware: Middleware {
+public class MakerAuthMiddleware: Middleware {
 
     private let turnstile: Turnstile
     private let cookieFactory: CookieFactory
-
+    
     public typealias CookieFactory = (String) -> Cookie
-
+    
     init() {
-        let realm = AuthenticatorRealm<Customer>()
+        let realm = AuthenticatorRealm<Maker>()
         self.turnstile = Turnstile(sessionManager: DatabaseLoginSessionManager(realm: realm), realm: realm)
         
         self.cookieFactory = { value in
@@ -58,7 +58,7 @@ class UserAuthMiddleware: Middleware {
         )
         
         let response = try next.respond(to: request)
-        let session = try request.userSubject().authDetails?.sessionID
+        let session = try request.makerSubject().authDetails?.sessionID
         
         if let session = session, request.cookies[cookieName] != session {
             response.cookies.insert(cookieFactory(session))
@@ -71,14 +71,13 @@ class UserAuthMiddleware: Middleware {
     }
 }
 
-public class UserProtectMiddleware: Middleware {
+public class MakerProtectMiddleware: Middleware {
     
     public func respond(to request: Request, chainingTo next: Responder) throws -> Response {
-        guard try request.userSubject().authenticated else {
-            throw Abort.custom(status: .forbidden, message: "No user subject.")
+        guard try request.makerSubject().authenticated else {
+            throw Abort.custom(status: .forbidden, message: "No maker subject.")
         }
         
         return try next.respond(to: request)
     }
 }
-

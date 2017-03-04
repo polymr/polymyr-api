@@ -1,5 +1,5 @@
 //
-//  VendorAuthMiddleware.swift
+//  UserAuthMiddleware.swift
 //  subber-api
 //
 //  Created by Hakon Hanesand on 11/10/16.
@@ -14,13 +14,13 @@ import Cache
 import Auth
 import Vapor
 
-private let cookieName = "vapor-vendor-auth"
-private let storageName = "vendorSubject"
+private let cookieName = "vapor-user-auth"
+private let storageName = "userSubject"
 private let cookieTimeout: TimeInterval = 7 * 24 * 60 * 60
 
 extension Request {
     
-    func vendorSubject() throws -> Subject {
+    func userSubject() throws -> Subject {
         guard let subject = storage[storageName] as? Subject else {
             throw AuthError.noSubject
         }
@@ -29,15 +29,15 @@ extension Request {
     }
 }
 
-public class VendorAuthMiddleware: Middleware {
+class CustomerAuthMiddleware: Middleware {
 
     private let turnstile: Turnstile
     private let cookieFactory: CookieFactory
-    
+
     public typealias CookieFactory = (String) -> Cookie
-    
+
     init() {
-        let realm = AuthenticatorRealm<Vendor>()
+        let realm = AuthenticatorRealm<Customer>()
         self.turnstile = Turnstile(sessionManager: DatabaseLoginSessionManager(realm: realm), realm: realm)
         
         self.cookieFactory = { value in
@@ -58,7 +58,7 @@ public class VendorAuthMiddleware: Middleware {
         )
         
         let response = try next.respond(to: request)
-        let session = try request.vendorSubject().authDetails?.sessionID
+        let session = try request.userSubject().authDetails?.sessionID
         
         if let session = session, request.cookies[cookieName] != session {
             response.cookies.insert(cookieFactory(session))
@@ -71,13 +71,14 @@ public class VendorAuthMiddleware: Middleware {
     }
 }
 
-public class VendorProtectMiddleware: Middleware {
+public class CustomerProtectMiddleware: Middleware {
     
     public func respond(to request: Request, chainingTo next: Responder) throws -> Response {
-        guard try request.vendorSubject().authenticated else {
-            throw Abort.custom(status: .forbidden, message: "No vendor subject.")
+        guard try request.userSubject().authenticated else {
+            throw Abort.custom(status: .forbidden, message: "No user subject.")
         }
         
         return try next.respond(to: request)
     }
 }
+

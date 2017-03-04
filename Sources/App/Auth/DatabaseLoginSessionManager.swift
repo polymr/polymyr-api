@@ -28,7 +28,7 @@ public final class DatabaseLoginSessionManager: SessionManager {
      */
     public func createSession(account: Account) -> String {
         let token = UUID().uuidString
-        let type: SessionType = account is Vendor ? .vendor : .customer
+        let type: SessionType = account is Maker ? .maker : .customer
         
         var session = Session(token: token, subject_id: account.uniqueID, type: type)
         

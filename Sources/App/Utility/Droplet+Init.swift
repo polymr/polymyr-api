@@ -43,8 +43,8 @@ extension Droplet {
         }
         
         drop.addConfigurable(middleware: SessionsMiddleware.createSessionsMiddleware(), name: "sessions")
-        drop.addConfigurable(middleware: UserAuthMiddleware(), name: "userAuth")
-        drop.addConfigurable(middleware: VendorAuthMiddleware(), name: "vendorAuth")
+        drop.addConfigurable(middleware: CustomerAuthMiddleware(), name: "customerAuth")
+        drop.addConfigurable(middleware: MakerAuthMiddleware(), name: "makerAuth")
         drop.addConfigurable(middleware: LoggingMiddleware(), name: "logger")
         drop.addConfigurable(middleware: CustomAbortMiddleware(), name: "customAbort")
         
@@ -56,20 +56,19 @@ extension Droplet {
         
         drop.middleware = remainingMiddleare
         
-        let preparations: [Preparation.Type] = [Box.self, Review.self, Vendor.self, Category.self, Picture.self, Order.self, Shipping.self, Subscription.self, Pivot<Box, Category>.self, Customer.self, Session.self, FeaturedBox.self, Onboarding.self, BoxPlan.self, VendorCustomer.self, Coupon.self, VendorAddress.self]
+        let preparations: [Preparation.Type] = [Product.self, Maker.self, CustomerAddress.self, Customer.self, Session.self, StripeMakerCustomer.self, MakerAddress.self]
         drop.preparations.append(contentsOf: preparations)
-
         
         return drop
     }
     
-    static let userProtect = UserProtectMiddleware()
-    static let vendorProtect = VendorProtectMiddleware()
+    static let userProtect = CustomerProtectMiddleware()
+    static let makerProtect = MakerProtectMiddleware()
     
     static func protect(_ type: SessionType) -> Middleware {
         switch type {
         case .customer: return userProtect
-        case .vendor: return vendorProtect
+        case .maker: return makerProtect
         case .none: return userProtect
         }
     }

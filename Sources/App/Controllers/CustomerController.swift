@@ -29,9 +29,9 @@ extension Customer {
         case .none:
             throw try Abort.custom(status: .forbidden, message: "Must authenticate as Customer(\(throwableId()) to perform \(request.method) on it.")
             
-        case .vendor:
-            let vendor = try request.vendor()
-            throw try Abort.custom(status: .forbidden, message: "Vendor(\(vendor.throwableId()) can not perform \(request.method) on Customer(\(throwableId())).")
+        case .maker:
+            let maker = try request.maker()
+            throw try Abort.custom(status: .forbidden, message: "Maker(\(maker.throwableId()) can not perform \(request.method) on Customer(\(throwableId())).")
             
         case .customer:
             let customer = try request.customer()

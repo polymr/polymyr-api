@@ -1,5 +1,5 @@
 //
-//  Vendor.swift
+//  Maker.swift
 //  subber-api
 //
 //  Created by Hakon Hanesand on 9/27/16.
@@ -63,9 +63,9 @@ extension BCryptSalt: NodeInitializable {
     }
 }
 
-final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
+final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "password", "stripe_id", "keys", "missingFields", "needsIdentityUpload"]
+    static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "password", "stripe_id", "keys", "missingFields", "needsIdentityUpload", "address_id"]
     
     var id: Node?
     var exists = false
@@ -77,6 +77,7 @@ final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
     let contactName: String
     let contactPhone: String
     let contactEmail: String
+    let address_id: Node?
     
     let location: String
     let createdOn: Date
@@ -107,31 +108,25 @@ final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
             self.password = BCrypt.hash(password: password, salt: salt)
         }
         
-        contactName = try node.extract("contactName")
+        email = try node.extract("email")
         businessName = try node.extract("businessName")
-        parentCompanyName = try node.extract("parentCompanyName")
-        
-        contactPhone = try node.extract("contactPhone")
-        contactEmail = try node.extract("contactEmail")
-        supportEmail = try node.extract("supportEmail")
         publicWebsite = try node.extract("publicWebsite")
         
-        established = try node.extract("established")
-        dateCreated = (try? node.extract("dateCreated")) ?? Date()
+        contactName = try node.extract("contactName")
+        contactPhone = try node.extract("contactPhone")
+        contactEmail = try node.extract("contactEmail")
+        address_id = node["address_id"]
         
-        estimatedTotalSubscribers = try node.extract("estimatedTotalSubscribers")
+        location = try node.extract("location")
+        createdOn = try node.extract("createdOn") ?? Date()
+        cut = try node.extract("cut") ?? 0.08
         
-        category_id = try node.autoextract(type: Category.self, key: "category")
-        address_id = try node.autoextract(type: VendorAddress.self, key: "address")
+        stripe_id = try node.extract("stripe_id")
         
-        cut = (try? node.extract("cut")) ?? 0.08
-        stripeAccountId = try? node.extract("stripeAccountId")
-        verificationState = try? node.extract("verificationState")
+        missingFields = (try? node.extract("missingFields")) ?? false
+        needsIdentityUpload = (try? node.extract("needsIdentityUpload")) ?? false
         
-        missingFields = try (node.extract("missingFields") ?? false)
-        needsIdentityUpload = try (node.extract("needsIdentityUpload") ?? false)
-        
-        if stripeAccountId != nil {
+        if stripe_id != nil {
             let publishable: String = try node.extract("publishableKey")
             let secret: String = try node.extract("secretKey")
             
@@ -141,19 +136,17 @@ final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
     
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            "contactName" : .string(contactName),
+            "email" : .string(email),
             "businessName" : .string(businessName),
-            "parentCompanyName" : .string(parentCompanyName),
-            "applicationState" : applicationState.makeNode(),
+            "publicWebsite" : .string(publicWebsite),
             
+            "contactName" : .string(contactName),
             "contactPhone" : .string(contactPhone),
             "contactEmail" : .string(contactEmail),
-            "supportEmail" : .string(supportEmail),
-            "publicWebsite" : .string(publicWebsite),
-            "estimatedTotalSubscribers" : .number(.int(estimatedTotalSubscribers)),
             
-            "established" : .string(established),
-            "dateCreated" : .string(dateCreated.ISO8601String),
+            "location" : .string(location),
+            "createdOn" : .string(createdOn.ISO8601String),
+            "cut" : .number(.double(cut)),
             
             "username" : .string(username),
             "password": .string(password),
@@ -163,10 +156,7 @@ final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
             "needsIdentityUpload" : .bool(needsIdentityUpload)
         ]).add(objects: [
             "id" : id,
-             "category_id" : category_id,
-             "cut" : cut,
-             "verificationState" : verificationState,
-             "stripeAccountId" : stripeAccountId,
+             "stripe_id" : stripe_id,
              "publishableKey" : keys?.publishable,
              "secretKey" : keys?.secret,
              "address_id" : address_id
@@ -174,40 +164,35 @@ final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     func postValidate() throws {
-        guard (try? category().first()) ?? nil != nil else {
-            throw ModelError.missingLink(from: Vendor.self, to: Category.self, id: category_id?.int)
-        }
-        
-        guard (try? address().first()) ?? nil != nil else {
-            throw ModelError.missingLink(from: Vendor.self, to: VendorAddress.self, id: address_id?.int)
-        }
+        // TODO
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(self.entity, closure: { vendor in
-            vendor.id()
-            vendor.string("contactName")
-            vendor.string("businessName")
-            vendor.string("parentCompanyName")
-            vendor.string("contactPhone")
-            vendor.string("contactEmail")
-            vendor.double("supportEmail")
-            vendor.string("publicWebsite")
-            vendor.double("cut")
-            vendor.string("estimatedTotalSubscribers")
-            vendor.string("established")
-            vendor.bool("missingFields")
-            vendor.bool("needsIdentityUpload")
-            vendor.string("dateCreated")
-            vendor.string("stripeAccountId")
-            vendor.string("username")
-            vendor.string("password")
-            vendor.string("salt")
-            vendor.double("applicationState")
-            vendor.string("verificationState")
-            vendor.string("publishableKey")
-            vendor.string("secretKey")
-            vendor.parent(Category.self, optional: false)
+        try database.create(self.entity, closure: { maker in
+            maker.id()
+            maker.string("email")
+            maker.string("businessName")
+            maker.string("publicWebsite")
+            
+            maker.string("contactName")
+            maker.string("contactPhone")
+            maker.string("contactEmail")
+            maker.parent(MakerAddress.self)
+            
+            maker.string("location")
+            maker.string("createdOn")
+            maker.double("cut")
+            
+            maker.string("username")
+            maker.string("password")
+            maker.string("salt")
+            
+            maker.string("publishableKey")
+            maker.string("secretKey")
+            
+            maker.string("stripe_id")
+            maker.bool("missingFields")
+            maker.bool("needsIdentityUpload")
         })
     }
     
@@ -221,31 +206,31 @@ final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
         }
         
         guard let stripeCustomerId = customer.stripe_id else {
-            throw Abort.custom(status: .internalServerError, message: "Can not duplicate account onto vendor connect account if it has not been created on the platform first.")
+            throw Abort.custom(status: .internalServerError, message: "Can not duplicate account onto maker connect account if it has not been created on the platform first.")
         }
         
         guard let secretKey = keys?.secret else {
-            throw Abort.custom(status: .internalServerError, message: "Missing secret key for vendor with id \(id?.int ?? 0)")
+            throw Abort.custom(status: .internalServerError, message: "Missing secret key for maker with id \(id?.int ?? 0)")
         }
         
         if let connectAccountCustomer = try self.connectAccountCustomers().filter("customer_id", customer_id).first() {
             
-            let hasPaymentMethod = try Stripe.shared.paymentInformation(for: connectAccountCustomer.connectAccountCustomerId, under: secretKey).filter { $0.id == card }.count > 0
+            let hasPaymentMethod = try Stripe.shared.paymentInformation(for: connectAccountCustomer.stripeCustomerId, under: secretKey).filter { $0.id == card }.count > 0
             
             if !hasPaymentMethod {
-                let token = try Stripe.shared.createToken(for: connectAccountCustomer.connectAccountCustomerId, representing: card, on: secretKey)
-                let _ = try Stripe.shared.associate(source: token.id, withStripe: connectAccountCustomer.connectAccountCustomerId, under: secretKey)
+                let token = try Stripe.shared.createToken(for: connectAccountCustomer.stripeCustomerId, representing: card, on: secretKey)
+                let _ = try Stripe.shared.associate(source: token.id, withStripe: connectAccountCustomer.stripeCustomerId, under: secretKey)
             }
             
-            return connectAccountCustomer.connectAccountCustomerId
+            return connectAccountCustomer.stripeCustomerId
         } else {
             let token = try Stripe.shared.createToken(for: stripeCustomerId, representing: card, on: secretKey)
             let stripeCustomer = try Stripe.shared.createStandaloneAccount(for: customer, from: token, on: secretKey)
             
-            var vendorCustomer = try VendorCustomer(vendor: self, customer: customer, account: stripeCustomer.id)
-            try vendorCustomer.save()
+            var makerCustomer = try StripeMakerCustomer(maker: self, customer: customer, account: stripeCustomer.id)
+            try makerCustomer.save()
             
-            return vendorCustomer.connectAccountCustomerId
+            return makerCustomer.stripeCustomerId
         }
     }
 }
@@ -256,57 +241,53 @@ extension Entity {
     }
 }
 
-extension Vendor {
+extension Maker {
     
-    func boxes() -> Children<Box> {
+    func products() -> Children<Product> {
         return fix_children()
     }
     
-    func category() throws -> Parent<Category> {
-        return try parent(category_id)
-    }
-    
-    func connectAccountCustomers() throws -> Children<VendorCustomer> {
+    func connectAccountCustomers() throws -> Children<StripeMakerCustomer> {
         return fix_children()
     }
     
-    func address() throws -> Parent<VendorAddress> {
+    func address() throws -> Parent<MakerAddress> {
         return try parent(address_id)
     }
 }
 
-extension Vendor: User {
+extension Maker: User {
     
     static func authenticate(credentials: Credentials) throws -> Auth.User {
         
         switch credentials {
             
         case let token as AccessToken:
-            let session = try Session.session(forToken: token, type: .vendor)
+            let session = try Session.session(forToken: token, type: .maker)
             
-            guard let vendor = try session.vendor().get() else {
+            guard let maker = try session.maker().get() else {
                 throw AuthError.invalidCredentials
             }
             
-            return vendor
+            return maker
             
         case let usernamePassword as UsernamePassword:
-            let query = try Vendor.query().filter("username", usernamePassword.username)
+            let query = try Maker.query().filter("username", usernamePassword.username)
             
-            guard let vendors = try? query.all() else {
+            guard let makers = try? query.all() else {
                 throw AuthError.invalidCredentials
             }
             
-            if vendors.count > 0 {
-                Droplet.logger?.error("found multiple accounts with the same username \(vendors.map { $0.id?.int ?? 0 })")
+            if makers.count > 0 {
+                Droplet.logger?.error("found multiple accounts with the same username \(makers.map { $0.id?.int ?? 0 })")
             }
             
-            guard let vendor = vendors.first else {
+            guard let maker = makers.first else {
                 throw AuthError.invalidCredentials
             }
             
-            if vendor.password == BCrypt.hash(password: usernamePassword.password, salt: vendor.salt) {
-                return vendor
+            if maker.password == BCrypt.hash(password: usernamePassword.password, salt: maker.salt) {
+                return maker
             } else {
                 throw AuthError.invalidBasicAuthorization
             }

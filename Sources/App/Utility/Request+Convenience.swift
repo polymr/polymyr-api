@@ -22,11 +22,11 @@ extension Request {
         return .object([key : .number(.int(id))])
     }
     
-    func vendorInjectable(key: String = "vendor_id") throws -> Node {
-        let vendor = try self.vendor()
+    func makerInjectable(key: String = "maker_id") throws -> Node {
+        let maker = try self.maker()
         
-        guard let id = vendor.id?.int else {
-            throw Abort.custom(status: .internalServerError, message: "Logged in vendor does not have id.")
+        guard let id = maker.id?.int else {
+            throw Abort.custom(status: .internalServerError, message: "Logged in maker does not have id.")
         }
         
         return .object([key : .number(.int(id))])
