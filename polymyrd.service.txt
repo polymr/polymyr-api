@@ -1,0 +1,12 @@
+[Unit]
+Description=Polymyr Production API server
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /home/hakon/polymyr/polymyr-dev-api/start.sh -e release -f /var/run/polymyrd.pid -d /home/hakon/polymyr/polymyr-dev-api
+Type=forking
+PIDFile=/var/run/polymyrd.pid
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
