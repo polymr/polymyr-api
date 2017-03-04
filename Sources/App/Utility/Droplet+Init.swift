@@ -56,7 +56,7 @@ extension Droplet {
         
         drop.middleware = remainingMiddleare
         
-        let preparations: [Preparation.Type] = [Product.self, Maker.self, CustomerAddress.self, Customer.self, Session.self, StripeMakerCustomer.self, MakerAddress.self, Campaign.self, Answer.self, QuestionSection.self, Question.self, Order.self, Pivot<Tag, Product>]
+        let preparations: [Preparation.Type] = [Product.self, Maker.self, CustomerAddress.self, Customer.self, Session.self, StripeMakerCustomer.self, MakerAddress.self, Campaign.self, Answer.self, QuestionSection.self, Question.self, Order.self, Pivot<Tag, Product>.self]
         drop.preparations.append(contentsOf: preparations)
         
         return drop
