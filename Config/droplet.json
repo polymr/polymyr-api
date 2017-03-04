@@ -8,11 +8,14 @@
     "middleware": {
         "server": [
             "file",
-            "abort",
+            "customAbort",
             "validation",
             "type-safe",
             "date",
-            "sessions"
+            "sessions",
+            "logger",
+            "makerAuth",
+            "customerAuth"
         ],
         "client": [
         

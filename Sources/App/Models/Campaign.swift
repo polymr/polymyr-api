@@ -30,7 +30,7 @@ final class Campaign: Model, Preparation, JSONConvertible, Sanitizable {
     init(node: Node, in context: Context) throws {
         id = node["id"]
         units = try node.extract("units")
-        purchasedUnits = try node.extract("purchasedUnits")
+        purchasedUnits = (try? node.extract("purchasedUnits")) ?? 0
         
         endDate = try node.extract("endDate")
         amountOff = try node.extract("amountOff")
