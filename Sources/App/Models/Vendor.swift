@@ -65,49 +65,36 @@ extension BCryptSalt: NodeInitializable {
 
 final class Vendor: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["contactName", "businessName", "parentCompanyName", "contactPhone", "contactEmail", "supportEmail", "publicWebsite", "dateCreated", "established", "category_id", "estimatedTotalSubscribers", "applicationState", "username", "password", "verificationState0", "stripeAccountId", "cut", "address"]
+    static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "password", "stripe_id", "keys", "missingFields", "needsIdentityUpload"]
     
     var id: Node?
     var exists = false
+    
+    let email: String
+    let businessName: String
+    let publicWebsite: String
 
     let contactName: String
     let contactPhone: String
     let contactEmail: String
-    var applicationState: ApplicationState = .none
-    var verificationState: LegalEntityVerificationStatus?
     
-    let publicWebsite: String
-    let supportEmail: String
-    let businessName: String
+    let location: String
+    let createdOn: Date
+    let cut: Double
     
-    let parentCompanyName: String
-    let established: String
-    
-    var category_id: Node?
-    let estimatedTotalSubscribers: Int
-    
-    let dateCreated: Date
-
     var username: String
     var password: String
     var salt: BCryptSalt
-
-    var stripeAccountId: String?
     
-    let cut: Double
+    var stripe_id: String?
+    var keys: Keys?
     
     var missingFields: Bool
     var needsIdentityUpload: Bool
     
-    var keys: Keys?
-    
-    var address_id: Node?
-    
     init(node: Node, in context: Context) throws {
         
-        id = try? node.extract("id")
-        
-        applicationState = try node.extract("applicationState")
+        id = node["id"]
         
         username = try node.extract("username")
         let password = try node.extract("password") as String
@@ -285,21 +272,6 @@ extension Vendor {
     
     func address() throws -> Parent<VendorAddress> {
         return try parent(address_id)
-    }
-}
-
-extension Vendor: Relationable {
-
-    typealias Relations = (boxes: [Box], category: Category)
-    
-    func relations() throws -> (boxes: [Box], category: Category) {
-        let boxes = try self.boxes().all()
-        
-        guard let category = try self.category().get() else {
-            throw Abort.custom(status: .internalServerError, message: "Missing category relation for vendor with name \(username)")
-        }
-        
-        return (boxes, category)
     }
 }
 
