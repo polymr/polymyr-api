@@ -1,13 +1,19 @@
+//
+//  Main.swift
+//  polymyr-api
+//
+//  Created by Hakon Hanesand on 3/3/17.
+//
+//
+
 import Vapor
+import Fluent
+import Node
+import HTTP
+import Turnstile
+import Foundation
+import Auth
 
-let drop = Droplet()
-
-drop.get { req in
-    return try drop.view.make("welcome", [
-    	"message": drop.localization[req.lang, "welcome", "title"]
-    ])
-}
-
-drop.resource("posts", PostController())
+let drop = Droplet.create()
 
 drop.run()
