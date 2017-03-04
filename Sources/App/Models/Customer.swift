@@ -150,36 +150,6 @@ extension Customer: User {
     }
 }
 
-extension Node {
-    
-    var type: String {
-        switch self {
-        case .array(_):
-            return "array"
-        case .null:
-            return "null"
-        case .bool(_):
-            return "bool"
-        case .bytes(_):
-            return "bytes"
-        case let .number(number):
-            switch number {
-            case .int(_):
-                return "number.int"
-            case .double(_):
-                return "number.double"
-            case .uint(_):
-                return "number.uint"
-            }
-        case .object(_):
-            return "object"
-        case .string(_):
-            return "string"
-        }
-    }
-    
-}
-
 extension Model {
     
     func throwableId() throws -> Int {

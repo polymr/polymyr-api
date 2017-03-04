@@ -147,6 +147,7 @@ extension Date: NodeConvertible {
 
 public extension Node {
     
+    // TODO : rename to extract stripe list
     func extractList<T: NodeInitializable>(_ path: PathIndex...) throws -> [T] {
         guard let node = self[path] else {
             throw NodeError.unableToConvert(node: self, expected: "path at \(path)")
@@ -162,6 +163,49 @@ public extension Node {
         
         return try [T](node: data)
     }
+    
+    func parseList(at key: String, with separator: String) throws -> [String] {
+        guard let object = self[key] else {
+            throw Abort.custom(status: .badRequest, message: "Missing list or string at \(key)")
+        }
+        
+        switch object {
+        case let .array(strings):
+            return strings.map { $0.string }.flatMap { $0 }
+        case let .string(string):
+            return string.components(separatedBy: separator)
+        default:
+            throw Abort.custom(status: .badRequest, message: "Unknown format for \(key)... got \(object.type)")
+        }
+    }
 }
 
-
+extension Node {
+    
+    var type: String {
+        switch self {
+        case .array(_):
+            return "array"
+        case .null:
+            return "null"
+        case .bool(_):
+            return "bool"
+        case .bytes(_):
+            return "bytes"
+        case let .number(number):
+            switch number {
+            case .int(_):
+                return "number.int"
+            case .double(_):
+                return "number.double"
+            case .uint(_):
+                return "number.uint"
+            }
+        case .object(_):
+            return "object"
+        case .string(_):
+            return "string"
+        }
+    }
+    
+}
