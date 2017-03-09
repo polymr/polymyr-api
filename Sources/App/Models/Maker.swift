@@ -177,7 +177,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             maker.string("contactName")
             maker.string("contactPhone")
             maker.string("contactEmail")
-            maker.parent(MakerAddress.self)
+            maker.parent(idKey: "address_id", optional: true)
             
             maker.string("location")
             maker.string("createdOn")
@@ -187,10 +187,10 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             maker.string("password")
             maker.string("salt")
             
-            maker.string("publishableKey")
-            maker.string("secretKey")
+            maker.string("publishableKey", optional: true)
+            maker.string("secretKey", optional: true)
             
-            maker.string("stripe_id")
+            maker.string("stripe_id", optional: true)
             maker.bool("missingFields")
             maker.bool("needsIdentityUpload")
         })

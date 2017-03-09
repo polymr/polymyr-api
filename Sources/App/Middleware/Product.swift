@@ -37,8 +37,8 @@ final class Product: Model, Preparation, JSONConvertible, Sanitizable {
             "name" : .string(name),
             "fullPrice" : .number(.double(fullPrice)),
         ]).add(objects: [
-            "id" : id!,
-            "maker_id" : maker_id!
+            "id" : id,
+            "maker_id" : maker_id
         ])
     }
     

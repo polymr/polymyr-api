@@ -17,11 +17,18 @@ import Auth
 let drop = Droplet.create()
 
 drop.resource("makers", MakerController())
+drop.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture>())
+
 drop.resource("customers", CustomerController())
-drop.resource("authentication", AuthenticationController())
+drop.picture(base: "customers", slug: "customer_id", picture: PictureController<CustomerPicture>())
+
 drop.resource("products", ProductController())
+drop.picture(base: "products", slug: "products_id", picture: PictureController<ProductPicture>())
+
+drop.resource("authentication", AuthenticationController())
 drop.resource("questions", QuestionController())
 drop.resource("campaigns", CampaignController())
+drop.resource("answers", AnswerController())
 drop.resource("orders", OrderController())
 drop.resource("sections", SectionController())
 drop.resource("customerAddresses", CustomerAddressController())

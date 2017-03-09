@@ -15,7 +15,7 @@ fileprivate let separator = "@@@<<<>>>@@@"
 
 final class Question: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["text", "campaign_id", "section_id"]
+    static var permitted: [String] = ["text", "qualifiers", "campaign_id", "section_id"]
     
     var id: Node?
     var exists = false
@@ -43,7 +43,7 @@ final class Question: Model, Preparation, JSONConvertible, Sanitizable {
         ]).add(objects: [
             "id" : id,
             "text" : text,
-            "qualifiers" : qualifiers?.joined(separator: separator)
+            "qualifiers" : qualifiers?.serialize(with: context)
         ])
     }
     

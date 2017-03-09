@@ -15,7 +15,7 @@ fileprivate let separator = "@"
 
 final class Answer: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["text", "question_id", "order_id", "campaign_id"]
+    static var permitted: [String] = ["text", "ratings", "question_id", "order_id", "campaign_id"]
     
     var id: Node?
     var exists = false

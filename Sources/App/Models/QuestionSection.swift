@@ -13,9 +13,20 @@ import Sanitized
 
 fileprivate let separator = "@@@<<<>>>@@@"
 
+extension Sequence where Iterator.Element == String {
+    
+    func serialize(with context: Context, with separator: String = "@@@<<<>>>@@@") -> Node {
+        if (context is DatabaseContext) {
+            return .string(self.joined(separator: separator))
+        }
+        
+        return .array(self.map { Node.string($0) })
+    }
+}
+
 final class QuestionSection: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["text", "question_id", "order_id", "campaign_id"]
+    static var permitted: [String] = ["name", "description", "suggestions", "isRating"]
     
     var id: Node?
     var exists = false
@@ -27,7 +38,7 @@ final class QuestionSection: Model, Preparation, JSONConvertible, Sanitizable {
     
     init(node: Node, in context: Context) throws {
         id = node["id"]
-        name = try node.extract("text")
+        name = try node.extract("name")
         suggestions = try node.parseList(at: "suggestions", with: separator)
         description = try node.extract("description")
         isRating = try node.extract("isRating")
@@ -37,7 +48,7 @@ final class QuestionSection: Model, Preparation, JSONConvertible, Sanitizable {
         return try Node(node: [
             "name" : .string(name),
             "description" : .string(description),
-            "suggestions" : .string(suggestions.joined(separator: separator)),
+            "suggestions" :  suggestions.serialize(with: context),
             "isRating" : .bool(isRating)
         ]).add(objects: [
             "id" : id

@@ -18,7 +18,7 @@ final class SectionController: ResourceRepresentable {
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var section: QuestionSection = try request.extractModel(injecting: request.customerInjectable())
+        var section: QuestionSection = try request.extractModel()
         try section.save()
         return section
     }

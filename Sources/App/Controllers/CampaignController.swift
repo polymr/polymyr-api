@@ -14,11 +14,11 @@ import Fluent
 final class CampaignController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try Order.all().makeJSON()
+        return try Campaign.all().makeJSON()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var campaign: Order = try request.extractModel(injecting: request.customerInjectable())
+        var campaign: Campaign = try request.extractModel(injecting: request.makerInjectable())
         try campaign.save()
         return campaign
     }

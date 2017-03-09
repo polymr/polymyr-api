@@ -84,11 +84,11 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
         try database.create(self.entity) { box in
             box.id()
             box.string("name")
-            box.string("stripe_id")
+            box.string("stripe_id", optional: true)
             box.string("email")
             box.string("password")
             box.string("salt")
-            box.int("default_shipping_id", optional: false)
+            box.int("default_shipping_id", optional: true)
         }
     }
     
