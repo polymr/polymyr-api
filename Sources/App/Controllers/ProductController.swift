@@ -28,7 +28,18 @@ extension Product {
 final class ProductController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try Product.all().makeNode().makeJSON()
+        let products = try Product.all()
+        
+        if let shouldIncludeCampaigns = request.query?["campaign"]?.bool, shouldIncludeCampaigns {
+            let result = try products.map { (product: Product) -> Node in
+                let campaign = try product.campaign().first()
+                return Node.object(["product" : try product.makeNode(), "campaign" : try campaign?.makeNode() ?? Node.null])
+            }
+            
+            return try result.makeJSON()
+        }
+        
+        return try products.makeJSON()
     }
     
     func show(_ request: Request, product: Product) throws -> ResponseRepresentable {
@@ -37,10 +48,37 @@ final class ProductController: ResourceRepresentable {
     
     func create(_ request: Request) throws -> ResponseRepresentable {
         let _ = try request.maker()
+        var result: [String : Node] = [:]
         
         var product: Product = try request.extractModel(injecting: request.makerInjectable())
         try product.save()
-        return product
+        result["product"] = try product.makeNode()
+        
+        if var campaignNode = request.json?.node["campaign"] {
+            campaignNode = try campaignNode.add(objects: ["maker_id" : request.maker().throwableId(), "product_id" : product.throwableId()])
+            var campaign: Campaign = try Campaign(node: campaignNode, in: EmptyNode)
+            try campaign.save()
+            
+            result["campaign"] = try campaign.makeNode()
+        }
+        
+        if let node = request.json?.node, let tags: [Int] = try node.extract("tags") {
+        
+            let tags = try tags.map { (id: Int) -> Tag? in
+                guard let tag = try Tag.find(id) else {
+                    return nil
+                }
+                
+                var pivot = Pivot<Tag, Product>(tag, product)
+                try pivot.save()
+                
+                return tag
+            }.flatMap { $0 }
+            
+            result["tags"] = try tags.makeNode()
+        }
+        
+        return try result.makeNode().makeJSON()
     }
     
     func delete(_ request: Request, product: Product) throws -> ResponseRepresentable {

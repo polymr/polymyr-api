@@ -32,5 +32,6 @@ drop.resource("answers", AnswerController())
 drop.resource("orders", OrderController())
 drop.resource("sections", SectionController())
 drop.resource("customerAddresses", CustomerAddressController())
+drop.resource("tags", TagController())
 
 drop.run()

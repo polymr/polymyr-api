@@ -26,9 +26,10 @@ final class Tag: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     func makeNode(context: Context) throws -> Node {
-        return try Node(node: []).add(objects: [
-            "id" : id,
+        return try Node(node: [
             "name" : name
+        ]).add(objects: [
+            "id" : id
         ])
     }
     
