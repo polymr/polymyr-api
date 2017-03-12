@@ -67,6 +67,12 @@ extension Product {
 final class ProductController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
+        
+        if let maker = request.query?["maker"]?.bool, maker {
+            let maker = try request.maker()
+            return try maker.products().all().makeJSON()
+        }
+        
         let products = try Product.all()
         
         if let expander: Expander = try request.extract() {
@@ -81,15 +87,6 @@ final class ProductController: ResourceRepresentable {
                     return nil
                 }
             })).makeJSON()
-        }
-        
-        if let shouldIncludeCampaigns = request.query?["campaign"]?.bool, shouldIncludeCampaigns {
-            let result = try products.map { (product: Product) -> Node in
-                let campaign = try product.campaign().first()
-                return Node.object(["product" : try product.makeNode(), "campaign" : try campaign?.makeNode() ?? Node.null])
-            }
-            
-            return try result.makeJSON()
         }
         
         return try products.makeJSON()
