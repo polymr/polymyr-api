@@ -11,6 +11,45 @@ import Vapor
 import enum HTTP.Method
 import HTTP
 import Fluent
+import Sanitized
+
+typealias Pair = (Hashable, Any)
+
+func merge<K: Hashable, V>(keys: [K], with values: [V]) -> [K: V] {
+    var dictionary: [K: V] = [:]
+    
+    zip(keys, values).forEach { key, value in
+        dictionary[key] = value
+    }
+    
+    return dictionary
+}
+
+struct Expander: QueryInitializable {
+    
+    static var key: String = "expand"
+    
+    let expandKeyPaths: [String]
+    
+    init(node: Node, in context: Context) throws {
+        expandKeyPaths = node.string?.components(separatedBy: ",") ?? []
+    }
+    
+    func expand<T: Model>(for models: [T], owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> [Node] {
+        return try models.map { (model: T) -> Node in
+            var valueMappings = try expandKeyPaths.map { relation in
+                return try mappings(relation, model)?.makeNode() ?? Node.null
+            }
+            
+            var keyPaths = expandKeyPaths
+            
+            keyPaths.append(key)
+            try valueMappings.append(model.makeNode())
+            
+            return try merge(keys: keyPaths, with: valueMappings).makeNode()
+        }
+    }
+}
 
 extension Product {
     
@@ -29,6 +68,20 @@ final class ProductController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
         let products = try Product.all()
+        
+        if let expander: Expander = try request.extract() {
+            return try Node.array(expander.expand(for: products, owner: "products", mappings: { (key, product) -> (NodeRepresentable?) in
+                switch key {
+                case "campaign":
+                    return try product.campaign().first()
+                case "tags":
+                    return try product.tags().all().makeNode()
+                default:
+                    Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
+                    return nil
+                }
+            })).makeJSON()
+        }
         
         if let shouldIncludeCampaigns = request.query?["campaign"]?.bool, shouldIncludeCampaigns {
             let result = try products.map { (product: Product) -> Node in

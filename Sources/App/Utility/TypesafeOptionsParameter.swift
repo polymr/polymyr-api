@@ -36,6 +36,12 @@ protocol QueryModifiable {
     func modify<T: Entity>(_ query: Query<T>) throws -> Query<T>
 }
 
+protocol QueryInitializable: NodeInitializable {
+    
+    static var key: String { get }
+}
+
+
 protocol TypesafeOptionsParameter: StringInitializable, NodeConvertible, QueryModifiable {
     
     static var key: String { get }
@@ -97,6 +103,10 @@ extension RawRepresentable where Self: TypesafeOptionsParameter, RawValue == Str
 }
 
 extension Request {
+    
+    func extract<T: QueryInitializable>() throws -> T? {
+        return try T.init(node: self.query?[T.key])
+    }
     
     func extract<T: TypesafeOptionsParameter>() throws -> T where T: RawRepresentable, T.RawValue == String {
         return try T.init(node: self.query?[T.key])

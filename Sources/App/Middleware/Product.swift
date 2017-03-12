@@ -73,4 +73,8 @@ extension Product {
     func campaign() -> Children<Campaign> {
         return children()
     }
+    
+    func tags() throws -> Siblings<Tag> {
+        return try siblings()
+    }
 }
