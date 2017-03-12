@@ -22,7 +22,7 @@ reset_production_server() {
 echo "\n>>>> git pull origin master"
 git pull origin master
 
-if [[ $(git diff --name-only HEAD~ HEAD -- nginx/) ]]; then
+if [ ! $(git diff --name-only HEAD~ HEAD -- nginx/) ]; then
 	echo "\n>>>> sudo cp -ru nginx/* /etc/nginx/"
 	sudo cp -ru nginx/* /etc/nginx/
 fi
@@ -33,7 +33,7 @@ vapor build --release=true --fetch=false
 echo "\n>>>> sudo systemctl restart polymyrd.service"
 sudo systemctl restart polymyrd.service
 
-if [[ $(git diff --name-only HEAD~1 HEAD -- polymyrd.service.txt) ]]; then
+if [ ! $(git diff --name-only HEAD~1 HEAD -- polymyrd.service.txt) ]; then
     echo "\n>>>> Detected changes in production server configuration files!"
 	reset_production_server
 fi
