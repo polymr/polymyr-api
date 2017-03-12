@@ -76,8 +76,7 @@ final class CustomerAddress: Model, Preparation, JSONConvertible, Sanitizable {
             shipping.string("zip")
             shipping.string("firstName")
             shipping.string("lastName")
-            shipping.string("phoneNumber")
-            shipping.bool("isDefault")
+            shipping.string("phoneNumber", optional: true)
             shipping.parent(Customer.self, optional: false)
         })
     }

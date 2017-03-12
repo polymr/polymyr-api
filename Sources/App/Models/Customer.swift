@@ -119,12 +119,12 @@ extension Customer: User {
         switch credentials {
             
         case let token as AccessToken:
-            let query = try Session.query().filter("accessToken", token.string)
+            let session = try Session.session(forToken: token, type: .customer)
             
-            guard let user = try query.first()?.user().first() else {
+            guard let user = try session.user().get() else {
                 throw AuthError.invalidCredentials
             }
-            
+        
             return user
             
         case let usernamePassword as UsernamePassword:
