@@ -6,7 +6,7 @@ server {
     index index.php;
 
     server_name polymyr.com www.polymyr.com;
-    charset utf-8
+    charset utf-8;
 
     location / {
         try_files $uri $uri/ =404;
