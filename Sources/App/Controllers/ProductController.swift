@@ -78,7 +78,7 @@ final class ProductController: ResourceRepresentable {
         }()
         
         if let expander: Expander = try request.extract() {
-            return try Node.array(expander.expand(for: products, owner: "products", mappings: { (key, product) -> (NodeRepresentable?) in
+            return try Node.array(expander.expand(for: products, owner: "product", mappings: { (key, product) -> (NodeRepresentable?) in
                 switch key {
                 case "campaign":
                     return try product.campaign().first()
