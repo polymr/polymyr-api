@@ -68,12 +68,14 @@ final class ProductController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
         
-        if let maker = request.query?["maker"]?.bool, maker {
-            let maker = try request.maker()
-            return try maker.products().all().makeJSON()
-        }
-        
-        let products = try Product.all()
+        let products = try { () -> [Product] in
+            if let maker = request.query?["maker"]?.bool, maker {
+                let maker = try request.maker()
+                return try maker.products().all()
+            }
+            
+            return try Product.all()
+        }()
         
         if let expander: Expander = try request.extract() {
             return try Node.array(expander.expand(for: products, owner: "products", mappings: { (key, product) -> (NodeRepresentable?) in
