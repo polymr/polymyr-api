@@ -84,6 +84,8 @@ final class ProductController: ResourceRepresentable {
                     return try product.campaign().first()
                 case "tags":
                     return try product.tags().all().makeNode()
+                case "maker":
+                    return try product.maker().first()
                 default:
                     Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
                     return nil
