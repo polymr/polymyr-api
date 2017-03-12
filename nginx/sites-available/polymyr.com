@@ -1,6 +1,6 @@
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    listen 80;
+    listen [::]:80;
 
     root /home/jasper/polymyr;
     index index.php;
@@ -30,7 +30,7 @@ server {
     charset utf-8;
 
     location / {
-            include proxy_params;
-            proxy_pass http://127.0.0.1:8080;
+        include proxy_params;
+        proxy_pass http://127.0.0.1:8080;
     }
 }
