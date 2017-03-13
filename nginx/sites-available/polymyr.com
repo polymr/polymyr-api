@@ -34,3 +34,26 @@ server {
         proxy_pass http://127.0.0.1:8080;
     }
 }
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    root /home/hakon/polymyr/polymyr-dev-api/Public/;
+
+    server_name static.polymyr.me www.static.polymyr.me;
+    charset utf-8;
+
+    location / {
+        include h5bp/basic.conf;
+
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        sendfile on;
+        tcp_nopush on;
+        sendfile_max_chunk 1m;
+
+        proxy_cache static;
+        try_files $uri =404;
+    }
+}

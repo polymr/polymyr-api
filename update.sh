@@ -12,28 +12,30 @@ reset_production_server() {
 	echo "\n>>>> sudo chmod 664 $destinationPath$prodServiceName"
 	sudo chmod 664 "$destinationPath$devServiceName"
 
-	echo "\n>>>> systemctl daemon-reload"
-	systemctl daemon-reload
-
-	echo "\n>>>> systemctl restart $prodServiceName"
-	systemctl restart "$prodServiceName"
+	echo "\n>>>> sudo systemctl daemon-reload"
+	sudo systemctl daemon-reload
 }
 
-echo "\n>>>> git pull origin master"
-git pull origin master
+CURRENT_GIT_SHA="$(git rev-parse HEAD)"
 
-if [ ! $(git diff --name-only HEAD~ HEAD -- nginx/) ]; then
-	echo "\n>>>> sudo cp -ru nginx/* /etc/nginx/"
+echo "\n>>>> git pull origin"
+git pull origin
+
+if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- nginx/)" ]; then
+	echo "    \n>>>> sudo cp -ru nginx/* /etc/nginx/"
 	sudo cp -ru nginx/* /etc/nginx/
+
+	echo "    >>>> sudo systemctl restart nginx"
+	sudo systemctl restart nginx
 fi
 
-echo "\n>>>> vapor build --release=true --fetch=false"
-vapor build --release=true --fetch=false
+echo "\n>>>> vapor build --release=true --fetch=false --verbose"
+vapor build --release=true --fetch=false --verbose
 
-echo "\n>>>> sudo systemctl restart polymyrd.service"
-sudo systemctl restart polymyrd.service
-
-if [ ! $(git diff --name-only HEAD~1 HEAD -- polymyrd.service.txt) ]; then
-    echo "\n>>>> Detected changes in production server configuration files!"
+if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- polymyrd.service.txt)" ]; then
+    echo "    \n>>>> Detected changes in production server configuration files!"
 	reset_production_server
 fi
+
+echo "\n>>>> sudo systemctl restart instacrated.service"
+sudo systemctl restart polymyrd.service

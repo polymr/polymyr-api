@@ -41,7 +41,6 @@ protocol QueryInitializable: NodeInitializable {
     static var key: String { get }
 }
 
-
 protocol TypesafeOptionsParameter: StringInitializable, NodeConvertible, QueryModifiable {
     
     static var key: String { get }
