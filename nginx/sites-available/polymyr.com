@@ -43,7 +43,7 @@ server {
 
     root /home/hakon/polymyr/polymyr-dev-api/Public/;
 
-    server_name static.polymyr.me www.static.polymyr.me;
+    server_name static.polymyr.com www.static.polymyr.com;
     charset utf-8;
 
     location / {
