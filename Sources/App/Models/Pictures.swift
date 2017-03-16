@@ -20,20 +20,23 @@ class Picture: Model, Preparation, JSONConvertible, Sanitizable {
     var id: Node?
     let owner_id: Node?
     let url: String
+    let index: Int?
 
     required init(node: Node, in context: Context = EmptyNode) throws {
         id = node["id"]
         url = try node.extract("url")
         owner_id = node["owner_id"]
+        index = try node.extract("index")
     }
     
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
             "url" : .string(url)
-            ]).add(objects: [
-                "id" : id,
-                "owner_id" : owner_id
-                ])
+        ]).add(objects: [
+            "id" : id,
+            "owner_id" : owner_id,
+            "index" : index
+        ])
     }
     
     static func prepare(_ database: Database) throws {

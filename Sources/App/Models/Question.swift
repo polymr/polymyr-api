@@ -52,7 +52,7 @@ final class Question: Model, Preparation, JSONConvertible, Sanitizable {
             question.id()
             question.string("text")
             question.parent(Campaign.self)
-            question.parent(QuestionSection.self)
+            question.parent(idKey: "section_id")
         })
     }
     

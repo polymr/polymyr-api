@@ -77,4 +77,8 @@ extension Product {
     func tags() throws -> Siblings<Tag> {
         return try siblings()
     }
+    
+    func pictures() -> Children<ProductPicture> {
+        return children("owner_id", ProductPicture.self)
+    }
 }

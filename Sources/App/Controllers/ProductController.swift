@@ -49,6 +49,19 @@ struct Expander: QueryInitializable {
             return try merge(keys: keyPaths, with: valueMappings).makeNode()
         }
     }
+    
+    func expand<T: Model>(for model: T, owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> Node {
+        var valueMappings = try expandKeyPaths.map { relation in
+            return try mappings(relation, model)?.makeNode() ?? Node.null
+        }
+        
+        var keyPaths = expandKeyPaths
+        
+        keyPaths.append(key)
+        try valueMappings.append(model.makeNode())
+        
+        return try merge(keys: keyPaths, with: valueMappings).makeNode()
+    }
 }
 
 extension Product {
@@ -86,6 +99,8 @@ final class ProductController: ResourceRepresentable {
                     return try product.tags().all().makeNode()
                 case "maker":
                     return try product.maker().first()
+                case "pictures":
+                    return try product.pictures().all().makeNode()
                 default:
                     Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
                     return nil
@@ -97,6 +112,25 @@ final class ProductController: ResourceRepresentable {
     }
     
     func show(_ request: Request, product: Product) throws -> ResponseRepresentable {
+        
+        if let expander: Expander = try request.extract() {
+            return try expander.expand(for: product, owner: "product", mappings: { (key, product) -> (NodeRepresentable?) in
+                switch key {
+                case "campaign":
+                    return try product.campaign().first()
+                case "tags":
+                    return try product.tags().all().makeNode()
+                case "maker":
+                    return try product.maker().first()
+                case "pictures":
+                    return try product.pictures().all().makeNode()
+                default:
+                    Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
+                    return nil
+                }
+            }).makeJSON()
+        }
+        
         return product
     }
     
