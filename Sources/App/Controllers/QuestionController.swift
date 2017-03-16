@@ -18,7 +18,7 @@ final class QuestionController: ResourceRepresentable {
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var question: Question = try request.extractModel(injecting: request.customerInjectable())
+        var question: Question = try request.extractModel(injecting: request.makerInjectable())
         try question.save()
         return question
     }
