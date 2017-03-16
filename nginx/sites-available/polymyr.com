@@ -67,7 +67,7 @@ server {
     include snippets/ssl-api.polymyr.com.conf;
     include snippets/ssl-params.conf;
 
-    root /home/hakon/polymyr/polymyr-dev-api/Public/;
+    root /home/hakon/polymyr/polymyr-dev-api/;
 
     server_name static.polymyr.com www.static.polymyr.com;
 
@@ -81,7 +81,7 @@ server {
         sendfile_max_chunk 1m;
 
         proxy_cache static;
-        try_files $uri =404;
+        try_files Public/$uri =404;
     }
 
     location ~ /.well-known {
