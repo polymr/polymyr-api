@@ -22,6 +22,10 @@ server {
     location ~ /\.ht {
         deny all;
     }
+
+    location ~ /.well-known {
+                allow all;
+    }
 }
 
 server {
@@ -57,5 +61,9 @@ server {
 
         proxy_cache static;
         try_files $uri =404;
+    }
+
+    location ~ /.well-known {
+                allow all;
     }
 }
