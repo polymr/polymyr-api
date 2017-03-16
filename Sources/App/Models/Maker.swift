@@ -65,7 +65,7 @@ extension BCryptSalt: NodeInitializable {
 
 final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "stripe_id", "keys", "missingFields", "needsIdentityUpload", "address_id"]
+    static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "stripe_id", "keys", "missingFields", "needsIdentityUpload", "address_id", "password"]
     
     var id: Node?
     var exists = false
@@ -149,6 +149,9 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             "cut" : .number(.double(cut)),
             
             "username" : .string(username),
+            "password" : .string(password),
+            "salt" : .string(salt.string),
+            
             "missingFields" : .bool(missingFields),
             "needsIdentityUpload" : .bool(needsIdentityUpload)
         ]).add(objects: [

@@ -26,7 +26,7 @@ extension Stripe {
 
 final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["email", "name", "default_shipping_id"]
+    static var permitted: [String] = ["email", "name", "default_shipping_id", "password"]
     
     var id: Node?
     var exists = false
@@ -62,7 +62,9 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
             "name" : .string(name),
-            "email" : .string(email)
+            "email" : .string(email),
+            "password" : .string(password),
+            "salt" : .string(salt.string)
         ]).add(objects: [
             "id" : id,
             "stripe_id" : stripe_id,
