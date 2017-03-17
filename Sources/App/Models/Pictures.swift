@@ -66,7 +66,7 @@ final class ProductPicture: Picture {
     }
     
     override func makeNode(context: Context) throws -> Node {
-        return try super.makeNode().add(objects: ["type" : type])
+        return try super.makeNode(context: context).add(objects: ["type" : type])
     }
     
     override class func prepare(_ database: Database) throws {
