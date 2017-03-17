@@ -70,7 +70,7 @@ func save(data: Data) throws -> String {
         throw Abort.custom(status: .internalServerError, message: "Unable to write multipart form data to file. Underlying error \(error)")
     }
     
-    return "http://api.polymyr.com/images/" + name
+    return "https://static.polymyr.com/images/" + name
 }
 
 final class PictureController<PictureType: Picture> {
@@ -82,7 +82,7 @@ final class PictureController<PictureType: Picture> {
     func create(_ request: Request, owner: Int) throws -> ResponseRepresentable {
         let url = try handle(upload: request)
 
-        var picture = try PictureType.init(node: Node(node: ["owner_id" : owner, "url" : url]))
+        var picture = try PictureType.init(node: Node(node: ["owner_id" : owner, "url" : url]).add(name: "type", node: request.query?["type"]))
         try picture.save()
         
         return picture

@@ -39,7 +39,7 @@ class Picture: Model, Preparation, JSONConvertible, Sanitizable {
         ])
     }
     
-    static func prepare(_ database: Database) throws {
+    class func prepare(_ database: Database) throws {
         try database.create(self.entity) { picture in
             picture.id()
             picture.string("url")
@@ -53,5 +53,28 @@ class Picture: Model, Preparation, JSONConvertible, Sanitizable {
 }
 
 final class MakerPicture: Picture {}
-final class ProductPicture: Picture {}
 final class CustomerPicture: Picture {}
+
+final class ProductPicture: Picture {
+
+    let type: Int?
+    
+    required init(node: Node, in context: Context) throws {
+        type = try node.extract("type")
+            
+        try super.init(node: node, in: context)
+    }
+    
+    override func makeNode(context: Context) throws -> Node {
+        return try super.makeNode().add(objects: ["type" : type])
+    }
+    
+    override class func prepare(_ database: Database) throws {
+        try database.create(self.entity) { picture in
+            picture.id()
+            picture.string("url")
+            picture.string("type")
+            picture.parent(idKey: "owner_id")
+        }
+    }
+}
