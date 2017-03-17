@@ -56,7 +56,7 @@ server {
 
     location ~ /.well-known {
         allow all;
-        try_files $uri;
+        try_files $uri =404;
     }
 
     location / {
