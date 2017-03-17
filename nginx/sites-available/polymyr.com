@@ -50,15 +50,18 @@ server {
     # include snippets/ssl-api.polymyr.com.conf;
     # include snippets/ssl-params.conf;
 
+    root /home/hakon/polymyr/polymyr-dev-api/;
+
     server_name api.polymyr.com www.api.polymyr.com;
+
+    location ~ /.well-known {
+        allow all;
+        try_files $uri;
+    }
 
     location / {
         include proxy_params;
         proxy_pass http://127.0.0.1:8080;
-    }
-
-    location ~ /.well-known {
-        allow all;
     }
 }
 
