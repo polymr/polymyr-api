@@ -34,4 +34,6 @@ drop.resource("sections", SectionController())
 drop.resource("customerAddresses", CustomerAddressController())
 drop.resource("tags", TagController())
 
+drop.collection(StripeCollection.self)
+
 drop.run()

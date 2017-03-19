@@ -47,31 +47,28 @@ final class CustomerController {
 
     func detail(_ request: Request) throws -> ResponseRepresentable {
         let customer = try request.customer()
-        var customerNode = try customer.makeNode()
-
-        guard let stripe_id = customer.stripe_id else {
-            throw Abort.custom(status: .badRequest, message: "User is missing a stripe id.")
+        
+        if let expander: Expander = try request.extract() {
+            return try expander.expand(for: customer, owner: "customer", mappings: { (key, product) -> (NodeRepresentable?) in
+                switch key {
+                case "cards":
+                    guard let stripe_id = customer.stripe_id else {
+                        throw Abort.custom(status: .badRequest, message: "No stripe id")
+                    }
+                    
+                    return try Stripe.shared.paymentInformation(for: stripe_id).makeNode()
+                    
+                case "shipping":
+                    return try customer.shippingAddresses().all().makeNode()
+                    
+                default:
+                    Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
+                    return nil
+                }
+            }).makeJSON()
         }
-
-        let options = try request.extract() as [FetchType]
-
-        if options.contains(.stripe) {
-            // TODO : is card needed here, and update documentation
-            if let card = request.query?["card"]?.string {
-                let cards = try Stripe.shared.paymentInformation(for: stripe_id)
-                customerNode["card"] = try cards.filter { $0.id == card }.first?.makeNode()
-            } else {
-                let stripeData = try Stripe.shared.customerInformation(for: stripe_id)
-                customerNode["stripe"] = try stripeData.makeNode()
-            }
-        }
-
-        if options.contains(.shipping) {
-            let shipping = try customer.shippingAddresses().all()
-            customerNode["shipping"] = try shipping.makeNode()
-        }
-
-        return try customerNode.makeJSON()
+    
+        return try customer.makeJSON()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {

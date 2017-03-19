@@ -59,7 +59,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
         }
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
             "name" : .string(name),
             "email" : .string(email),
@@ -134,7 +134,7 @@ extension Customer: User {
                 throw AuthError.invalidCredentials
             }
             
-            if user.password == BCrypt.hash(password: usernamePassword.password, salt: user.salt) {
+            if try user.password == BCrypt.digest(password: usernamePassword.password, salt: user.salt) {
                 return user
             } else {
                 throw AuthError.invalidBasicAuthorization

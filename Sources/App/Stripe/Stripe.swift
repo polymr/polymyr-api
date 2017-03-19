@@ -87,6 +87,10 @@ public final class Stripe {
         return subscription
     }
     
+    public func charge(customer id: String, price: Double, fee percent: Double, on card: String, under account: String = token) throws -> Charge {
+        return try base.post("charges", query: ["amount" : price, "currency" : "USD", "application_fee" : price * percent, "card" : card, "customer" : id], token: account)
+    }
+    
     public func createCoupon(code: String) throws -> StripeCoupon {
         return try base.post("coupons", query: ["duration": Duration.once.rawValue, "id" : code, "percent_off" : 5, "max_redemptions" : 1])
     }
@@ -99,8 +103,8 @@ public final class Stripe {
         return try base.get("customers/\(customer)")
     }
     
-    public func vendorInformation(for vendor: String) throws -> StripeAccount {
-        return try base.get("accounts/\(vendor)")
+    public func makerInformation(for maker: String) throws -> StripeAccount {
+        return try base.get("accounts/\(maker)")
     }
     
     public func transfers(for secretKey: String) throws -> [Transfer] {

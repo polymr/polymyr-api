@@ -213,7 +213,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             throw Abort.custom(status: .internalServerError, message: "Missing secret key for maker with id \(id?.int ?? 0)")
         }
         
-        if let connectAccountCustomer = try self.connectAccountCustomers().filter("customer_id", customer_id).first() {
+        if let connectAccountCustomer = try self.connectAccountCustomers().filter("customer_id", customer_id).filter("maker_id", self.throwableId()).first() {
             
             let hasPaymentMethod = try Stripe.shared.paymentInformation(for: connectAccountCustomer.stripeCustomerId, under: secretKey).filter { $0.id == card }.count > 0
             
@@ -286,7 +286,7 @@ extension Maker: User {
                 throw AuthError.invalidCredentials
             }
             
-            if maker.password == BCrypt.hash(password: usernamePassword.password, salt: maker.salt) {
+            if try maker.password == BCrypt.digest(password: usernamePassword.password, salt: maker.salt) {
                 return maker
             } else {
                 throw AuthError.invalidBasicAuthorization
