@@ -88,7 +88,7 @@ server {
         sendfile_max_chunk 1m;
 
         proxy_cache static;
-        try_files Public/$uri =404;
+        try_files Public$uri =404;
     }
 
     location ~ /.well-known {
