@@ -33,6 +33,7 @@ drop.resource("orders", OrderController())
 drop.resource("sections", SectionController())
 drop.resource("customerAddresses", CustomerAddressController())
 drop.resource("tags", TagController())
+drop.resource("descriptions", DescriptionController())
 
 drop.collection(StripeCollection.self)
 
