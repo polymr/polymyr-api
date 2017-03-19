@@ -79,6 +79,8 @@ server {
     server_name static.polymyr.com www.static.polymyr.com;
 
     location / {
+        root /home/hakon/polymyr/polymyr-dev-api/Public;
+
         include h5bp/basic.conf;
 
         tcp_nodelay on;
@@ -88,7 +90,7 @@ server {
         sendfile_max_chunk 1m;
 
         proxy_cache static;
-        try_files Public$uri =404;
+        try_files $uri =404;
     }
 
     location ~ /.well-known {
