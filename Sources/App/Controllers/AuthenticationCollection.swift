@@ -28,15 +28,15 @@ final class AuthenticationCollection: RouteCollection {
     let google: Google
     
     required init() throws {
-        try! drop.log.error(drop.config.node.makeJSON().prettyString)
+        try! Droplet.logger?.error(Droplet.instance?.config.node.makeJSON().prettyString ?? "{{}}")
         
-        guard let fb = drop.config["oauth", "facebook"], let fb_id: String = try fb.extract("id"), let fb_secret: String = try fb.extract("secret") else {
+        guard let fb = Droplet.instance?.config["oauth", "facebook"], let fb_id: String = try fb.extract("id"), let fb_secret: String = try fb.extract("secret") else {
             throw Abort.custom(status: .internalServerError, message: "Missing facebook configuration.")
         }
         
         facebook = Facebook(clientID: fb_id, clientSecret: fb_secret)
         
-        guard let gl = drop.config["oauth", "google"], let gl_id: String = try gl.extract("id"), let gl_secret: String = try gl.extract("secret") else {
+        guard let gl = Droplet.instance?.config["oauth", "google"], let gl_id: String = try gl.extract("id"), let gl_secret: String = try gl.extract("secret") else {
             throw Abort.custom(status: .internalServerError, message: "Missing facebook configuration.")
         }
         

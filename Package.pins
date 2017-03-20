@@ -50,16 +50,16 @@
       "version": "1.2.0"
     },
     {
-      "package": "Jay",
-      "reason": null,
-      "repositoryURL": "https://github.com/DanToml/Jay.git",
-      "version": "1.0.1"
-    },
-    {
       "package": "JSON",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/json.git",
       "version": "1.0.6"
+    },
+    {
+      "package": "Jay",
+      "reason": null,
+      "repositoryURL": "https://github.com/DanToml/Jay.git",
+      "version": "1.0.1"
     },
     {
       "package": "Leaf",
