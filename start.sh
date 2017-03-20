@@ -1,49 +1,25 @@
 #!/usr/bin/env bash
 
 while getopts "e:f:d:" opt; do
-  	case $opt in
-    	e) config="$OPTARG"
-    	;;
-     	f) pidFile="$OPTARG"
-     	;;
-     	d) projectFolder="$OPTARG"
-  	esac
+    case $opt in
+      e) environment="$OPTARG"
+      ;;
+      f) pidFile="$OPTARG"
+    esac
 done
 
-configs=("development" "release")
-
-function printConfigs {
-	for item in ${configs[*]}; do
-    	printf "%s " "$item"
-	done
-}
-
-if [ -z "$config" ]; then
-  	printf "No environment was provided. Provde one with -e. Valid values are "
-  	printConfigs
-  	printf "\n"
-  	exit
+if [ -z "$environment" ]; then
+    printf "No environment was provided. Provde one with -e."
+    exit
 fi
 
 if [ -z "$pidFile" ]; then
-    printf "No pidFile was provided."
+    printf "No pidFile was provided. Provide one with -f."
     exit
-fi
-
-if [ -z "$projectFolder" ]; then
-    printf "No projectFolder was provided."
-    exit
-fi
-
-if [[ ! " ${configs[@]} " =~ " ${config} " ]]; then
-	printf "Invalid environment. Valid values are "
-	printConfigs
-	printf "\n"
 fi
 
 sudo rm "$pidFile"
 sudo touch "$pidFile"
 
-cd "$projectFolder" || exit
-
-.build/"$config"/App & echo $! > "$pidFile"
+DIR="$(dirname "${BASH_SOURCE[0]}")"
+"$DIR"/.build/release/App --env="$environment" & echo $! > "$pidFile"

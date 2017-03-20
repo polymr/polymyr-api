@@ -39,6 +39,9 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     var default_shipping_id: Node?
     var stripe_id: String?
     
+    var google_id: String?
+    var facebook_id: String?
+    
     init(node: Node, in context: Context) throws {
         id = try? node.extract("id")
         default_shipping_id = try? node.extract("default_shipping_id")
@@ -46,7 +49,9 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
         // Name and email are always mandatory
         email = try node.extract("email")
         name = try node.extract("name")
-        stripe_id = try? node.extract("stripe_id")
+        stripe_id = try node.extract("stripe_id")
+        google_id = try node.extract("google_id")
+        facebook_id = try node.extract("facebook_id")
         
         let password = try node.extract("password") as String
          
@@ -68,7 +73,9 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
         ]).add(objects: [
             "id" : id,
             "stripe_id" : stripe_id,
-            "default_shipping_id" : default_shipping_id
+            "default_shipping_id" : default_shipping_id,
+            "google_id" : google_id,
+            "facebook_id" : facebook_id
         ])
     }
     
@@ -88,6 +95,8 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
             box.string("email")
             box.string("password")
             box.string("salt")
+            box.string("google_id", optional: true)
+            box.string("facebook_id", optional: true)
             box.int("default_shipping_id", optional: true)
         }
     }
@@ -119,26 +128,22 @@ extension Customer: User {
         switch credentials {
             
         case let token as AccessToken:
-            let session = try Session.session(forToken: token, type: .customer)
-            
-            guard let user = try session.user().get() else {
+            guard let _user = try? Session.session(forToken: token, type: .customer).user().first(), let user = _user else {
                 throw AuthError.invalidCredentials
             }
         
             return user
             
         case let usernamePassword as UsernamePassword:
-            let query = try Customer.query().filter("email", usernamePassword.username)
-            
-            guard let user = try query.first() else {
+            guard let _user = try? Customer.query().filter("email", usernamePassword.username).first(), let user = _user else {
                 throw AuthError.invalidCredentials
             }
             
-            if try user.password == BCrypt.digest(password: usernamePassword.password, salt: user.salt) {
-                return user
-            } else {
-                throw AuthError.invalidBasicAuthorization
+            guard let result = try? BCrypt.verify(password: usernamePassword.password, matchesHash: user.password), result else {
+                throw AuthError.invalidCredentials
             }
+            
+            return user
             
         default:
             throw AuthError.unsupportedCredentials

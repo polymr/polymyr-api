@@ -93,6 +93,9 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     var missingFields: Bool
     var needsIdentityUpload: Bool
     
+    var google_id: String?
+    var facebook_id: String?
+    
     init(node: Node, in context: Context) throws {
         
         id = node["id"]
@@ -116,6 +119,9 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
         contactPhone = try node.extract("contactPhone")
         contactEmail = try node.extract("contactEmail")
         address_id = node["address_id"]
+        
+        google_id = try node.extract("google_id")
+        facebook_id = try node.extract("facebook_id")
         
         location = try node.extract("location")
         createdOn = try node.extract("createdOn") ?? Date()
@@ -159,7 +165,9 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
              "stripe_id" : stripe_id,
              "publishableKey" : keys?.publishable,
              "secretKey" : keys?.secret,
-             "address_id" : address_id
+             "address_id" : address_id,
+             "google_id" : google_id,
+             "facebook_id" : facebook_id
         ])
     }
     
@@ -182,6 +190,9 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             maker.string("location")
             maker.string("createdOn")
             maker.double("cut")
+            
+            maker.string("google_id", optional: true)
+            maker.string("facebook_id", optional: true)
             
             maker.string("username")
             maker.string("password")
@@ -263,34 +274,22 @@ extension Maker: User {
         switch credentials {
             
         case let token as AccessToken:
-            let session = try Session.session(forToken: token, type: .maker)
-            
-            guard let maker = try session.maker().get() else {
+            guard let _maker = try? Session.session(forToken: token, type: .maker).maker().first(), let maker = _maker else {
                 throw AuthError.invalidCredentials
             }
             
             return maker
-            
+
         case let usernamePassword as UsernamePassword:
-            let query = try Maker.query().filter("username", usernamePassword.username)
-            
-            guard let makers = try? query.all() else {
+            guard let _maker = try? Customer.query().filter("email", usernamePassword.username).first(), let maker = _maker else {
                 throw AuthError.invalidCredentials
             }
             
-            if makers.count > 0 {
-                Droplet.logger?.error("found multiple accounts with the same username \(makers.map { $0.id?.int ?? 0 })")
-            }
-            
-            guard let maker = makers.first else {
+            guard let result = try? BCrypt.verify(password: usernamePassword.password, matchesHash: maker.password), result else {
                 throw AuthError.invalidCredentials
             }
             
-            if try maker.password == BCrypt.digest(password: usernamePassword.password, salt: maker.salt) {
-                return maker
-            } else {
-                throw AuthError.invalidBasicAuthorization
-            }
+            return maker
             
         default:
             throw AuthError.unsupportedCredentials

@@ -3,7 +3,7 @@ Description=Polymyr Production API server
 After=network.target
 
 [Service]
-ExecStart=/bin/bash /home/hakon/polymyr/polymyr-dev-api/start.sh -e release -f /var/run/polymyrd.pid -d /home/hakon/polymyr/polymyr-dev-api
+ExecStart=/bin/bash /home/hakon/polymyr/polymyr-dev-api/start.sh -e production -f /var/run/polymyrd.pid
 Type=forking
 PIDFile=/var/run/polymyrd.pid
 Restart=always
