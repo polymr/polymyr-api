@@ -12,6 +12,7 @@ import Auth
 import Turnstile
 import BCrypt
 import Sanitized
+import TurnstileWeb
 
 extension Stripe {
     
@@ -140,6 +141,20 @@ extension Customer: User {
             }
             
             guard let result = try? BCrypt.verify(password: usernamePassword.password, matchesHash: user.password), result else {
+                throw AuthError.invalidCredentials
+            }
+            
+            return user
+            
+        case let facebook as FacebookAccount:
+            guard let _user = try? Customer.query().filter("facebook_id", facebook.uniqueID).first(), let user = _user else {
+                throw AuthError.invalidCredentials
+            }
+            
+            return user
+        
+        case let google as GoogleAccount:
+            guard let _user = try? Customer.query().filter("google_id", google.uniqueID).first(), let user = _user else {
                 throw AuthError.invalidCredentials
             }
             

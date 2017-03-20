@@ -25,7 +25,6 @@ drop.picture(base: "customers", slug: "customer_id", picture: PictureController<
 drop.resource("products", ProductController())
 drop.picture(base: "products", slug: "products_id", picture: PictureController<ProductPicture>())
 
-drop.resource("authentication", AuthenticationController())
 drop.resource("questions", QuestionController())
 drop.resource("campaigns", CampaignController())
 drop.resource("answers", AnswerController())
@@ -36,5 +35,6 @@ drop.resource("tags", TagController())
 drop.resource("descriptions", DescriptionController())
 
 drop.collection(StripeCollection.self)
+try drop.collection(AuthenticationCollection())
 
 drop.run()
