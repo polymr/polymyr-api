@@ -28,6 +28,7 @@ final class AuthenticationCollection: RouteCollection {
     let google: Google
     
     required init() throws {
+        Droplet.logger?.error(Droplet.instance?.workDir ?? "{{}}")
         try! Droplet.logger?.error(Droplet.instance?.config.node.makeJSON().prettyString ?? "{{}}")
         
         guard let fb = Droplet.instance?.config["oauth", "facebook"], let fb_id: String = try fb.extract("id"), let fb_secret: String = try fb.extract("secret") else {
