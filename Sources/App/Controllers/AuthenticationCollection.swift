@@ -28,6 +28,8 @@ final class AuthenticationCollection: RouteCollection {
     let google: Google
     
     required init() throws {
+        try! print(drop.config.node.makeJSON().prettyString)
+        
         guard let fb = drop.config["oauth", "facebook"], let fb_id: String = try fb.extract("id"), let fb_secret: String = try fb.extract("secret") else {
             throw Abort.custom(status: .internalServerError, message: "Missing facebook configuration.")
         }
