@@ -96,7 +96,7 @@ final class AuthenticationCollection: RouteCollection {
                 
                 gl_group.get("login") { request in
                     let state = UUID().uuidString
-                    let response = Response(redirect: self.google.getLoginLink(redirectURL: "https://goo.gl/2AeBEb", state: state).absoluteString)
+                    let response = Response(redirect: self.google.getLoginLink(redirectURL: "/oauth/google/callback", state: state).absoluteString)
                     response.cookies["OAuthState"] = state
                     return response
                 }

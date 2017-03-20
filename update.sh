@@ -37,5 +37,5 @@ if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- polymyrd.service.txt)" ]; 
 	reset_production_server
 fi
 
-echo "\n>>>> sudo systemctl restart instacrated.service"
+echo "\n>>>> sudo systemctl restart polymyrd.service"
 sudo systemctl restart polymyrd.service
