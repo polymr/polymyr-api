@@ -72,7 +72,7 @@ final class AuthenticationCollection: RouteCollection {
                 
                 fb_group.get("login") { request in
                     let state = UUID().uuidString
-                    let response = Response(redirect: self.facebook.getLoginLink(redirectURL: "https://api.polymyr.com/oauth/facebook/callback", state: state).absoluteString)
+                    let response = Response(redirect: self.facebook.getLoginLink(redirectURL: "https://api.polymyr.com/oauth/facebook/callback", state: state, scopes: ["email"]).absoluteString)
                     response.cookies["OAuthState"] = state
                     return response
                 }
