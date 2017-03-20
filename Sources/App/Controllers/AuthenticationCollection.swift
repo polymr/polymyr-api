@@ -28,9 +28,6 @@ final class AuthenticationCollection: RouteCollection {
     let google: Google
     
     required init() throws {
-        Droplet.logger?.error(Droplet.instance?.workDir ?? "{{}}")
-        try! Droplet.logger?.error(Droplet.instance?.config.node.makeJSON().prettyString ?? "{{}}")
-        
         guard let fb = Droplet.instance?.config["oauth", "facebook"], let fb_id: String = try fb.extract("id"), let fb_secret: String = try fb.extract("secret") else {
             throw Abort.custom(status: .internalServerError, message: "Missing facebook configuration.")
         }
@@ -75,7 +72,7 @@ final class AuthenticationCollection: RouteCollection {
                 
                 fb_group.get("login") { request in
                     let state = UUID().uuidString
-                    let response = Response(redirect: self.facebook.getLoginLink(redirectURL: request.baseURL + "/oauth/facebook/callback", state: state).absoluteString)
+                    let response = Response(redirect: self.facebook.getLoginLink(redirectURL: "https://api.polymyr.com/oauth/facebook/callback", state: state).absoluteString)
                     response.cookies["OAuthState"] = state
                     return response
                 }
@@ -99,7 +96,7 @@ final class AuthenticationCollection: RouteCollection {
                 
                 gl_group.get("login") { request in
                     let state = UUID().uuidString
-                    let response = Response(redirect: self.google.getLoginLink(redirectURL: "/oauth/google/callback", state: state).absoluteString)
+                    let response = Response(redirect: self.google.getLoginLink(redirectURL: request.baseURL + "/oauth/google/callback", state: state).absoluteString)
                     response.cookies["OAuthState"] = state
                     return response
                 }
