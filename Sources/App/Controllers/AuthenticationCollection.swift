@@ -82,7 +82,7 @@ final class AuthenticationCollection: RouteCollection {
                         throw Abort.custom(status: .internalServerError, message: "Missing state.")
                     }
                     
-                    guard let account = try self.facebook.authenticate(authorizationCodeCallbackURL: request.uri.description, state: state) as? FacebookAccount else {
+                    guard let account = try? self.facebook.authenticate(authorizationCodeCallbackURL: request.uri.description, state: state) as! FacebookAccount else {
                         throw Abort.custom(status: .internalServerError, message: "Failed to create facebook account")
                     }
                     
