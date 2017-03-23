@@ -284,7 +284,7 @@ extension Maker: User {
             return maker
 
         case let usernamePassword as UsernamePassword:
-            guard let _maker = try? Customer.query().filter("email", usernamePassword.username).first(), let maker = _maker else {
+            guard let _maker = try? Maker.query().filter("username", usernamePassword.username).first(), let maker = _maker else {
                 throw AuthError.invalidCredentials
             }
             
