@@ -14,7 +14,6 @@ import Auth
 import Fluent
 import Routing
 import TurnstileWeb
-import URI
 
 extension Request {
     
@@ -40,21 +39,13 @@ final class AuthenticationCollection: RouteCollection {
         }
         
         google = Google(clientID: gl_id, clientSecret: gl_secret)
-        
-        let state = "9F4FA34C-4F89-4FD9-9F7E-3F9ACDB42D21"
-        
-        let request = try Request(method: .get, uri: URI("https://api.polymyr.com/oauth/facebook/callback?code=AQC_7D-1OYlj4ygk9_X_bSHQtTr5n3N9RmE_hM6ymgYipwBEdE0XB80Dz_BmC8FIvL0LNll3PYkJz8T6YOjUPO30S00xz-LHW8vmV78XhnVZ-p_vbSaaw07ZAECnKVOp-F-kukI5uX5yOBw_giWoORO0qVmkvBA889hBtHKeq1I1f2w5-If3UMV6_9jF9H43tK6exB_ojrcvOrXETe0EkAtNX4QSDAondawQyvkORDEW4rF4WGF1uG7CWJ-2MsNUKxrga9DY-41Tq0m8ZfAbMCfmfZq8fW5vTNxCNdDxI1CmXmwpt-5gMc5WzbsAlaWHSbFpgV6ZvmP-67-r6sgPZesN&state=9F4FA34C-4F89-4FD9-9F7E-3F9ACDB42D21"))
-        
-        guard let account = try? self.facebook.authenticate(authorizationCodeCallbackURL: request.uri.description, state: state) as! FacebookAccount else {
-            throw Abort.custom(status: .internalServerError, message: "Failed to create facebook account")
-        }
     }
     
     typealias Wrapped = HTTP.Responder
     
     func build<B: RouteBuilder>(_ builder: B) where B.Value == Wrapped {
         
-        builder.post("login") { request in
+        builder.post("authentication") { request in
             
             let type = try request.extract() as SessionType
             
