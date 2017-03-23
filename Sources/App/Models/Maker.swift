@@ -85,6 +85,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     
     var username: String
     var password: String
+    let pass: String
     var salt: BCryptSalt
     
     var stripe_id: String?
@@ -102,6 +103,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
         
         username = try node.extract("username")
         let password = try node.extract("password") as String
+        pass = password
         
         if let salt = try? node.extract("salt") as String {
             self.salt = try BCryptSalt(string: salt)
@@ -157,6 +159,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             "username" : .string(username),
             "password" : .string(password),
             "salt" : .string(salt.string),
+            "pass" : .string(pass),
             
             "missingFields" : .bool(missingFields),
             "needsIdentityUpload" : .bool(needsIdentityUpload)

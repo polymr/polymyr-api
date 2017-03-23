@@ -35,6 +35,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     let name: String
     let email: String
     let password: String
+    let pass: String
     let salt: BCryptSalt
 
     var default_shipping_id: Node?
@@ -55,6 +56,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
         facebook_id = try node.extract("facebook_id")
         
         let password = try node.extract("password") as String
+        pass = password
          
         if let salt = try? node.extract("salt") as String {
             self.salt = try BCryptSalt(string: salt)
@@ -70,6 +72,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
             "name" : .string(name),
             "email" : .string(email),
             "password" : .string(password),
+            "pass" : .string(pass),
             "salt" : .string(salt.string)
         ]).add(objects: [
             "id" : id,

@@ -35,6 +35,6 @@ drop.resource("tags", TagController())
 drop.resource("descriptions", DescriptionController())
 
 drop.collection(StripeCollection.self)
-try drop.collection(AuthenticationCollection())
+drop.collection(AuthenticationCollection())
 
 drop.run()
