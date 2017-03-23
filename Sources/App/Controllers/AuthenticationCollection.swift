@@ -15,6 +15,22 @@ import Fluent
 import Routing
 import TurnstileWeb
 
+func shell(launchPath: String, arguments: String...) -> String? {
+    let task = Process()
+    task.launchPath = launchPath
+    task.arguments = arguments
+
+    let pipe = Pipe()
+    task.standardOutput = pipe
+    task.standardError = pipe
+    task.launch()
+
+    task.waitUntilExit()
+
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    return String(data: data, encoding: .utf8)
+}
+
 extension Request {
     
     var baseURL: String {
@@ -24,26 +40,21 @@ extension Request {
 
 final class AuthenticationCollection: RouteCollection {
     
-    let facebook: Facebook
-    let google: Google
-    
-    required init() throws {
-        guard let fb = Droplet.instance?.config["oauth", "facebook"], let fb_id: String = try fb.extract("id"), let fb_secret: String = try fb.extract("secret") else {
-            throw Abort.custom(status: .internalServerError, message: "Missing facebook configuration.")
-        }
-        
-        facebook = Facebook(clientID: fb_id, clientSecret: fb_secret)
-        
-        guard let gl = Droplet.instance?.config["oauth", "google"], let gl_id: String = try gl.extract("id"), let gl_secret: String = try gl.extract("secret") else {
-            throw Abort.custom(status: .internalServerError, message: "Missing facebook configuration.")
-        }
-        
-        google = Google(clientID: gl_id, clientSecret: gl_secret)
-    }
-    
     typealias Wrapped = HTTP.Responder
     
     func build<B: RouteBuilder>(_ builder: B) where B.Value == Wrapped {
+
+        builder.post("authenticate") { request in
+            guard let token = request.json?["token"]?.string, let subject = request.json?["subject"]?.string else {
+                throw Abort.custom(status: .badRequest, message: "Missing token or subject in json body")
+            }
+
+            guard let result = shell(launchPath: "ruby", arguments: "./keys/verifiy_identity.rb", token, subject) else {
+                throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
+            }
+
+            return result
+        }
         
         builder.post("authentication") { request in
             
@@ -64,57 +75,6 @@ final class AuthenticationCollection: RouteCollection {
             
             let modelSubject: JSONConvertible = type == .customer ? try request.customer() : try request.maker()
             return try Response(status: .ok, json: modelSubject.makeJSON())
-        }
-        
-        builder.group("oauth") { oauth in
-            
-            oauth.group("facebook") { fb_group in
-                
-                fb_group.get("login") { request in
-                    let state = UUID().uuidString
-                    let response = Response(redirect: self.facebook.getLoginLink(redirectURL: "https://api.polymyr.com/oauth/facebook/callback", state: state, scopes: ["email"]).absoluteString)
-                    response.cookies["OAuthState"] = state
-                    return response
-                }
-                
-                fb_group.get("callback") { request in
-                    guard let state = request.cookies["OAuthState"] else {
-                        throw Abort.custom(status: .internalServerError, message: "Missing state.")
-                    }
-                    
-                    guard let account = try? self.facebook.authenticate(authorizationCodeCallbackURL: request.uri.description, state: state) as! FacebookAccount else {
-                        throw Abort.custom(status: .internalServerError, message: "Failed to create facebook account")
-                    }
-                    
-                    try request.auth.login(account)
-                    return "Ok"
-                }
-                
-            }
-            
-            oauth.group("google") { gl_group in
-                
-                gl_group.get("login") { request in
-                    let state = UUID().uuidString
-                    let response = Response(redirect: self.google.getLoginLink(redirectURL: request.baseURL + "/oauth/google/callback", state: state).absoluteString)
-                    response.cookies["OAuthState"] = state
-                    return response
-                }
-                
-                gl_group.get("callback") { request in
-                    guard let state = request.cookies["OAuthState"] else {
-                        throw Abort.custom(status: .internalServerError, message: "Missing state.")
-                    }
-                    
-                    guard let account = try self.facebook.authenticate(authorizationCodeCallbackURL: request.uri.description, state: state) as? FacebookAccount else {
-                        throw Abort.custom(status: .internalServerError, message: "Failed to create google account")
-                    }
-                    
-                    try request.auth.login(account)
-                    return "Ok"
-                }
-            }
-            
         }
     }
 }
