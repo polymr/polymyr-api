@@ -38,30 +38,47 @@ extension Request {
     }
 }
 
+final class JWTCredentials: Credentials {
+
+    /// Username or email address
+    public let token: String
+
+    /// Password (unhashed)
+    public let subject: String
+
+    /// Initializer for PasswordCredentials
+    public init(token: String, subject: String) {
+        self.token = token
+        self.subject = subject
+    }
+}
+
+extension Request {
+
+    func jwtCredentials() -> JWTCredentials? {
+        guard let token = json?["token"]?.string, let subject = json?["subject"]?.string else {
+            return nil
+        }
+
+        return JWTCredentials(token: token, subject: subject)
+    }
+}
+
 final class AuthenticationCollection: RouteCollection {
     
     typealias Wrapped = HTTP.Responder
     
     func build<B: RouteBuilder>(_ builder: B) where B.Value == Wrapped {
-
-        builder.post("authenticate") { request in
-            guard let token = request.json?["token"]?.string, let subject = request.json?["subject"]?.string else {
-                throw Abort.custom(status: .badRequest, message: "Missing token or subject in json body")
-            }
-
-            guard let result = shell(launchPath: "ruby", arguments: "./keys/verifiy_identity.rb", token, subject) else {
-                throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
-            }
-
-            return result
-        }
         
         builder.post("authentication") { request in
             
             let type = try request.extract() as SessionType
-            
-            guard let credentials = request.auth.header?.usernamePassword else {
-                throw AuthError.noAuthorizationHeader
+
+            var _credentials: Credentials? = request.auth.header?.usernamePassword
+            _credentials = request.jwtCredentials()
+
+            guard let credentials = _credentials else {
+                throw AuthError.invalidCredentials
             }
             
             switch type {

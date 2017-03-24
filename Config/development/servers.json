@@ -2,6 +2,7 @@
 	"default": {
 		"port": "8081",
 		"host": "0.0.0.0",
-		"securityLayer": "none"
+		"securityLayer": "none",
+        "ruby" : "/Users/hakonhanesand/.rbenv/shims/ruby"
 	}
 }

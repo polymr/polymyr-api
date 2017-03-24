@@ -41,8 +41,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     var default_shipping_id: Node?
     var stripe_id: String?
     
-    var google_id: String?
-    var facebook_id: String?
+    var sub_id: String?
     
     init(node: Node, in context: Context) throws {
         id = try? node.extract("id")
@@ -52,8 +51,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
         email = try node.extract("email")
         name = try node.extract("name")
         stripe_id = try node.extract("stripe_id")
-        google_id = try node.extract("google_id")
-        facebook_id = try node.extract("facebook_id")
+        sub_id = try node.extract("sub_id")
         
         let password = try node.extract("password") as String
         pass = password
@@ -78,8 +76,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
             "id" : id,
             "stripe_id" : stripe_id,
             "default_shipping_id" : default_shipping_id,
-            "google_id" : google_id,
-            "facebook_id" : facebook_id
+            "sub_id" : sub_id
         ])
     }
     
@@ -99,8 +96,7 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
             box.string("email")
             box.string("password")
             box.string("salt")
-            box.string("google_id", optional: true)
-            box.string("facebook_id", optional: true)
+            box.string("sub_id", optional: true)
             box.int("default_shipping_id", optional: true)
         }
     }
@@ -149,15 +145,22 @@ extension Customer: User {
             
             return user
             
-        case let facebook as FacebookAccount:
-            guard let _user = try? Customer.query().filter("facebook_id", facebook.uniqueID).first(), let user = _user else {
+
+        case let jwt as JWTCredentials:
+            guard let ruby = drop.config["servers", "default", "ruby"]?.string else {
+                throw Abort.custom(status: .internalServerError, message: "Missing path to ruby executable")
+            }
+
+            guard let result = shell(launchPath: ruby, arguments: drop.workDir + "identity/verifiy_identity.rb", jwt.token, jwt.subject, drop.workDir) else {
+                throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
+            }
+
+            guard result == "success" else {
+                print(result)
                 throw AuthError.invalidCredentials
             }
-            
-            return user
-        
-        case let google as GoogleAccount:
-            guard let _user = try? Customer.query().filter("google_id", google.uniqueID).first(), let user = _user else {
+
+            guard let _user = try? Customer.query().filter("sub_id", jwt.subject).first(), let user = _user else {
                 throw AuthError.invalidCredentials
             }
             

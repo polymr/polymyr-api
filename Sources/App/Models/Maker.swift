@@ -94,8 +94,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     var missingFields: Bool
     var needsIdentityUpload: Bool
     
-    var google_id: String?
-    var facebook_id: String?
+    var sub_id: String?
     
     init(node: Node, in context: Context) throws {
         
@@ -122,12 +121,10 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
         contactEmail = try node.extract("contactEmail")
         address_id = node["address_id"]
         
-        google_id = try node.extract("google_id")
-        facebook_id = try node.extract("facebook_id")
-        
         location = try node.extract("location")
         createdOn = try node.extract("createdOn") ?? Date()
         cut = try node.extract("cut") ?? 0.08
+        sub_id = try node.extract("sub_id")
         
         stripe_id = try node.extract("stripe_id")
         
@@ -169,8 +166,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
              "publishableKey" : keys?.publishable,
              "secretKey" : keys?.secret,
              "address_id" : address_id,
-             "google_id" : google_id,
-             "facebook_id" : facebook_id
+             "sub_id" : sub_id
         ])
     }
     
@@ -203,6 +199,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             
             maker.string("publishableKey", optional: true)
             maker.string("secretKey", optional: true)
+            maker.string("sub_id", optional: true)
             
             maker.string("stripe_id", optional: true)
             maker.bool("missingFields")
@@ -293,7 +290,26 @@ extension Maker: User {
             }
             
             return maker
-            
+
+        case let jwt as JWTCredentials:
+            guard let ruby = drop.config["servers", "default", "ruby"]?.string else {
+                throw Abort.custom(status: .internalServerError, message: "Missing path to ruby executable")
+            }
+
+            guard let result = shell(launchPath: ruby, arguments: drop.workDir + "identity/verifiy_identity.rb", jwt.token, jwt.subject, drop.workDir) else {
+                throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
+            }
+
+            guard result == "success" else {
+                print(result)
+                throw AuthError.invalidCredentials
+            }
+
+            guard let _maker = try? Maker.query().filter("sub_id", jwt.subject).first(), let maker = _maker else {
+                throw AuthError.invalidCredentials
+            }
+
+            return maker
         default:
             throw AuthError.unsupportedCredentials
         }
