@@ -23,10 +23,10 @@ begin
 	decoded_token = JWT.decode token, key, true, {
 		:algorithm => 'RS256',
 		:exp_leeway => 60,
-		:verify_iss => true, :iss => 'https://securetoken.google.com/polymyr-162101',
+		:verify_iss => true, :iss => 'https://securetoken.google.com/polymyr-a5014',
 		# :verify_sub => true, :sub => sub, 
 		:verify_iat => true, :iat_leeway => 60,
-		:verify_aud => true, :aud => ['polymyr-162101']
+		:verify_aud => true, :aud => 'polymyr-a5014'
 	}
 rescue => error
 	puts error.message
