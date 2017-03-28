@@ -265,6 +265,10 @@ extension Maker {
     func address() throws -> Parent<MakerAddress> {
         return try parent(address_id)
     }
+
+    func orders() -> Children<Order> {
+        return children()
+    }
 }
 
 extension Maker: User {

@@ -34,14 +34,16 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     
     let name: String
     let email: String
-    let password: String
-    let pass: String
-    let salt: BCryptSalt
-
     var default_shipping_id: Node?
     var stripe_id: String?
     
     var sub_id: String?
+
+    init(name: String, email: String, subject_id: String) {
+        self.name = name
+        self.email = email
+        sub_id = subject_id
+    }
     
     init(node: Node, in context: Context) throws {
         id = try? node.extract("id")
@@ -52,26 +54,12 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
         name = try node.extract("name")
         stripe_id = try node.extract("stripe_id")
         sub_id = try node.extract("sub_id")
-        
-        let password = try node.extract("password") as String
-        pass = password
-         
-        if let salt = try? node.extract("salt") as String {
-            self.salt = try BCryptSalt(string: salt)
-            self.password = password
-        } else {
-            self.salt = try BCryptSalt(workFactor: 10)
-            self.password = try BCrypt.digest(password: password, salt: salt)
-        }
     }
     
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
             "name" : .string(name),
-            "email" : .string(email),
-            "password" : .string(password),
-            "pass" : .string(pass),
-            "salt" : .string(salt.string)
+            "email" : .string(email)
         ]).add(objects: [
             "id" : id,
             "stripe_id" : stripe_id,
@@ -94,8 +82,6 @@ final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
             box.string("name")
             box.string("stripe_id", optional: true)
             box.string("email")
-            box.string("password")
-            box.string("salt")
             box.string("sub_id", optional: true)
             box.int("default_shipping_id", optional: true)
         }
@@ -133,18 +119,6 @@ extension Customer: User {
             }
         
             return user
-            
-        case let usernamePassword as UsernamePassword:
-            guard let _user = try? Customer.query().filter("email", usernamePassword.username).first(), let user = _user else {
-                throw AuthError.invalidCredentials
-            }
-            
-            guard let result = try? BCrypt.verify(password: usernamePassword.password, matchesHash: user.password), result else {
-                throw AuthError.invalidCredentials
-            }
-            
-            return user
-            
 
         case let jwt as JWTCredentials:
             guard let ruby = drop.config["servers", "default", "ruby"]?.string else {
@@ -155,15 +129,16 @@ extension Customer: User {
                 throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
             }
 
-            guard result == "success" else {
-                print(result)
+            guard result == "success\n" else {
                 throw AuthError.invalidCredentials
             }
 
-            guard let _user = try? Customer.query().filter("sub_id", jwt.subject).first(), let user = _user else {
-                throw AuthError.invalidCredentials
+            if let _user = try? Customer.query().filter("sub_id", jwt.subject).first(), let user = _user {
+                return user
             }
-            
+
+            var user = Customer(name: jwt.providerData.displayName, email: jwt.providerData.email, subject_id: jwt.subject)
+            try user.save()
             return user
             
         default:
@@ -188,5 +163,12 @@ extension Model {
         }
         
         return customerIdInt
+    }
+}
+
+extension Customer  {
+
+    func orders() -> Children<Order> {
+        return children()
     }
 }

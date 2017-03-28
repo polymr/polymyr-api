@@ -68,3 +68,14 @@ final class Campaign: Model, Preparation, JSONConvertible, Sanitizable {
         try database.delete(self.entity)
     }
 }
+
+extension Campaign {
+
+    func maker() throws -> Parent<Maker> {
+        return try parent(maker_id)
+    }
+
+    func product() throws -> Parent<Product> {
+        return try parent(product_id)
+    }
+}

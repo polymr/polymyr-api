@@ -38,29 +38,54 @@ extension Request {
     }
 }
 
+final class ProviderData: NodeConvertible {
+
+    public let uid: String
+    public let displayName: String
+    public let photoURL: String
+    public let email: String
+    public let providerId: String
+
+    init(node: Node, in context: Context = EmptyNode) throws {
+        uid = try node.extract("uid")
+        displayName = try node.extract("displayName")
+        photoURL = try node.extract("photoURL")
+        email = try node.extract("email")
+        providerId = try node.extract("providerId")
+    }
+
+    func makeNode(context: Context = EmptyNode) throws -> Node {
+        return try Node(node: [
+            "uid" : .string(uid),
+            "displayName" : .string(displayName),
+            "photoURL" : .string(photoURL),
+            "email" : .string(email),
+            "providerId" : .string(providerId)
+        ])
+    }
+}
+
 final class JWTCredentials: Credentials {
 
-    /// Username or email address
     public let token: String
-
-    /// Password (unhashed)
     public let subject: String
+    public let providerData: ProviderData
 
-    /// Initializer for PasswordCredentials
-    public init(token: String, subject: String) {
+    public init(token: String, subject: String, providerData: Node) throws {
         self.token = token
         self.subject = subject
+        self.providerData = try ProviderData(node: providerData)
     }
 }
 
 extension Request {
 
     func jwtCredentials() -> JWTCredentials? {
-        guard let token = json?["token"]?.string, let subject = json?["subject"]?.string else {
+        guard let token = json?["token"]?.string, let subject = json?["subject"]?.string, let providerData = json?["providerData"]?.node else {
             return nil
         }
 
-        return JWTCredentials(token: token, subject: subject)
+        return try? JWTCredentials(token: token, subject: subject, providerData: providerData)
     }
 }
 

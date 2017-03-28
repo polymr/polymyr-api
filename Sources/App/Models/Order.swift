@@ -29,6 +29,8 @@ final class Order: Model, Preparation, JSONConvertible, Sanitizable {
     
     var charge_id: String?
     let card: String
+
+    let fulfilled: Bool
     
     init(node: Node, in context: Context) throws {
         id = node["id"]
@@ -42,6 +44,8 @@ final class Order: Model, Preparation, JSONConvertible, Sanitizable {
         
         campaign_id = node["campaign_id"]
         maker_id = node["maker_id"]
+
+        fulfilled = (try? node.extract("fulfilled")) ?? false
         
         if let product_id = product_id, campaign_id == nil || maker_id == nil {
             guard let product = try Product.find(product_id) else {
@@ -72,6 +76,7 @@ final class Order: Model, Preparation, JSONConvertible, Sanitizable {
             order.id()
             order.string("card")
             order.string("charge_id")
+            order.bool("fulfilled", default: false)
             order.parent(Campaign.self)
             order.parent(Product.self)
             order.parent(Maker.self)

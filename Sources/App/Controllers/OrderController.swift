@@ -32,31 +32,42 @@ extension Stripe {
 final class OrderController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try Order.all().makeJSON()
+        let type: SessionType = try request.extract()
+
+        switch type {
+        case .customer:
+            return try request.customer().orders().all().makeJSON()
+        case .maker:
+            var query = try request.maker().orders().makeQuery()
+
+            if let fulfilled = request.query?["fulfilled"]?.bool {
+                query = try query.filter("fulfilled", fulfilled)
+            }
+
+            return try request.maker().orders().all().makeJSON()
+        case .none:
+            return try Order.all().makeJSON()
+        }
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
         var order: Order = try request.extractModel(injecting: request.customerInjectable())
-        
-        guard let product = try order.product().first() else {
-            throw Abort.custom(status: .badRequest, message: "no product")
+
+        guard let campaign = try order.campaign().first() else {
+            throw Abort.custom(status: .badRequest, message: "no campaign")
         }
         
         guard let customer = try order.customer().first() else {
             throw Abort.custom(status: .badRequest, message: "no customer")
         }
-        
-        guard let campaign = try order.campaign().first() else {
-            throw Abort.custom(status: .badRequest, message: "no campaign")
+
+        guard let product = try campaign.product().first(), let maker = try campaign.maker().first() else {
+            throw Abort.custom(status: .internalServerError, message: "malformed campaign object")
         }
-        
-        guard let maker = try order.maker().first() else {
-            throw Abort.custom(status: .badRequest, message: "no maker")
-        }
-    
+
         let charge = try Stripe.shared.order(customer: customer, product: product, maker: maker, campaign: campaign, card: order.card)
         order.charge_id = charge.id
-        
+
         try order.save()
         return order
     }
