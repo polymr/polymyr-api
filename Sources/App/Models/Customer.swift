@@ -129,10 +129,8 @@ extension Customer: User {
                 throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
             }
 
-            drop.log.debug(result)
-
             guard result == "success\n" else {
-                throw AuthError.invalidCredentials
+                throw Abort.custom(status: .internalServerError, message: result)
             }
 
             if let _user = try? Customer.query().filter("sub_id", jwt.subject).first(), let user = _user {
