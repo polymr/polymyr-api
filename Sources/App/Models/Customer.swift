@@ -137,7 +137,11 @@ extension Customer: User {
                 return user
             }
 
-            var user = Customer(name: jwt.providerData.displayName, email: jwt.providerData.email, subject_id: jwt.subject)
+            guard let providerData = jwt.providerData else {
+                throw Abort.custom(status: .internalServerError, message: "Need provider data")
+            }
+
+            var user = Customer(name: providerData.displayName, email: providerData.email, subject_id: jwt.subject)
             try user.save()
             return user
             

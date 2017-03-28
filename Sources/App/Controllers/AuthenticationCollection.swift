@@ -69,9 +69,9 @@ final class JWTCredentials: Credentials {
 
     public let token: String
     public let subject: String
-    public let providerData: ProviderData
+    public let providerData: ProviderData?
 
-    public init(token: String, subject: String, providerData: Node) throws {
+    public init(token: String, subject: String, providerData: Node?) throws {
         self.token = token
         self.subject = subject
         self.providerData = try ProviderData(node: providerData)
@@ -81,9 +81,11 @@ final class JWTCredentials: Credentials {
 extension Request {
 
     func jwtCredentials() -> JWTCredentials? {
-        guard let token = json?["token"]?.string, let subject = json?["subject"]?.string, let providerData = json?["providerData"]?.node else {
+        guard let token = json?["token"]?.string, let subject = json?["subject"]?.string else {
             return nil
         }
+
+        let providerData = json?["providerData"]?.node
 
         return try? JWTCredentials(token: token, subject: subject, providerData: providerData)
     }
