@@ -56,11 +56,12 @@ final class ProviderData: NodeConvertible {
 
     func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node: [
-            "uid" : .string(uid),
             "displayName" : .string(displayName),
-            "photoURL" : .string(photoURL),
             "email" : .string(email),
-            "providerId" : .string(providerId)
+        ]).add(objects: [
+            "uid" : uid,
+            "photoURL" : photoURL,
+            "providerId" : providerId
         ])
     }
 }
