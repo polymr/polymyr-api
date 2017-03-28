@@ -40,11 +40,11 @@ extension Request {
 
 final class ProviderData: NodeConvertible {
 
-    public let uid: String
+    public let uid: String?
     public let displayName: String
-    public let photoURL: String
+    public let photoURL: String?
     public let email: String
-    public let providerId: String
+    public let providerId: String?
 
     init(node: Node, in context: Context = EmptyNode) throws {
         uid = try node.extract("uid")
