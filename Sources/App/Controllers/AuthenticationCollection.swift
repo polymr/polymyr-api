@@ -13,7 +13,6 @@ import Turnstile
 import Auth
 import Fluent
 import Routing
-import TurnstileWeb
 
 func shell(launchPath: String, arguments: String...) -> String? {
     let task = Process()
@@ -29,13 +28,6 @@ func shell(launchPath: String, arguments: String...) -> String? {
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     return String(data: data, encoding: .utf8)
-}
-
-extension Request {
-    
-    var baseURL: String {
-        return uri.scheme + "://" + uri.host + (uri.port == nil ? "" : ":\(uri.port!)")
-    }
 }
 
 final class ProviderData: NodeConvertible {
@@ -79,14 +71,14 @@ final class JWTCredentials: Credentials {
     }
 }
 
-extension Request {
+extension JSON {
 
-    func jwtCredentials() -> JWTCredentials? {
-        guard let token = json?["token"]?.string, let subject = json?["subject"]?.string else {
+    var jwt: JWTCredentials? {
+        guard let token = self["token"]?.string, let subject = self["subject"]?.string else {
             return nil
         }
 
-        let providerData = json?["providerData"]?.node
+        let providerData = self["providerData"]?.node
 
         return try? JWTCredentials(token: token, subject: subject, providerData: providerData)
     }
@@ -102,10 +94,7 @@ final class AuthenticationCollection: RouteCollection {
             
             let type = try request.extract() as SessionType
 
-            var _credentials: Credentials? = request.auth.header?.usernamePassword
-            _credentials = request.jwtCredentials()
-
-            guard let credentials = _credentials else {
+            guard let credentials: Credentials = request.auth.header?.usernamePassword ?? request.json?.jwt else {
                 throw AuthError.invalidCredentials
             }
             

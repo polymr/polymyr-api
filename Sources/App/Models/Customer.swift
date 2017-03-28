@@ -12,7 +12,6 @@ import Auth
 import Turnstile
 import BCrypt
 import Sanitized
-import TurnstileWeb
 
 extension Stripe {
     
@@ -27,13 +26,14 @@ extension Stripe {
 
 final class Customer: Model, Preparation, JSONConvertible, Sanitizable {
     
-    static var permitted: [String] = ["email", "name", "default_shipping_id", "password"]
+    static var permitted: [String] = ["email", "name", "default_shipping_id"]
     
     var id: Node?
     var exists = false
     
     let name: String
     let email: String
+
     var default_shipping_id: Node?
     var stripe_id: String?
     
@@ -128,6 +128,8 @@ extension Customer: User {
             guard let result = shell(launchPath: ruby, arguments: drop.workDir + "identity/verifiy_identity.rb", jwt.token, jwt.subject, drop.workDir) else {
                 throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
             }
+
+            drop.console.info("ruby result : \(result)")
 
             guard result == "success\n" else {
                 throw Abort.custom(status: .internalServerError, message: result)
