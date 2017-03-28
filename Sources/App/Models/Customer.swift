@@ -129,6 +129,8 @@ extension Customer: User {
                 throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
             }
 
+            drop.log.debug(result)
+
             guard result == "success\n" else {
                 throw AuthError.invalidCredentials
             }
