@@ -67,7 +67,7 @@ final class JWTCredentials: Credentials {
     public init(token: String, subject: String, providerData: Node?) throws {
         self.token = token
         self.subject = subject
-        self.providerData = try ProviderData(node: providerData)
+        self.providerData = try? ProviderData(node: providerData)
     }
 }
 
