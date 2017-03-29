@@ -12,7 +12,12 @@ import Cookies
 import Cache
 import Auth
 import Vapor
-import Foundation.NSDate
+
+#if os(macOS)
+    import Foundation.NSDate
+#else
+    import Foundation.Date
+#endif
 
 private let cookieName = "maker-auth"
 private let storageName = "makerSubject"

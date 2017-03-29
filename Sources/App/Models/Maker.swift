@@ -12,7 +12,12 @@ import Auth
 import Turnstile
 import BCrypt
 import Sanitized
-import Foundation.NSDate
+
+#if os(macOS)
+    import Foundation.NSDate
+#else
+    import Foundation.Date
+#endif
 
 extension Node {
 

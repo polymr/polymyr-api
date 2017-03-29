@@ -10,7 +10,12 @@ import Node
 import JSON
 import Fluent
 import Vapor
-import Foundation.NSDate
+
+#if os(macOS)
+    import Foundation.NSDate
+#else
+    import Foundation.Date
+#endif
 
 struct OwnerContext: Context {
 

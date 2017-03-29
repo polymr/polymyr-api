@@ -12,11 +12,16 @@ import Cookies
 import Cache
 import Auth
 import Vapor
-import Foundation.NSDate
+
+#if os(macOS)
+    import Foundation.NSDate
+#else
+    import Foundation.Date
+#endif
 
 private let cookieName = "vapor-user-auth"
 private let storageName = "userSubject"
-private let cookieTimeout: TimeInterval = 7 * 24 * 60 * 60
+private let cookieTimeout: Double = 7 * 24 * 60 * 60
 
 extension Request {
     

@@ -8,7 +8,12 @@
 
 import Node
 import Vapor
+
+#if os(macOS)
 import Foundation.NSDate
+#else
+import Foundation.Date
+#endif
 
 public final class DeclineChargeRules: NodeConvertible {
     

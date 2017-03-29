@@ -9,7 +9,12 @@
 import Turnstile
 import Random
 import Cache
-import Foundation.NSUUID
+
+#if os(macOS)
+    import Foundation.NSUUID
+#else
+    import Foundation.UUID
+#endif
 
 public final class DatabaseLoginSessionManager: SessionManager {
 

@@ -16,7 +16,12 @@ import class FormData.Serializer
 import class Multipart.Serializer
 import struct Multipart.Part
 import FormData
-import Foundation.NSUUID
+
+#if os(macOS)
+    import Foundation.NSUUID
+#else
+    import Foundation.UUID
+#endif
 
 func createToken(token: String) -> [HeaderKey: String] {
     let data = token.data(using: .utf8)!.base64EncodedString()

@@ -10,7 +10,12 @@ import HTTP
 import Routing
 import Vapor
 import Node
-import Foundation.NSDate
+
+#if os(macOS)
+    import Foundation.NSDate
+#else
+    import Foundation.Date
+#endif
 
 extension Sequence where Iterator.Element == Bool {
     
