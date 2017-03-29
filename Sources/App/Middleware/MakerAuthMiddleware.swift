@@ -15,8 +15,6 @@ import Vapor
 
 #if os(macOS)
     import Foundation.NSDate
-#else
-    import Foundation.Date
 #endif
 
 private let cookieName = "maker-auth"

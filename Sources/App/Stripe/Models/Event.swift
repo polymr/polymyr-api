@@ -11,8 +11,6 @@ import Vapor
 
 #if os(macOS)
     import Foundation.NSDate
-#else
-    import Foundation.Date
 #endif
 
 fileprivate func parseEvent(from string: String) throws -> (EventResource, EventAction) {

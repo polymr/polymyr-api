@@ -10,8 +10,6 @@ import Node
 
 #if os(macOS)
     import Foundation.NSDate
-#else
-    import Foundation.Date
 #endif
 
 public enum IdentityVerificationFailureReason: String, NodeConvertible {

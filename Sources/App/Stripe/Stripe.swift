@@ -13,8 +13,6 @@ import Vapor
 
 #if os(macOS)
     import Foundation.NSDate
-#else
-    import Foundation.Date
 #endif
 
 fileprivate func merge(query: [String: CustomStringConvertible?], with metadata: [String: CustomStringConvertible]) -> [String: CustomStringConvertible] {

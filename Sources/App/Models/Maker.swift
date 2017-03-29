@@ -15,8 +15,6 @@ import Sanitized
 
 #if os(macOS)
     import Foundation.NSDate
-#else
-    import Foundation.Date
 #endif
 
 extension Node {

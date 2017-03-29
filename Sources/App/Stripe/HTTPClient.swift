@@ -19,8 +19,6 @@ import FormData
 
 #if os(macOS)
     import Foundation.NSUUID
-#else
-    import Foundation.UUID
 #endif
 
 func createToken(token: String) -> [HeaderKey: String] {

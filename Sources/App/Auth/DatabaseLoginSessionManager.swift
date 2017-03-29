@@ -12,8 +12,6 @@ import Cache
 
 #if os(macOS)
     import Foundation.NSUUID
-#else
-    import Foundation.UUID
 #endif
 
 public final class DatabaseLoginSessionManager: SessionManager {
