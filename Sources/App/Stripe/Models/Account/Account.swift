@@ -249,8 +249,8 @@ public final class StripeAccount: NodeConvertible {
             fieldsNeeded.append("legal_entity.dob")
         }
 
-        if fieldsNeeded.contains("external_account") {
-            fieldsNeeded.remove(at: fieldsNeeded.index(of: "external_account")!)
+        if let index = fieldsNeeded.index(of: "external_account") {
+            fieldsNeeded.remove(at: index)
 
             let accountFields = ["external_account.routing_number", "external_account.account_number", "external_account.country", "external_account.currency"]
             fieldsNeeded.append(contentsOf: accountFields)

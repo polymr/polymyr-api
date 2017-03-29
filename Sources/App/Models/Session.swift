@@ -45,7 +45,7 @@ final class Session: Model, Preparation, JSONConvertible {
         
         type = try node.extract("type") { (_type: String) in
             return SessionType(rawValue: _type)
-        }!
+        } ?? .none
     }
     
     init(id: String? = nil, token: String, subject_id: String, type: SessionType) {
@@ -58,9 +58,11 @@ final class Session: Model, Preparation, JSONConvertible {
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
             "accessToken" : .string(accessToken),
-            "customer_id" : customer_id!,
             "type" : .string(type.rawValue)
-            ]).add(name: "id", node: id)
+        ]).add(objects: [
+            "id" : id,
+             "customer_id" : customer_id
+        ])
     }
     
     static func prepare(_ database: Database) throws {

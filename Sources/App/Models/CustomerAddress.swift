@@ -50,13 +50,13 @@ final class CustomerAddress: Model, Preparation, JSONConvertible, Sanitizable {
             "city" : .string(city),
             "state" : .string(state),
             "zip" : .string(zip),
-            "customer_id" : customer_id!,
             "firstName" : .string(firstName),
             "lastName" : .string(lastName),
         ]).add(objects: [
             "id" : id,
             "apartment" : apartment,
-            "phoneNumber" : phoneNumber
+            "phoneNumber" : phoneNumber,
+            "customer_id" : customer_id
         ])
     }
     

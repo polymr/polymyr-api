@@ -123,7 +123,7 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                         }
 
                         guard let id = customer.stripe_id else {
-                            throw Abort.custom(status: .badRequest, message: "User \(customer.id!.int!) doesn't have a stripe account.")
+                            throw try Abort.custom(status: .badRequest, message: "User \(customer.throwableId()) doesn't have a stripe account.")
                         }
 
                         return try Stripe.shared.delete(payment: source, from: id).makeResponse()

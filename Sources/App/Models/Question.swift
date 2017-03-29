@@ -36,10 +36,9 @@ final class Question: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     func makeNode(context: Context) throws -> Node {
-        return try Node(node: [
-            "campaign_id" : campaign_id!,
-            "section_id" : section_id!
-        ]).add(objects: [
+        return try Node(node: []).add(objects: [
+            "campaign_id" : campaign_id,
+            "section_id" : section_id,
             "id" : id,
             "text" : text,
             "qualifiers" : qualifiers?.serialize(with: context)

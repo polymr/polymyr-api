@@ -33,9 +33,12 @@ public struct StripeHTTPError: AbortError {
     }
 }
 
-func createToken(token: String) -> [HeaderKey: String] {
-    let data = token.data(using: .utf8)!.base64EncodedString()
-    return ["Authorization" : "Basic \(data)"]
+func createToken(token: String) throws -> [HeaderKey: String] {
+    guard let data = token.data(using: .utf8) else {
+        throw Abort.custom(status: .internalServerError, message: "Unable to convert stripe token.")
+    }
+
+    return ["Authorization" : "Basic \(data.base64EncodedString())"]
 }
 
 public class HTTPClient {

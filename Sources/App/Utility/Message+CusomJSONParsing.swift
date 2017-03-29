@@ -29,7 +29,7 @@ extension Message {
             throw Abort.custom(status: .badRequest, message: "Incorrect encoding of body contents.")
         }
         
-        var json: JSON!
+        let json: JSON
         
         do {
             json = try JSON(bytes: body)
