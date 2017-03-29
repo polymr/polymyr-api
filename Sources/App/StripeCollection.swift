@@ -13,7 +13,7 @@ import Node
 
 #if os(macOS)
     import Foundation.NSDate
-#else
+#endif
 
 extension Sequence where Iterator.Element == Bool {
     
