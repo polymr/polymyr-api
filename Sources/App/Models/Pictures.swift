@@ -25,7 +25,7 @@ class Picture: Model, Preparation, JSONConvertible, Sanitizable {
     required init(node: Node, in context: Context = EmptyNode) throws {
         id = node["id"]
         url = try node.extract("url")
-        owner_id = node["owner_id"]
+        owner_id = node["owner_id"] ?? (context as? OwnerContext)?.owner_id
         index = try node.extract("index")
     }
     

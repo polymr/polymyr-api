@@ -12,6 +12,19 @@ import JSON
 import Fluent
 import Vapor
 
+struct OwnerContext: Context {
+
+    var owner_id: Node
+
+    init?(from entity: Entity) {
+        guard let id = entity.id else {
+            return nil
+        }
+
+        owner_id = id
+    }
+}
+
 extension Node: JSONConvertible {
     
     mutating func substitute(key: String, model: Model) throws -> Node {

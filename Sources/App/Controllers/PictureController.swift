@@ -45,34 +45,6 @@ extension RouteBuilder where Value == Responder {
     }
 }
 
-fileprivate func handle(upload request: Request) throws -> String {
-    guard let data = request.formData?.first?.value.part.body else {
-        throw Abort.custom(status: .badRequest, message: "No file in request")
-    }
-    
-    return try save(data: Data(bytes: data))
-}
-
-func save(data: Data) throws -> String {
-    
-    let imageFolder = "Public/images"
-    
-    guard let workPath = Droplet.instance?.workDir else {
-        throw Abort.custom(status: .internalServerError, message: "Missing working directory")
-    }
-    
-    let name = UUID().uuidString + ".png"
-    let saveURL = URL(fileURLWithPath: workPath).appendingPathComponent(imageFolder, isDirectory: true).appendingPathComponent(name, isDirectory: false)
-    
-    do {
-        try data.write(to: saveURL)
-    } catch {
-        throw Abort.custom(status: .internalServerError, message: "Unable to write multipart form data to file. Underlying error \(error)")
-    }
-    
-    return "https://static.polymyr.com/images/" + name
-}
-
 final class PictureController<PictureType: Picture> {
     
     func index(_ request: Request, owner: Int) throws -> ResponseRepresentable {
@@ -80,11 +52,8 @@ final class PictureController<PictureType: Picture> {
     }
 
     func create(_ request: Request, owner: Int) throws -> ResponseRepresentable {
-        let url = try handle(upload: request)
-
-        var picture = try PictureType.init(node: Node(node: ["owner_id" : owner, "url" : url]).add(name: "type", node: request.query?["type"]))
+        var picture: PictureType = try request.extractModel(injecting: Node.object(["owner_id" : .number(.int(owner))]))
         try picture.save()
-        
         return picture
     }
     

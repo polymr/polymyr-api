@@ -35,13 +35,13 @@
       "package": "Engine",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/engine.git",
-      "version": "1.3.11"
+      "version": "1.3.12"
     },
     {
       "package": "Fluent",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/fluent.git",
-      "version": "1.4.1"
+      "version": "1.4.2"
     },
     {
       "package": "FluentMySQL",
@@ -131,7 +131,7 @@
       "package": "Vapor",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/vapor.git",
-      "version": "1.5.9"
+      "version": "1.5.13"
     },
     {
       "package": "VaporMySQL",

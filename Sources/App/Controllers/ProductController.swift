@@ -141,6 +141,10 @@ final class ProductController: ResourceRepresentable {
         var product: Product = try request.extractModel(injecting: request.makerInjectable())
         try product.save()
         result["product"] = try product.makeNode()
+
+        guard let node = request.json?.node else {
+            return try result.makeNode().makeJSON()
+        }
         
         if var campaignNode = request.json?.node["campaign"] {
             campaignNode = try campaignNode.add(objects: ["maker_id" : request.maker().throwableId(), "product_id" : product.throwableId()])
@@ -148,6 +152,17 @@ final class ProductController: ResourceRepresentable {
             try campaign.save()
             
             result["campaign"] = try campaign.makeNode()
+        }
+
+        if let pictureNode = node["pictures"]?.nodeArray {
+
+            let pictures = try pictureNode.map { (object: Node) -> ProductPicture in
+                var picture: ProductPicture = try ProductPicture(node: object, in: OwnerContext(from: product) ?? EmptyNode)
+                try picture.save()
+                return picture
+            }
+
+            result["pictures"] = try pictures.makeNode()
         }
         
         if let node = request.json?.node, let tags: [Int] = try node.extract("tags") {
