@@ -249,6 +249,13 @@ public final class StripeAccount: NodeConvertible {
             fieldsNeeded.append("legal_entity.dob")
         }
 
+        if fieldsNeeded.contains("external_account") {
+            fieldsNeeded.remove(at: fieldsNeeded.index(of: "external_account")!)
+
+            let accountFields = ["external_account.routing_number", "external_account.account_number", "external_account.country", "external_account.currency"]
+            fieldsNeeded.append(contentsOf: accountFields)
+        }
+
         return fieldsNeeded
     }
     
@@ -264,8 +271,8 @@ public final class StripeAccount: NodeConvertible {
     
     private func description(for field: String) throws -> [Node] {
         switch field {
-        case "external_account":
-            return ExternalAccount.descriptionsForNeededFields(in: country, for: field)
+        case let field where field.hasPrefix("external_account"):
+            return [.object(ExternalAccount.descriptionsForNeededFields(in: country, for: field))]
             
         case let field where field.hasPrefix("legal_entity"):
             return [.object(LegalEntity.descriptionForNeededFields(in: country, for: field))]
@@ -275,5 +282,15 @@ public final class StripeAccount: NodeConvertible {
         default:
             return [.string(field)]
         }
+    }
+
+    var requiresIdentityVerification: Bool {
+        let triggers = ["legal_entity.verification.document",
+                        "legal_entity.additional_owners.0.verification.document",
+                        "legal_entity.additional_owners.1.verification.document",
+                        "legal_entity.additional_owners.2.verification.document",
+                        "legal_entity.additional_owners.3.verification.document"]
+
+        return triggers.map { verification.fields_needed.contains($0) }.reduce(false) { $0 || $1 }
     }
 }

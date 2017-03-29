@@ -116,16 +116,19 @@ public final class LegalEntity: NodeConvertible {
         case let field where field.hasPrefix("legal_entity.address"):
             switch field {
             case "legal_entity.address.city":
-                return ["name" : "City", "description" : "The city your business is registered in.", "key" : .string("\(field).city")]
+                return ["name" : "City", "description" : "The city your business is registered in.", "key" : .string(field)]
             case "legal_entity.address.line1":
-                return ["name" : "Address", "description" : "The address of your business.", "key" : .string("\(field).line1")]
+                return ["name" : "Address", "description" : "The address of your business.", "key" : .string(field)]
             case "legal_entity.address.postal_code":
-                return ["name" : "Postal Code", "description" : "The postal code your business is registered in.", "key" : .string("\(field).postal_code")]
+                return ["name" : "Postal Code", "description" : "The postal code your business is registered in.", "key" : .string(field)]
             case "legal_entity.address.state":
-                return ["name" : "State", "description" : "The state your business is registered in.", "key" : .string("\(field).state")]
+                return ["name" : "State", "description" : "The state your business is registered in.", "key" : .string(field)]
             default:
-                return ["name" : "", "description" : ""]
+                return ["name" : "", "description" : "", "key" : .string(field)]
             }
+
+        case let field where field.hasSuffix("document"):
+            return ["name" : "Identity Verification", "upload" : true, "upload_info" : Node.object(["url" : "https://uploads.stripe.com/v1/files", "purpose" : "identity_document", "api_key" : .string(Stripe.token)])]
             
         case "legal_entity.dob":
             return ["name" : "Date of Birth", "description" : "The date of birth for your company representative.", "key" : .string(field)]
@@ -136,12 +139,12 @@ public final class LegalEntity: NodeConvertible {
             return ["name" : "Last Name", "description": "The last name of your company representative.", "key" : .string(field)]
             
         case "legal_entity.ssn_last_4":
-            return ["name" : "Last 4 of Social Security number", "description" : "The last four digits of the compnay representative's SSN.", "key" : .string(field)]
+            return ["name" : "Last 4 of Social Security number", "description" : "The last four digits of the company representative's SSN.", "key" : .string(field)]
         case "legal_entity.type":
             return ["name" : "Always company.", "description" : "Always company", "key" : .string(field)]
 
         default:
-            return ["name" : "", "description" : "", "key" : ""]
+            return ["name" : "", "description" : "", "key" : .string(field)]
         }
     }
 }

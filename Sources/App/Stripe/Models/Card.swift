@@ -59,7 +59,7 @@ public final class Card: NodeConvertible {
     public let country: CountryCode
     public let currency: String?
     public let customer: String?
-    public let cvc_check: Verification
+    public let cvc_check: Verification?
     public let default_for_currency: Bool?
     public let dynamic_last4: String?
     public let last4: String
@@ -108,13 +108,13 @@ public final class Card: NodeConvertible {
             "id" : .string(id),
             "brand" : .string(brand.rawValue),
             "county" : .string(country.rawValue),
-            "cvc_check" : .string(cvc_check.rawValue),
             "last4" : .string(last4),
             "exp_year" : .number(.int(exp_year)),
             "exp_month" : .number(.int(exp_month)),
             "fingerprint" : .string(fingerprint)
         ] as [String : Node]).add(objects: [
             "currency" : currency,
+            "cvc_check" : cvc_check,
             "default_for_currency" : default_for_currency,
             "dynamic_last4" : dynamic_last4,
             "tokenization_method" : tokenization_method,

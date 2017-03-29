@@ -60,8 +60,8 @@ public enum Risk: String, NodeConvertible {
 public final class Outcome: NodeConvertible {
 
     public let network_status: NetworkStatus
-    public let reason: String
-    public let risk_level: String
+    public let reason: String?
+    public let risk_level: String?
     public let seller_message: String
     public let type: Type
 
@@ -77,11 +77,12 @@ public final class Outcome: NodeConvertible {
     public func makeNode(context: Context = EmptyNode) throws -> Node {
         return try Node(node : [
             "network_status" : try network_status.makeNode(),
-            "reason" : .string(reason),
-            "risk_level" : .string(risk_level),
             "seller_message" : .string(seller_message),
             "type" : try type.makeNode()
-        ] as [String : Node])
+        ] as [String : Node]).add(objects: [
+            "reason" : reason,
+            "risk_level" : risk_level
+        ])
     }
 }
 
@@ -140,14 +141,14 @@ public final class Charge: NodeConvertible {
     public let captured: Bool
     public let created: Date
     public let currency: Currency
-    public let customer: String
+    public let customer: String?
     public let description: String?
     public let destination: String?
     public let dispute: Dispute?
     public let failure_code: ErrorType?
     public let failure_message: String?
     public let fraud_details: Node
-    public let invoice: String
+    public let invoice: String?
     public let livemode: Bool
     public let order: String?
     public let outcome: Outcome
@@ -162,7 +163,7 @@ public final class Charge: NodeConvertible {
     public let source_transfer: String?
     public let statement_descriptor: String?
     public let status: ChargeStatus?
-    public let transfer: String
+    public let transfer: String?
 
     public required init(node: Node, in context: Context = EmptyNode) throws {
 
@@ -213,32 +214,32 @@ public final class Charge: NodeConvertible {
             "captured" : .bool(captured),
             "created" : try created.makeNode(),
             "currency" : try currency.makeNode(),
-            "customer" : .string(customer),
             "fraud_details" : fraud_details,
-            "invoice" : .string(invoice),
             "livemode" : .bool(livemode),
             "outcome" : try outcome.makeNode(),
             "paid" : .bool(paid),
             "refunded" : .bool(refunded),
             "refunds" : refunds,
             "source" : try source.makeNode(),
-            "transfer" : .string(transfer)
         ] as [String : Node]).add(objects: [
             "application" : application,
             "application_fee" : application_fee,
             "description" : description,
             "destination" : destination,
             "dispute" : dispute,
+            "customer" : customer,
             "failure_code" : failure_code,
             "failure_message" : failure_message,
             "order" : order,
+            "invoice" : invoice,
             "receipt_email" : receipt_email,
             "receipt_number" : receipt_number,
             "source_transfer" : source_transfer,
             "statement_descriptor" : statement_descriptor,
             "status" : status,
             "review" : review,
-            "shipping" : shipping
+            "shipping" : shipping,
+            "transfer" : transfer
         ])
     }
 }

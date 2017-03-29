@@ -18,14 +18,18 @@ extension Stripe {
         let reward = campaign.amountOff
         let fee = maker.cut
         
-        let feePercentage = (price - reward) / price + fee
-        let stripe_id = try maker.fetchConnectAccount(for: customer, with: card)
+        let feePercentage = reward / price + fee
+
+        guard let stripe_id = customer.stripe_id else {
+            throw Abort.custom(status: .badRequest, message: "Customer does not have stripe account.")
+        }
     
         guard let secret = maker.keys?.secret else {
             throw Abort.custom(status: .badRequest, message: "Missing vendor keys")
         }
-        
-        return try Stripe.shared.charge(customer: stripe_id, price: price, fee: feePercentage, on: card, under: secret)
+
+        let token = try Stripe.shared.createToken(for: stripe_id, representing: card, on: secret)
+        return try Stripe.shared.charge(source: token.id, for: price, withFee: feePercentage, under: secret)
     }
 }
 

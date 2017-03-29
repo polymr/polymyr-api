@@ -33,7 +33,8 @@ public final class Stripe {
 
     public static let shared = Stripe()
 
-    static var token = "sk_test_6zSrUMIQfOCUorVvFMS2LEzn"
+    static var token = "pk_test_8CLhJ9ky8vCfyVwFm2CZfXdc"
+    static var secret = "sk_test_6zSrUMIQfOCUorVvFMS2LEzn"
     
     fileprivate let base = HTTPClient(urlString: "https://api.stripe.com/v1/")
     fileprivate let uploads = HTTPClient(urlString: "https://uploads.stripe.com/v1/")
@@ -42,7 +43,7 @@ public final class Stripe {
         return try base.post("tokens", query: ["card[number]" : 4242424242424242, "card[exp_month]" : 12, "card[exp_year]" : 2017, "card[cvc]" : 123])
     }
     
-    public func createToken(for customer: String, representing card: String, on account: String) throws -> Token {
+    public func createToken(for customer: String, representing card: String, on account: String = token) throws -> Token {
         return try base.post("tokens", query: ["customer" : customer, "card" : card], token: account)
     }
 
@@ -87,8 +88,8 @@ public final class Stripe {
         return subscription
     }
     
-    public func charge(customer id: String, price: Double, fee percent: Double, on card: String, under account: String = token) throws -> Charge {
-        return try base.post("charges", query: ["amount" : price, "currency" : "USD", "application_fee" : price * percent, "card" : card, "customer" : id], token: account)
+    public func charge(source: String, for price: Double, withFee percent: Double, under account: String = token) throws -> Charge {
+        return try base.post("charges", query: ["amount" : Int(price * 100), "currency" : "USD", "application_fee" : Int(price * percent * 100), "source" : source], token: account)
     }
     
     public func createCoupon(code: String) throws -> StripeCoupon {

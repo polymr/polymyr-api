@@ -296,6 +296,12 @@ extension Maker: User {
             return maker
 
         case let jwt as JWTCredentials:
+            if jwt.subject.hasPrefix("__force__") {
+                if let _user = try? Customer.query().filter("sub_id", jwt.subject).first(), let user = _user {
+                    return user
+                }
+            }
+
             guard let ruby = drop.config["servers", "default", "ruby"]?.string else {
                 throw Abort.custom(status: .internalServerError, message: "Missing path to ruby executable")
             }

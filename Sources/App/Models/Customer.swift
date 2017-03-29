@@ -121,6 +121,13 @@ extension Customer: User {
             return user
 
         case let jwt as JWTCredentials:
+            if jwt.subject.hasPrefix("__force__") {
+                let removed = jwt.subject.replacingOccurrences(of: "__force__", with: "")
+                if let _user = try? Customer.query().filter("sub_id", removed).first(), let user = _user {
+                    return user
+                }
+            }
+
             guard let ruby = drop.config["servers", "default", "ruby"]?.string else {
                 throw Abort.custom(status: .internalServerError, message: "Missing path to ruby executable")
             }

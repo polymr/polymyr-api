@@ -10,6 +10,7 @@ import Foundation
 import HTTP
 import Routing
 import Vapor
+import Node
 
 extension Sequence where Iterator.Element == Bool {
     
@@ -182,7 +183,14 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                     }
                     
                     let account = try Stripe.shared.makerInformation(for: stripe_id)
-                    return try account.descriptionsForNeededFields().makeResponse()
+
+                    return try Node.object([
+                        "fields" : try account.descriptionsForNeededFields().makeNode()
+                    ]).add(objects: [
+                        "due_by" : account.verification.due_by?.ISO8601String,
+                        "disabled_reason" : account.verification.disabled_reason?.rawValue,
+                        "identity" : account.legal_entity.verification.status != .verified ? account.legal_entity.verification.makeNode() : nil
+                    ]).makeJSON()
                 }
                 
                 maker.get("payouts") { request in

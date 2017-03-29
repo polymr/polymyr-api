@@ -33,7 +33,7 @@ public class HTTPClient {
         client = Client<TCPClientStream, HTTP.Serializer<Request>, HTTP.Parser<Response>>.self
     }
     
-    func get<T: NodeConvertible>(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.token) throws -> T {
+    func get<T: NodeConvertible>(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.secret) throws -> T {
         let response = try client.get(baseURLString + resource, headers: createToken(token: token), query: query)
         
         guard let json = try? response.json() else {
@@ -45,7 +45,7 @@ public class HTTPClient {
         return try T.init(node: json.makeNode())
     }
     
-    func get<T: NodeConvertible>(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.token) throws -> [T] {
+    func get<T: NodeConvertible>(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.secret) throws -> [T] {
         let response = try client.get(baseURLString + resource, headers: createToken(token: token), query: query)
         
         guard let json = try? response.json() else {
@@ -63,7 +63,7 @@ public class HTTPClient {
         }
     }
     
-    func post<T: NodeConvertible>(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.token) throws -> T {
+    func post<T: NodeConvertible>(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.secret) throws -> T {
         let response = try client.post(baseURLString + resource, headers: createToken(token: token), query: query)
         
         guard let json = try? response.json() else {
@@ -106,7 +106,7 @@ public class HTTPClient {
         return try T.init(node: json.makeNode())
     }
     
-    func delete(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.token) throws -> JSON {
+    func delete(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.secret) throws -> JSON {
         let response = try client.delete(baseURLString + resource, headers: createToken(token: token), query: query)
         
         guard let json = try? response.json() else {
