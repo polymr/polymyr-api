@@ -9,10 +9,7 @@
 import Vapor
 import Fluent
 import Sanitized
-
-#if os(macOS)
-    import Foundation.NSDate
-#endif
+import Foundation
 
 final class Campaign: Model, Preparation, JSONConvertible, Sanitizable {
     

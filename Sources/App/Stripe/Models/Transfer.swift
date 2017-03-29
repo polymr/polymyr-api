@@ -7,10 +7,7 @@
 //
 
 import Node
-
-#if os(macOS)
-    import Foundation.NSDate
-#endif
+import Foundation
 
 public enum SourceType: String, NodeConvertible {
     

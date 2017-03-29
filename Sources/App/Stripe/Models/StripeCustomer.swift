@@ -8,10 +8,7 @@
 
 import Node
 import Vapor
-
-#if os(macOS)
-    import Foundation.NSDate
-#endif
+import Foundation
 
 public final class StripeCustomer: NodeConvertible {
     
