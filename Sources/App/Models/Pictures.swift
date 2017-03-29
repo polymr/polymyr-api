@@ -13,7 +13,7 @@ import Sanitized
 
 class Picture: Model, Preparation, JSONConvertible, Sanitizable {
 
-    static var permitted: [String] = ["owner_id", "url"]
+    static var permitted: [String] = ["owner_id", "url", "type"]
     
     var exists: Bool = false
     
