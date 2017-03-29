@@ -11,12 +11,27 @@ import class HTTP.Serializer
 import class HTTP.Parser
 import HTTP
 import enum Vapor.Abort
+import protocol Vapor.AbortError
 import Transport
 import class FormData.Serializer
 import class Multipart.Serializer
 import struct Multipart.Part
 import FormData
 import Foundation
+
+public struct StripeHTTPError: AbortError {
+    public let message: String
+    public let metadata: Node?
+    public let code: Int
+    public let status: HTTP.Status
+
+    init(node: Node, code: HTTP.Status) {
+        self.metadata = node
+        self.code = code.statusCode
+        self.status = code
+        self.message = "Stripe Error"
+    }
+}
 
 func createToken(token: String) -> [HeaderKey: String] {
     let data = token.data(using: .utf8)!.base64EncodedString()
@@ -120,7 +135,7 @@ public class HTTPClient {
     
     private func checkForStripeError(in json: JSON, from resource: String) throws {
         if json.node["error"] != nil {
-            throw Abort.custom(status: .internalServerError, message: "Error from Stripe:\(resource) >>> \(json.prettyString)")
+            throw StripeHTTPError(node: json.node, code: .internalServerError)
         }
     }
 }

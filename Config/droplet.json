@@ -8,7 +8,7 @@
     "middleware": {
         "server": [
             "file",
-            "customAbort",
+            "abort",
             "validation",
             "type-safe",
             "date",
