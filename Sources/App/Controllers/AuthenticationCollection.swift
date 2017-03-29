@@ -6,29 +6,12 @@
 //
 //
 
-import Foundation
 import Vapor
 import HTTP
 import Turnstile
 import Auth
 import Fluent
 import Routing
-
-func shell(launchPath: String, arguments: String...) -> String? {
-    let task = Process()
-    task.launchPath = launchPath
-    task.arguments = arguments
-
-    let pipe = Pipe()
-    task.standardOutput = pipe
-    task.standardError = pipe
-    task.launch()
-
-    task.waitUntilExit()
-
-    let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    return String(data: data, encoding: .utf8)
-}
 
 final class ProviderData: NodeConvertible {
 

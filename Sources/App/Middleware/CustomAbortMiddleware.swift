@@ -8,7 +8,6 @@
 
 import Vapor
 import HTTP
-import Foundation
 
 class CustomAbortMiddleware: Middleware {
     public func respond(to request: Request, chainingTo chain: Responder) throws -> Response {

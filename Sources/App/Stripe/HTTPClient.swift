@@ -6,7 +6,6 @@
 //
 //
 
-import Foundation
 import JSON
 import class HTTP.Serializer
 import class HTTP.Parser
@@ -17,6 +16,7 @@ import class FormData.Serializer
 import class Multipart.Serializer
 import struct Multipart.Part
 import FormData
+import Foundation.NSUUID
 
 func createToken(token: String) -> [HeaderKey: String] {
     let data = token.data(using: .utf8)!.base64EncodedString()

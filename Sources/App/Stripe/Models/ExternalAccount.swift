@@ -6,7 +6,6 @@
 //
 //
 
-import Foundation
 import Node
 
 public enum ExternalAccountVerificationStatus: String, NodeConvertible {

@@ -6,10 +6,10 @@
 //
 //
 
-import Foundation
 import Vapor
 import Fluent
 import Sanitized
+import Foundation.NSDate
 
 final class Campaign: Model, Preparation, JSONConvertible, Sanitizable {
     

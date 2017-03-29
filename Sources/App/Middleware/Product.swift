@@ -8,7 +8,6 @@
 
 import Vapor
 import Fluent
-import Foundation
 import Sanitized
 
 final class Product: Model, Preparation, JSONConvertible, Sanitizable {

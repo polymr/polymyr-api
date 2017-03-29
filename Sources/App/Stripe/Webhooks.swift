@@ -6,12 +6,9 @@
 //
 //
 
-import Foundation
 import HTTP
 import Routing
 import Vapor
-
-
 
 public final class StripeWebhookManager: RouteCollection {
 

@@ -132,8 +132,12 @@ extension Customer: User {
                 throw Abort.custom(status: .internalServerError, message: "Missing path to ruby executable")
             }
 
-            guard let result = shell(launchPath: ruby, arguments: drop.workDir + "identity/verifiy_identity.rb", jwt.token, jwt.subject, drop.workDir) else {
-                throw Abort.custom(status: .internalServerError, message: "Failed to decode token.")
+            let result: String
+
+            do {
+                result = try drop.console.backgroundExecute(program: ruby, arguments: [drop.workDir + "identity/verifiy_identity.rb", jwt.token, jwt.subject, drop.workDir])
+            } catch {
+               throw Abort.custom(status: .internalServerError, message: "Failed to decode token. \(error)")
             }
 
             drop.console.info("ruby result : \(result)")

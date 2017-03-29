@@ -6,9 +6,9 @@
 //
 //
 
-import Foundation
 import Node
 import Vapor
+import Foundation.NSDate
 
 public final class StripeCustomer: NodeConvertible {
     

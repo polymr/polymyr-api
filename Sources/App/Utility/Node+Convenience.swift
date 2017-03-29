@@ -6,11 +6,11 @@
 //
 //
 
-import Foundation
 import Node
 import JSON
 import Fluent
 import Vapor
+import Foundation.NSDate
 
 struct OwnerContext: Context {
 

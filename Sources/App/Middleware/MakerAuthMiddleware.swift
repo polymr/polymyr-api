@@ -9,14 +9,14 @@
 import Turnstile
 import HTTP
 import Cookies
-import Foundation
 import Cache
 import Auth
 import Vapor
+import Foundation.NSDate
 
 private let cookieName = "maker-auth"
 private let storageName = "makerSubject"
-private let cookieTimeout: TimeInterval = 7 * 24 * 60 * 60
+private let cookieTimeout: Double = 7 * 24 * 60 * 60
 
 extension Request {
     

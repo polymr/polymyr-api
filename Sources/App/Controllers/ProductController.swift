@@ -6,7 +6,6 @@
 //
 //
 
-import Foundation
 import Vapor
 import enum HTTP.Method
 import HTTP

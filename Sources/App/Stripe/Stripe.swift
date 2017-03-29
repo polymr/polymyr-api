@@ -6,11 +6,11 @@
 //
 //
 
-import Foundation
 import JSON
 import HTTP
 import Transport
 import Vapor
+import Foundation.NSDate
 
 fileprivate func merge(query: [String: CustomStringConvertible?], with metadata: [String: CustomStringConvertible]) -> [String: CustomStringConvertible] {
     let arguments = metadata.map { ("metadata[\($0)]", $1) }

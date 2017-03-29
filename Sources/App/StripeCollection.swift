@@ -6,11 +6,11 @@
 //
 //
 
-import Foundation
 import HTTP
 import Routing
 import Vapor
 import Node
+import Foundation.NSDate
 
 extension Sequence where Iterator.Element == Bool {
     

@@ -9,7 +9,7 @@
 import Turnstile
 import Random
 import Cache
-import Foundation
+import Foundation.NSUUID
 
 public final class DatabaseLoginSessionManager: SessionManager {
 

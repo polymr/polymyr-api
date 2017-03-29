@@ -6,10 +6,8 @@
 //
 //
 
-import Foundation
 import Vapor
 import HTTP
-
 
 enum FetchType: String, TypesafeOptionsParameter {
 

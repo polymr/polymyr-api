@@ -6,8 +6,6 @@
 //
 //
 
-import Foundation
-
 public enum StripeError: Error {
     
     case error(type: String, message: String)

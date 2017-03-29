@@ -6,7 +6,6 @@
 //
 //
 
-import Foundation
 import Node
 
 public enum LegalEntityVerificationStatus: String, NodeConvertible {

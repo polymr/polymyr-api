@@ -6,8 +6,8 @@
 //
 //
 
-import Foundation
 import Node
+import Foundation.NSDate
 
 public enum SourceType: String, NodeConvertible {
     

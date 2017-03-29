@@ -6,7 +6,6 @@
 //
 //
 
-import Foundation
 import Vapor
 import Sessions
 import VaporMySQL

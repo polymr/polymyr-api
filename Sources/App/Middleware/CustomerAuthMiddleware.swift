@@ -9,10 +9,10 @@
 import Turnstile
 import HTTP
 import Cookies
-import Foundation
 import Cache
 import Auth
 import Vapor
+import Foundation.NSDate
 
 private let cookieName = "vapor-user-auth"
 private let storageName = "userSubject"

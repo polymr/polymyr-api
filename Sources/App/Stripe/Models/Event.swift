@@ -6,9 +6,9 @@
 //
 //
 
-import Foundation
 import Node
 import Vapor
+import Foundation.NSDate
 
 fileprivate func parseEvent(from string: String) throws -> (EventResource, EventAction) {
     let components = string.components(separatedBy: ".")

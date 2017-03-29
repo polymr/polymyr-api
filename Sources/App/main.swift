@@ -11,7 +11,6 @@ import Fluent
 import Node
 import HTTP
 import Turnstile
-import Foundation
 import Auth
 
 let drop = Droplet.create()
@@ -32,7 +31,6 @@ drop.resource("orders", OrderController())
 drop.resource("sections", SectionController())
 drop.resource("customerAddresses", CustomerAddressController())
 drop.resource("tags", TagController())
-drop.resource("descriptions", DescriptionController())
 
 drop.collection(StripeCollection.self)
 drop.collection(AuthenticationCollection())
