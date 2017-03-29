@@ -51,10 +51,24 @@ final class PictureController<PictureType: Picture> {
         return try PictureType.query().filter("owner_id", owner).all().makeJSON()
     }
 
-    func create(_ request: Request, owner: Int) throws -> ResponseRepresentable {
-        var picture: PictureType = try request.extractModel(injecting: Node.object(["owner_id" : .number(.int(owner))]))
+    func createPicture(from nodeObject: Node, with owner: Int) throws -> ProductPicture {
+        var picture: ProductPicture = try ProductPicture(node: nodeObject, in: OwnerContext(with: owner))
         try picture.save()
         return picture
+    }
+
+    func create(_ request: Request, owner: Int) throws -> ResponseRepresentable {
+        guard let node = request.json?.node else {
+            throw Abort.custom(status: .badRequest, message: "Missing json.")
+        }
+
+        if let array = node.nodeArray {
+            return try array.map {
+                try createPicture(from: $0, with: owner)
+                }.makeNode().makeJSON()
+        } else {
+            return try createPicture(from: node, with: owner).makeJSON()
+        }
     }
     
     func delete(_ request: Request, owner: Int, picture: Int) throws -> ResponseRepresentable {

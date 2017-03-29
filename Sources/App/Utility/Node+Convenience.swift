@@ -23,6 +23,10 @@ struct OwnerContext: Context {
 
         owner_id = id
     }
+
+    init(with id: Int) {
+        owner_id = .number(.int(id))
+    }
 }
 
 extension Node: JSONConvertible {
