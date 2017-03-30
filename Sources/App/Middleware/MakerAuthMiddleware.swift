@@ -14,7 +14,7 @@ import Auth
 import Vapor
 import Foundation
 
-private let cookieName = "maker-auth"
+private let cookieName = "polymyr-maker-auth"
 private let storageName = "makerSubject"
 private let cookieTimeout: Double = 7 * 24 * 60 * 60
 
