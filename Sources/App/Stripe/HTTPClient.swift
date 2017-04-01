@@ -82,7 +82,9 @@ public class HTTPClient {
     }
     
     func post<T: NodeConvertible>(_ resource: String, query: [String : CustomStringConvertible] = [:], token: String = Stripe.secret) throws -> T {
+        print("posting")
         let response = try client.post(baseURLString + resource, headers: createToken(token: token), query: query)
+        print("ending")
         
         guard let json = try? response.json() else {
             throw Abort.custom(status: .internalServerError, message: response.description)
