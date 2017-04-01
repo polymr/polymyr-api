@@ -15,6 +15,29 @@ import Auth
 
 let drop = Droplet.create()
 
+let appendQuery = ["managed": true, "email": "hakon@hanesand.no", "country": "US", "legal_entity[type]": "company", "metadata[id]": "28"] as [String : CustomStringConvertible]
+var query = ""
+
+guard !appendQuery.isEmpty else {
+    fatalError("error")
+}
+
+let test = appendQuery
+    .map { key, value in
+        return "\(key)=\(value)"
+    }
+    .joined(separator: "&")
+
+var new = ""
+
+new += query
+new += "&"
+
+new += test
+query = new
+
+print("New query : \(query)")
+
 drop.resource("makers", MakerController())
 drop.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture>())
 
