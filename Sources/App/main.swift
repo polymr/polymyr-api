@@ -38,6 +38,9 @@ query = new
 
 print("New query : \(query)")
 
+let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+print("encoded \(encoded)")
+
 drop.resource("makers", MakerController())
 drop.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture>())
 
