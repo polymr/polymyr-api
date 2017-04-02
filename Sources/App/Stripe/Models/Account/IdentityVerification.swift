@@ -26,13 +26,13 @@ public final class IdentityVerification: NodeConvertible {
     public let due_by: Date?
     public let fields_needed: [String]
     
-    public required init(node: Node, in context: Context = EmptyNode) throws {
-        disabled_reason = try node.extract("disabled_reason")
-        due_by = try node.extract("due_by")
-        fields_needed = try node.extract("fields_needed")
+    public required init(node: Node) throws {
+        disabled_reason = try node.get("disabled_reason")
+        due_by = try node.get("due_by")
+        fields_needed = try node.get("fields_needed")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "fields_needed" : .array(fields_needed.map { Node.string($0) } )
         ] as [String : Node]).add(objects: [

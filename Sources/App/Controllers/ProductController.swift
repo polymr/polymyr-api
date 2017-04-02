@@ -10,7 +10,7 @@ import Vapor
 import enum HTTP.Method
 import HTTP
 import Fluent
-import Sanitized
+import FluentProvider
 
 typealias Pair = (Hashable, Any)
 
@@ -30,36 +30,36 @@ struct Expander: QueryInitializable {
     
     let expandKeyPaths: [String]
     
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         expandKeyPaths = node.string?.components(separatedBy: ",") ?? []
     }
     
     func expand<T: Model>(for models: [T], owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> [Node] {
         return try models.map { (model: T) -> Node in
             var valueMappings = try expandKeyPaths.map { relation in
-                return try mappings(relation, model)?.makeNode() ?? Node.null
+                return try mappings(relation, model)?.makeNode(in: emptyContext) ?? Node.null
             }
             
             var keyPaths = expandKeyPaths
             
             keyPaths.append(key)
-            try valueMappings.append(model.makeNode())
+            try valueMappings.append(model.makeNode(in: emptyContext))
             
-            return try merge(keys: keyPaths, with: valueMappings).makeNode()
+            return try merge(keys: keyPaths, with: valueMappings).makeNode(in: emptyContext)
         }
     }
     
     func expand<T: Model>(for model: T, owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> Node {
         var valueMappings = try expandKeyPaths.map { relation in
-            return try mappings(relation, model)?.makeNode() ?? Node.null
+            return try mappings(relation, model)?.makeNode(in: emptyContext) ?? Node.null
         }
         
         var keyPaths = expandKeyPaths
         
         keyPaths.append(key)
-        try valueMappings.append(model.makeNode())
+        try valueMappings.append(model.makeNode(in: emptyContext))
         
-        return try merge(keys: keyPaths, with: valueMappings).makeNode()
+        return try merge(keys: keyPaths, with: valueMappings).makeNode(in: emptyContext)
     }
 }
 
@@ -67,13 +67,18 @@ extension Product {
     
     func shouldAllow(request: Request) throws {
         guard let maker = try? request.maker() else {
-            throw try Abort.custom(status: .forbidden, message: "Method \(request.method) is not allowed on resource Product(\(throwableId())) by this user. Must be logged in as Maker(\(maker_id?.int ?? 0)).")
+            throw try Abort.custom(status: .forbidden, message: "Method \(request.method) is not allowed on resource Product(\(throwableId())) by this user. Must be logged in as Maker(\(maker_id.int ?? 0)).")
         }
         
-        guard try maker.throwableId() == maker_id?.int else {
-            throw try Abort.custom(status: .forbidden, message: "This Maker(\(maker.throwableId()) does not have access to resource Product(\(throwableId()). Must be logged in as Maker(\(maker_id?.int ?? 0).")
+        guard try maker.throwableId() == maker_id.int else {
+            throw try Abort.custom(status: .forbidden, message: "This Maker(\(maker.throwableId()) does not have access to resource Product(\(throwableId()). Must be logged in as Maker(\(maker_id.int ?? 0).")
         }
     }
+}
+
+public struct ParentContext: Context {
+
+    public let parent_id: Identifier
 }
 
 final class ProductController: ResourceRepresentable {
@@ -90,21 +95,21 @@ final class ProductController: ResourceRepresentable {
         }()
         
         if let expander: Expander = try request.extract() {
-            return try Node.array(expander.expand(for: products, owner: "product", mappings: { (key, product) -> (NodeRepresentable?) in
+            return try expander.expand(for: products, owner: "product", mappings: { (key, product) -> (NodeRepresentable?) in
                 switch key {
                 case "campaign":
                     return try product.campaign().first()
                 case "tags":
-                    return try product.tags().all().makeNode()
+                    return try product.tags().all().makeNode(in: jsonContext)
                 case "maker":
                     return try product.maker().first()
                 case "pictures":
-                    return try product.pictures().all().makeNode()
+                    return try product.pictures().all().makeNode(in: jsonContext)
                 default:
-                    Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
+                    drop.log.warning("Could not find expansion for \(key) on ProductController.")
                     return nil
                 }
-            })).makeJSON()
+            }).makeResponse()
         }
         
         return try products.makeJSON()
@@ -118,16 +123,16 @@ final class ProductController: ResourceRepresentable {
                 case "campaign":
                     return try product.campaign().first()
                 case "tags":
-                    return try product.tags().all().makeNode()
+                    return try product.tags().all().makeNode(in: jsonContext)
                 case "maker":
                     return try product.maker().first()
                 case "pictures":
-                    return try product.pictures().all().makeNode()
+                    return try product.pictures().all().makeNode(in: jsonContext)
                 default:
-                    Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
+                    drop.log.warning("Could not find expansion for \(key) on ProductController.")
                     return nil
                 }
-            }).makeJSON()
+            }).makeResponse()
         }
         
         return product
@@ -137,50 +142,55 @@ final class ProductController: ResourceRepresentable {
         let _ = try request.maker()
         var result: [String : Node] = [:]
         
-        var product: Product = try request.extractModel(injecting: request.makerInjectable())
+        let product: Product = try request.extractModel(injecting: request.makerInjectable())
         try product.save()
-        result["product"] = try product.makeNode()
+
+        guard let product_id = product.id else {
+            throw Abort.custom(status: .internalServerError, message: "Failed to save product.")
+        }
+
+        result["product"] = try product.makeNode(in: emptyContext)
 
         guard let node = request.json?.node else {
-            return try result.makeNode().makeJSON()
+            return try JSON(result.makeNode(in: jsonContext))
         }
         
-        if var campaignNode = request.json?.node["campaign"] {
+        if var campaignNode: Node = try node.get("campaign") {
             campaignNode = try campaignNode.add(objects: ["maker_id" : request.maker().throwableId(), "product_id" : product.throwableId()])
-            var campaign: Campaign = try Campaign(node: campaignNode, in: EmptyNode)
+            let campaign: Campaign = try Campaign(node: campaignNode, in: emptyContext)
             try campaign.save()
             
-            result["campaign"] = try campaign.makeNode()
+            result["campaign"] = try campaign.makeNode(in: emptyContext)
         }
 
-        if let pictureNode = node["pictures"]?.nodeArray {
+        if let pictureNode: [Node] = try node.get("pictures") {
 
             let pictures = try pictureNode.map { (object: Node) -> ProductPicture in
-                var picture: ProductPicture = try ProductPicture(node: object, in: OwnerContext(from: product) ?? EmptyNode)
+                let picture: ProductPicture = try ProductPicture(node: object, in: ParentContext(parent_id: product_id))
                 try picture.save()
                 return picture
             }
 
-            result["pictures"] = try pictures.makeNode()
+            result["pictures"] = try pictures.makeNode(in: emptyContext)
         }
         
-        if let node = request.json?.node, let tags: [Int] = try node.extract("tags") {
+        if let node = request.json?.node, let tags: [Int] = try node.get("tags") {
         
             let tags = try tags.map { (id: Int) -> Tag? in
                 guard let tag = try Tag.find(id) else {
                     return nil
                 }
                 
-                var pivot = Pivot<Tag, Product>(tag, product)
+                let pivot = try Pivot<Tag, Product>(tag, product)
                 try pivot.save()
                 
                 return tag
             }.flatMap { $0 }
             
-            result["tags"] = try tags.makeNode()
+            result["tags"] = try tags.makeNode(in: emptyContext)
         }
         
-        return try result.makeNode().makeJSON()
+        return try JSON(result.makeNode(in: jsonContext))
     }
     
     func delete(_ request: Request, product: Product) throws -> ResponseRepresentable {
@@ -193,7 +203,7 @@ final class ProductController: ResourceRepresentable {
     func modify(_ request: Request, product: Product) throws -> ResponseRepresentable {
         try product.shouldAllow(request: request)
         
-        var product: Product = try request.patchModel(product)
+        let product: Product = try request.patchModel(product)
         try product.save()
         return try Response(status: .ok, json: product.makeJSON())
     }

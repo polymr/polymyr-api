@@ -36,16 +36,16 @@ public final class LegalEntityIdentityVerification: NodeConvertible {
     public let details: String?
     public let details_code: LegalEntityVerificationFailureReason?
     
-    public required init(node: Node, in context: Context = EmptyNode) throws {
-        status = try node.extract("status")
-        document = try node.extract("document")
-        details = try node.extract("details")
-        details_code = try node.extract("details_code")
+    public required init(node: Node) throws {
+        status = try node.get("status")
+        document = try node.get("document")
+        details = try node.get("details")
+        details_code = try node.get("details_code")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            "status" : try status.makeNode(),
+            "status" : try status.makeNode(in: context),
         ] as [String : Node]).add(objects: [
             "details" : details,
             "document" : document,
@@ -74,29 +74,29 @@ public final class LegalEntity: NodeConvertible {
     public let type: String?
     public let verification: LegalEntityIdentityVerification
     
-    public required init(node: Node, in context: Context = EmptyNode) throws {
-        address = try node.extract("address")
-        business_name = try node.extract("business_name")
-        business_tax_id_provided = try node.extract("business_tax_id_provided")
-        dob = try node.extract("dob")
-        first_name = try node.extract("first_name")
-        last_name = try node.extract("last_name")
-        personal_address = try node.extract("personal_address")
-        personal_id_number_provided = try node.extract("personal_id_number_provided")
-        ssn_last_4_provided = try node.extract("ssn_last_4_provided")
-        type = try node.extract("type")
-        verification = try node.extract("verification")
+    public required init(node: Node) throws {
+        address = try node.get("address")
+        business_name = try node.get("business_name")
+        business_tax_id_provided = try node.get("business_tax_id_provided")
+        dob = try node.get("dob")
+        first_name = try node.get("first_name")
+        last_name = try node.get("last_name")
+        personal_address = try node.get("personal_address")
+        personal_id_number_provided = try node.get("personal_id_number_provided")
+        ssn_last_4_provided = try node.get("ssn_last_4_provided")
+        type = try node.get("type")
+        verification = try node.get("verification")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            "address" : try address.makeNode(),
+            "address" : try address.makeNode(in: context),
             "business_tax_id_provided" : .bool(business_tax_id_provided),
-            "dob" : try dob.makeNode(),
-            "personal_address" : try personal_address.makeNode(),
+            "dob" : try dob.makeNode(in: context),
+            "personal_address" : try personal_address.makeNode(in: context),
             "personal_id_number_provided" : .bool(personal_id_number_provided),
             "ssn_last_4_provided" : .bool(ssn_last_4_provided),
-            "verification" : try verification.makeNode()
+            "verification" : try verification.makeNode(in: context)
         ] as [String : Node]).add(objects: [
             "business_name" : business_name,
             "first_name" : first_name,

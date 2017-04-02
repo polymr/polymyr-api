@@ -8,6 +8,7 @@
 
 import Vapor
 import HTTP
+import AuthProvider
 
 enum FetchType: String, TypesafeOptionsParameter {
 
@@ -20,23 +21,22 @@ enum FetchType: String, TypesafeOptionsParameter {
     static var defaultValue: FetchType? = nil
 }
 
+extension Request {
+
+    func customer() throws -> Customer {
+        return try auth.assertAuthenticated(Customer.self)
+    }
+
+    func maker() throws -> Maker {
+        return try auth.assertAuthenticated(Maker.self)
+    }
+}
+
 extension Customer {
     
     func shouldAllow(request: Request) throws {
-        switch request.sessionType {
-        case .none:
-            throw try Abort.custom(status: .forbidden, message: "Must authenticate as Customer(\(throwableId()) to perform \(request.method) on it.")
-            
-        case .maker:
-            let maker = try request.maker()
-            throw try Abort.custom(status: .forbidden, message: "Maker(\(maker.throwableId()) can not perform \(request.method) on Customer(\(throwableId())).")
-            
-        case .customer:
-            let customer = try request.customer()
-            
-            guard try customer.throwableId() == throwableId() else {
-                throw try Abort.custom(status: .forbidden, message: "Customer(\(customer.throwableId()) can not perform \(request.method) on Customer(\(throwableId()).")
-            }
+        guard try self.throwableId() == request.customer().throwableId() else {
+            throw AuthenticationError.notAuthenticated
         }
     }
 }
@@ -54,23 +54,23 @@ final class CustomerController {
                         throw Abort.custom(status: .badRequest, message: "No stripe id")
                     }
                     
-                    return try Stripe.shared.paymentInformation(for: stripe_id).makeNode()
+                    return try Stripe.shared.paymentInformation(for: stripe_id).makeNode(in: jsonContext)
                     
                 case "shipping":
-                    return try customer.shippingAddresses().all().makeNode()
+                    return try customer.shippingAddresses().all().makeNode(in: jsonContext)
                     
                 default:
-                    Droplet.logger?.warning("Could not find expansion for \(key) on ProductController.")
+                    drop.log.warning("Could not find expansion for \(key) on ProductController.")
                     return nil
                 }
-            }).makeJSON()
+            }).makeResponse()
         }
     
         return try customer.makeJSON()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var customer: Customer = try request.extractModel()
+        let customer: Customer = try request.extractModel()
         try customer.save()
         return customer
     }
@@ -78,7 +78,7 @@ final class CustomerController {
     func modify(_ request: Request, customer: Customer) throws -> ResponseRepresentable {
         try customer.shouldAllow(request: request)
         
-        var customer: Customer = try request.patchModel(customer)
+        let customer: Customer = try request.patchModel(customer)
         try customer.save()
         return try Response(status: .ok, json: customer.makeJSON())
     }

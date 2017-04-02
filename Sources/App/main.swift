@@ -8,57 +8,45 @@
 
 import Vapor
 import Fluent
+import FluentProvider
 import Node
 import HTTP
-import Turnstile
-import Auth
+import AuthProvider
 
 let drop = Droplet.create()
 
-let appendQuery = ["managed": true, "email": "hakon@hanesand.no", "country": "US", "legal_entity[type]": "company", "metadata[id]": "28"] as [String : CustomStringConvertible]
-var query = ""
+let makerPasswordAuthMiddleWare = PasswordAuthenticationMiddleware(Maker.self)
 
-guard !appendQuery.isEmpty else {
-    fatalError("error")
+let userTokenAuthMiddleware = TokenAuthenticationMiddleware(Customer.self)
+let makerTokenAuthMiddleware = TokenAuthenticationMiddleware(Maker.self)
+
+let userPersist = PersistMiddleware(Customer.self)
+let makerPersist = PersistMiddleware(Maker.self)
+
+drop.group(middleware: [makerPasswordAuthMiddleWare, userTokenAuthMiddleware]) { authenticated in
+    authenticated.resource("makers", MakerController())
+    authenticated.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture, Maker>())
+
+    authenticated.resource("customers", CustomerController())
+    authenticated.picture(base: "customers", slug: "customer_id", picture: PictureController<CustomerPicture, Customer>())
+
+    authenticated.resource("products", ProductController())
+    authenticated.picture(base: "products", slug: "products_id", picture: PictureController<ProductPicture, Product>())
+
+    authenticated.resource("questions", QuestionController())
+    authenticated.resource("campaigns", CampaignController())
+    authenticated.resource("answers", AnswerController())
+    authenticated.resource("orders", OrderController())
+    authenticated.resource("sections", SectionController())
+    authenticated.resource("customerAddresses", CustomerAddressController())
+    authenticated.resource("tags", TagController())
+
+    StripeCollection().build(authenticated)
+    AuthenticationCollection().build(authenticated)
 }
 
-let test = appendQuery
-    .map { key, value in
-        return "\(key)=\(value)"
-    }
-    .joined(separator: "&")
-
-var new = ""
-
-new += query
-new += "&"
-
-new += test
-query = new
-
-print("New query : \(query)")
-
-let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-print("encoded \(encoded)")
-
-drop.resource("makers", MakerController())
-drop.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture>())
-
-drop.resource("customers", CustomerController())
-drop.picture(base: "customers", slug: "customer_id", picture: PictureController<CustomerPicture>())
-
-drop.resource("products", ProductController())
-drop.picture(base: "products", slug: "products_id", picture: PictureController<ProductPicture>())
-
-drop.resource("questions", QuestionController())
-drop.resource("campaigns", CampaignController())
-drop.resource("answers", AnswerController())
-drop.resource("orders", OrderController())
-drop.resource("sections", SectionController())
-drop.resource("customerAddresses", CustomerAddressController())
-drop.resource("tags", TagController())
-
-drop.collection(StripeCollection.self)
-drop.collection(AuthenticationCollection())
-
-drop.run()
+do {
+    try drop.run()
+} catch {
+    fatalError("Error while running droplet : \(error)")
+}

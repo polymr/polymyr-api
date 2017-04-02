@@ -9,6 +9,7 @@
 import HTTP
 import Vapor
 import Fluent
+import FluentProvider
 
 final class QuestionController: ResourceRepresentable {
     
@@ -17,7 +18,7 @@ final class QuestionController: ResourceRepresentable {
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var question: Question = try request.extractModel(injecting: request.makerInjectable())
+        let question: Question = try request.extractModel(injecting: request.makerInjectable())
         try question.save()
         return question
     }
@@ -28,7 +29,7 @@ final class QuestionController: ResourceRepresentable {
     }
     
     func modify(_ request: Request, question: Question) throws -> ResponseRepresentable {
-        var question: Question = try request.patchModel(question)
+        let question: Question = try request.patchModel(question)
         try question.save()
         return try Response(status: .ok, json: question.makeJSON())
     }

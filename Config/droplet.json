@@ -5,20 +5,5 @@
     "log": "console",
     "hash": "crypto",
     "cipher": "crypto",
-    "middleware": {
-        "server": [
-            "file",
-            "abort",
-            "validation",
-            "type-safe",
-            "date",
-            "sessions",
-            "logger",
-            "makerAuth",
-            "customerAuth"
-        ],
-        "client": [
-        
-        ]
-    }
+    "cache" : "fluent"
 }

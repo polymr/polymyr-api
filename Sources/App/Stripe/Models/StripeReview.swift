@@ -30,28 +30,28 @@ public final class StripeReview: NodeConvertible {
     public let open: Bool
     public let reason: ReviewReason
 
-    public required init(node: Node, in context: Context = EmptyNode) throws {
+    public required init(node: Node) throws {
 
-        guard try node.extract("object") == StripeReview.type else {
-            throw NodeError.unableToConvert(node: node, expected: StripeReview.type)
+        guard try node.get("object") == StripeReview.type else {
+            throw NodeError.unableToConvert(input: node, expectation: StripeReview.type, path: ["object"])
         }
 
-        id = try node.extract("id")
-        charge = try node.extract("charge")
-        created = try node.extract("created")
-        livemode = try node.extract("livemode")
-        open = try node.extract("open")
-        reason = try node.extract("reason")
+        id = try node.get("id")
+        charge = try node.get("charge")
+        created = try node.get("created")
+        livemode = try node.get("livemode")
+        open = try node.get("open")
+        reason = try node.get("reason")
     }
 
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node : [
             "id" : .string(id),
             "charge" : .string(charge),
-            "created" : try created.makeNode(),
+            "created" : try created.makeNode(in: context),
             "livemode" : .bool(livemode),
             "open" : .bool(open),
-            "reason" : try reason.makeNode()
+            "reason" : try reason.makeNode(in: context)
         ] as [String : Node])
     }
 }

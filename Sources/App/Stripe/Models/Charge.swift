@@ -20,15 +20,15 @@ public final class Rule: NodeConvertible {
     public let action: Action
     public let predicate: String
 
-    public required init(node: Node, in context: Context = EmptyNode) throws {
+    public required init(node: Node) throws {
 
-        action = try node.extract("action")
-        predicate = try node.extract("predicate")
+        action = try node.get("action")
+        predicate = try node.get("predicate")
     }
 
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node : [
-            "action" : try action.makeNode(),
+            "action" : try action.makeNode(in: context),
             "predicate" : .string(predicate)
         ] as [String : Node])
     }
@@ -65,20 +65,20 @@ public final class Outcome: NodeConvertible {
     public let seller_message: String
     public let type: Type
 
-    public required init(node: Node, in context: Context = EmptyNode) throws {
+    public required init(node: Node) throws {
 
-        network_status = try node.extract("network_status")
-        reason = try node.extract("reason")
-        risk_level = try node.extract("risk_level")
-        seller_message = try node.extract("seller_message")
-        type = try node.extract("type")
+        network_status = try node.get("network_status")
+        reason = try node.get("reason")
+        risk_level = try node.get("risk_level")
+        seller_message = try node.get("seller_message")
+        type = try node.get("type")
     }
 
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node : [
-            "network_status" : try network_status.makeNode(),
+            "network_status" : try network_status.makeNode(in: context),
             "seller_message" : .string(seller_message),
-            "type" : try type.makeNode()
+            "type" : try type.makeNode(in: context)
         ] as [String : Node]).add(objects: [
             "reason" : reason,
             "risk_level" : risk_level
@@ -103,17 +103,17 @@ public final class StripeShipping: NodeConvertible {
     public let tracking_number: String
     public let phone: String
 
-    public required init(node: Node, in context: Context = EmptyNode) throws {
+    public required init(node: Node) throws {
 
-        address = try node.extract("address")
-        name = try node.extract("name")
-        tracking_number = try node.extract("tracking_number")
-        phone = try node.extract("phone")
+        address = try node.get("address")
+        name = try node.get("name")
+        tracking_number = try node.get("tracking_number")
+        phone = try node.get("phone")
     }
 
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node : [
-            "address" : try address.makeNode(),
+            "address" : try address.makeNode(in: context),
             "name" : .string(name),
             "tracking_number" : .string(tracking_number),
             "phone" : .string(phone)
@@ -165,62 +165,62 @@ public final class Charge: NodeConvertible {
     public let status: ChargeStatus?
     public let transfer: String?
 
-    public required init(node: Node, in context: Context = EmptyNode) throws {
+    public required init(node: Node) throws {
 
-        guard try node.extract("object") == Charge.type else {
-            throw NodeError.unableToConvert(node: node, expected: Token.type)
+        guard try node.get("object") == Charge.type else {
+            throw NodeError.unableToConvert(input: node, expectation: Token.type, path: ["object"])
         }
 
-        id = try node.extract("id")
-        amount = try node.extract("amount")
-        amount_refunded = try node.extract("amount_refunded")
-        application = try node.extract("application")
-        application_fee = try node.extract("application_fee")
-        balance_transaction = try node.extract("balance_transaction")
-        captured = try node.extract("captured")
-        created = try node.extract("created")
-        currency = try node.extract("currency")
-        customer = try node.extract("customer")
-        description = try node.extract("description")
-        destination = try node.extract("destination")
-        dispute = try node.extract("dispute")
-        failure_code = try node.extract("failure_code")
-        failure_message = try node.extract("failure_message")
-        fraud_details = try node.extract("fraud_details")
-        invoice = try node.extract("invoice")
-        livemode = try node.extract("livemode")
-        order = try node.extract("order")
-        outcome = try node.extract("outcome")
-        paid = try node.extract("paid")
-        receipt_email = try node.extract("receipt_email")
-        receipt_number = try node.extract("receipt_number")
-        refunded = try node.extract("refunded")
-        refunds = try node.extract("refunds")
-        review = try node.extract("review")
-        shipping = try node.extract("shipping")
-        source = try node.extract("source")
-        source_transfer = try node.extract("source_transfer")
-        statement_descriptor = try node.extract("statement_descriptor")
-        status = try node.extract("status")
-        transfer = try node.extract("transfer")
+        id = try node.get("id")
+        amount = try node.get("amount")
+        amount_refunded = try node.get("amount_refunded")
+        application = try node.get("application")
+        application_fee = try node.get("application_fee")
+        balance_transaction = try node.get("balance_transaction")
+        captured = try node.get("captured")
+        created = try node.get("created")
+        currency = try node.get("currency")
+        customer = try node.get("customer")
+        description = try node.get("description")
+        destination = try node.get("destination")
+        dispute = try node.get("dispute")
+        failure_code = try node.get("failure_code")
+        failure_message = try node.get("failure_message")
+        fraud_details = try node.get("fraud_details")
+        invoice = try node.get("invoice")
+        livemode = try node.get("livemode")
+        order = try node.get("order")
+        outcome = try node.get("outcome")
+        paid = try node.get("paid")
+        receipt_email = try node.get("receipt_email")
+        receipt_number = try node.get("receipt_number")
+        refunded = try node.get("refunded")
+        refunds = try node.get("refunds")
+        review = try node.get("review")
+        shipping = try node.get("shipping")
+        source = try node.get("source")
+        source_transfer = try node.get("source_transfer")
+        statement_descriptor = try node.get("statement_descriptor")
+        status = try node.get("status")
+        transfer = try node.get("transfer")
     }
 
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node : [
             "id" : .string(id),
             "amount" : .number(.int(amount)),
             "amount_refunded" : .number(.int(amount_refunded)),
             "balance_transaction" : .string(balance_transaction),
             "captured" : .bool(captured),
-            "created" : try created.makeNode(),
-            "currency" : try currency.makeNode(),
+            "created" : try created.makeNode(in: context),
+            "currency" : try currency.makeNode(in: context),
             "fraud_details" : fraud_details,
             "livemode" : .bool(livemode),
-            "outcome" : try outcome.makeNode(),
+            "outcome" : try outcome.makeNode(in: context),
             "paid" : .bool(paid),
             "refunded" : .bool(refunded),
             "refunds" : refunds,
-            "source" : try source.makeNode(),
+            "source" : try source.makeNode(in: context),
         ] as [String : Node]).add(objects: [
             "application" : application,
             "application_fee" : application_fee,

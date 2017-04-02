@@ -8,36 +8,39 @@
 
 import Vapor
 import Fluent
-import Sanitized
+import FluentProvider
+import Node
 
 fileprivate let separator = "@"
 
-final class Answer: Model, Preparation, JSONConvertible, Sanitizable {
+final class Answer: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+
+    let storage = Storage()
     
     static var permitted: [String] = ["text", "ratings", "question_id", "order_id", "campaign_id"]
     
-    var id: Node?
+    var id: Identifier?
     var exists = false
     
     // One will be filled out
     let text: String?
     let ratings: [Int]?
     
-    var question_id: Node?
-    var order_id: Node?
-    var campaign_id: Node?
+    var question_id: Identifier
+    var order_id: Identifier
+    var campaign_id: Identifier
     
-    init(node: Node, in context: Context) throws {
-        id = node["id"]
-        text = try node.extract("text")
+    init(node: Node) throws {
+        id = try node.get("id")
+        text = try node.get("text")
         ratings = (try? node.parseList(at: "ratings", with: separator).map { $0.int }.flatMap { $0 })
         
-        question_id = node["question_id"]
-        order_id = node["order_id"]
-        campaign_id = node["campaign_id"]
+        question_id = try node.get("question_id")
+        order_id = try node.get("order_id")
+        campaign_id = try node.get("campaign_id")
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: []).add(objects: [
             "id" : id,
             "ratings" : ratings?.map { String(describing: $0) }.joined(separator: separator),
@@ -49,16 +52,16 @@ final class Answer: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(self.entity, closure: { answer in
-            answer.id()
+        try database.create(Answer.self) { answer in
+            answer.id(for: Answer.self)
             answer.string("text")
-            answer.parent(Question.self)
-            answer.parent(Order.self)
-            answer.parent(Campaign.self)
-        })
+            answer.parent(idKey: "question_id", idType: .int)
+            answer.parent(idKey: "order_id", idType: .int)
+            answer.parent(idKey: "campaign_id", idType: .int)
+        }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(self.entity)
+        try database.delete(Answer.self)
     }
 }

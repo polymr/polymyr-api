@@ -9,6 +9,7 @@
 import HTTP
 import Vapor
 import Fluent
+import FluentProvider
 
 extension Stripe {
     
@@ -54,7 +55,7 @@ final class OrderController: ResourceRepresentable {
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var order: Order = try request.extractModel(injecting: request.customerInjectable())
+        let order: Order = try request.extractModel(injecting: request.customerInjectable())
 
         guard let campaign = try order.campaign().first() else {
             throw Abort.custom(status: .badRequest, message: "no campaign")
@@ -81,7 +82,7 @@ final class OrderController: ResourceRepresentable {
     }
     
     func modify(_ request: Request, order: Order) throws -> ResponseRepresentable {
-        var order: Order = try request.patchModel(order)
+        let order: Order = try request.patchModel(order)
         try order.save()
         return try Response(status: .ok, json: order.makeJSON())
     }

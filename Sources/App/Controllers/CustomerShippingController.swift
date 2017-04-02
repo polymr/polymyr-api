@@ -8,17 +8,16 @@
 
 import Vapor
 import HTTP
-import FluentMySQL
 
 extension CustomerAddress {
     
     func shouldAllow(request: Request) throws {
         guard let customer = try? request.customer() else {
-            throw try Abort.custom(status: .forbidden, message: "Method \(request.method) is not allowed on resource CustomerShipping(\(throwableId())) by this user. Must be logged in as Customer(\(customer_id?.int ?? 0)).")
+            throw try Abort.custom(status: .forbidden, message: "Method \(request.method) is not allowed on resource CustomerShipping(\(throwableId())) by this user. Must be logged in as Customer(\(customer_id.int ?? 0)).")
         }
         
-        guard customer.id?.int == customer_id?.int else {
-            throw try Abort.custom(status: .forbidden, message: "This Customer(\(customer.throwableId())) does not have access to resource CustomerShipping(\(throwableId()). Must be logged in as Customer(\(customer_id?.int ?? 0).")
+        guard customer.id?.int == customer_id.int else {
+            throw try Abort.custom(status: .forbidden, message: "This Customer(\(customer.throwableId())) does not have access to resource CustomerShipping(\(throwableId()). Must be logged in as Customer(\(customer_id.int ?? 0).")
         }
     }
 }
@@ -33,7 +32,7 @@ final class CustomerAddressController: ResourceRepresentable {
     func create(_ request: Request) throws -> ResponseRepresentable {
         let _ = try request.customer()
         
-        var address: CustomerAddress = try request.extractModel(injecting: request.customerInjectable())
+        let address: CustomerAddress = try request.extractModel(injecting: request.customerInjectable())
         try address.save()
         return address
     }
@@ -46,7 +45,7 @@ final class CustomerAddressController: ResourceRepresentable {
     
     func modify(_ request: Request, address: CustomerAddress) throws -> ResponseRepresentable {
         try address.shouldAllow(request: request)
-        var updated: CustomerAddress = try request.patchModel(address)
+        let updated: CustomerAddress = try request.patchModel(address)
         try updated.save()
         return updated
     }

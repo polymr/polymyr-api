@@ -8,14 +8,15 @@
 
 import Vapor
 import Fluent
-import Sanitized
+import FluentProvider
+import Node
 
 fileprivate let separator = "@@@<<<>>>@@@"
 
 extension Sequence where Iterator.Element == String {
     
-    func serialize(with context: Context, with separator: String = "@@@<<<>>>@@@") -> Node {
-        if (context is DatabaseContext) {
+    func serialize(with _context: Context?, with separator: String = "@@@<<<>>>@@@") -> Node {
+        if let context = _context, context.isMySQL {
             return .string(self.joined(separator: separator))
         }
         
@@ -23,11 +24,13 @@ extension Sequence where Iterator.Element == String {
     }
 }
 
-final class QuestionSection: Model, Preparation, JSONConvertible, Sanitizable {
+final class QuestionSection: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+
+    let storage = Storage()
     
     static var permitted: [String] = ["name", "description", "suggestions", "isRating"]
     
-    var id: Node?
+    var id: Identifier?
     var exists = false
     
     let name: String
@@ -35,15 +38,15 @@ final class QuestionSection: Model, Preparation, JSONConvertible, Sanitizable {
     let suggestions: [String]
     let isRating: Bool
     
-    init(node: Node, in context: Context) throws {
-        id = node["id"]
-        name = try node.extract("name")
+    init(node: Node) throws {
+        id = try node.get("id")
+        name = try node.get("name")
         suggestions = try node.parseList(at: "suggestions", with: separator)
-        description = try node.extract("description")
-        isRating = try node.extract("isRating")
+        description = try node.get("description")
+        isRating = try node.get("isRating")
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "name" : .string(name),
             "description" : .string(description),
@@ -55,16 +58,16 @@ final class QuestionSection: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(self.entity, closure: { questionSection in
-            questionSection.id()
+        try database.create(QuestionSection.self) { questionSection in
+            questionSection.id(for: Question.self)
             questionSection.string("name")
             questionSection.string("description")
             questionSection.string("suggestions")
             questionSection.bool("isRating")
-        })
+        }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(self.entity)
+        try database.delete(QuestionSection.self)
     }
 }

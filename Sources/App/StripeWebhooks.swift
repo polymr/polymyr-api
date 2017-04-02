@@ -9,6 +9,7 @@
 import HTTP
 import Routing
 import Vapor
+import FluentProvider
 
 func extractFrom<T: Model>(metadata: Node) throws -> T? {
     return try metadata[T.entity]?.string.flatMap { try T(from: $0) }
@@ -24,13 +25,13 @@ class StripeWebhooks {
 
     required init() {
 
-        StripeWebhookManager.shared.registerHandler(forResource: .account, action: .updated) { (event) -> Response in
+        StripeWebhookManagerCollection.shared.registerHandler(forResource: .account, action: .updated) { (event) -> Response in
             guard let account = event.data.object as? StripeAccount else {
                 throw Abort.custom(status: .internalServerError, message: "Failed to parse the account from the account.updated event.")
             }
 
             guard let id = account.metadata["id"], let vendor = try Maker.find(id) else {
-                Droplet.logger?.error("Stripe account \(account.id) is missing a connected vendor in its metadata.")
+                drop.log.error("Stripe account \(account.id) is missing a connected vendor in its metadata.")
                 throw Abort.custom(status: .internalServerError, message: "Missing connected vendor for account with id \(account.id)")
             }
 

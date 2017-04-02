@@ -9,6 +9,7 @@
 import HTTP
 import Vapor
 import Fluent
+import FluentProvider
 
 final class SectionController: ResourceRepresentable {
     
@@ -17,7 +18,7 @@ final class SectionController: ResourceRepresentable {
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var section: QuestionSection = try request.extractModel()
+        let section: QuestionSection = try request.extractModel()
         try section.save()
         return section
     }
@@ -28,7 +29,7 @@ final class SectionController: ResourceRepresentable {
     }
     
     func modify(_ request: Request, section: QuestionSection) throws -> ResponseRepresentable {
-        var section: QuestionSection = try request.patchModel(section)
+        let section: QuestionSection = try request.patchModel(section)
         try section.save()
         return try Response(status: .ok, json: section.makeJSON())
     }

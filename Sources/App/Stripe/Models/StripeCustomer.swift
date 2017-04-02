@@ -28,28 +28,28 @@ public final class StripeCustomer: NodeConvertible {
     public let sources: [Card]
     public let subscriptions: [StripeSubscription]
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
+    public init(node: Node) throws {
         
-        guard try node.extract("object") == StripeCustomer.type else {
-            throw NodeError.unableToConvert(node: node, expected: StripeCustomer.type)
+        guard try node.get("object") == StripeCustomer.type else {
+            throw NodeError.unableToConvert(input: node, expectation: StripeCustomer.type, path: ["object"])
         }
         
-        id = try node.extract("id")
-        account_balance = try node.extract("account_balance")
-        created = try node.extract("created")
-        currency = try node.extract("currency")
-        default_source = try node.extract("default_source")
-        delinquent = try node.extract("delinquent")
-        description = try node.extract("description")
-        discount = try node.extract("discount")
-        email = try node.extract("email")
-        livemode = try node.extract("livemode")
+        id = try node.get("id")
+        account_balance = try node.get("account_balance")
+        created = try node.get("created")
+        currency = try node.get("currency")
+        default_source = try node.get("default_source")
+        delinquent = try node.get("delinquent")
+        description = try node.get("description")
+        discount = try node.get("discount")
+        email = try node.get("email")
+        livemode = try node.get("livemode")
         sources = try node.extractList("sources")
         subscriptions = try node.extractList("subscriptions")
-        metadata = node["metadata"] ?? EmptyNode
+        metadata = try node.get("metadata")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "id" : .string(id),
             "account_balance" : .number(.int(account_balance)),
@@ -57,8 +57,8 @@ public final class StripeCustomer: NodeConvertible {
             "default_source" : .string(default_source),
             "delinquent" : .bool(delinquent),
             "livemode" : .bool(livemode),
-            "sources" :  .array(sources.map { try $0.makeNode() }),
-            "subscriptions" : .array(subscriptions.map { try $0.makeNode() }),
+            "sources" :  .array(sources.map { try $0.makeNode(in: context) }),
+            "subscriptions" : .array(subscriptions.map { try $0.makeNode(in: context) }),
             "metadata" : metadata
         ] as [String : Node]).add(objects: [
             "discount" : discount,

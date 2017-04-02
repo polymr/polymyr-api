@@ -2,6 +2,18 @@
   "autoPin": true,
   "pins": [
     {
+      "package": "Auth",
+      "reason": null,
+      "repositoryURL": "https://github.com/vapor/auth.git",
+      "version": "0.4.0"
+    },
+    {
+      "package": "AuthProvider",
+      "reason": null,
+      "repositoryURL": "https://github.com/vapor/auth-provider.git",
+      "version": "0.3.0"
+    },
+    {
       "package": "BCrypt",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/bcrypt.git",
@@ -59,7 +71,7 @@
       "package": "Fluent",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/fluent.git",
-      "version": "2.0.0-beta.1"
+      "version": "2.0.0-beta.2"
     },
     {
       "package": "FluentProvider",
@@ -71,6 +83,12 @@
       "package": "JSON",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/json.git",
+      "version": "2.0.0-beta.1"
+    },
+    {
+      "package": "JWT",
+      "reason": null,
+      "repositoryURL": "https://github.com/vapor/jwt.git",
       "version": "2.0.0-beta.1"
     },
     {
@@ -95,7 +113,7 @@
       "package": "MySQLDriver",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/mysql-driver.git",
-      "version": "2.0.0-beta.2"
+      "version": "2.0.0-beta.3"
     },
     {
       "package": "MySQLProvider",

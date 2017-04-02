@@ -33,30 +33,30 @@ public final class StripeCoupon: NodeConvertible {
     public let times_redeemed: Int
     public let valid: Bool
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
-        guard try node.extract("object") == StripeCoupon.type else {
-            throw NodeError.unableToConvert(node: node, expected: StripeCoupon.type)
+    public init(node: Node) throws {
+        guard try node.get("object") == StripeCoupon.type else {
+            throw NodeError.unableToConvert(input: node, expectation: StripeCoupon.type, path: ["object"])
         }
         
-        id = try node.extract("id")
-        amount_off = try node.extract("amount_off")
-        created = try node.extract("created")
-        currency = try node.extract("currency")
-        duration = try node.extract("duration")
-        duration_in_months = try node.extract("duration_in_months")
-        livemode = try node.extract("livemode")
-        max_redemptions = try node.extract("max_redemptions")
-        percent_off = try node.extract("percent_off")
-        redeem_by = try node.extract("redeem_by")
-        times_redeemed = try node.extract("times_redeemed")
-        valid = try node.extract("valid")
+        id = try node.get("id")
+        amount_off = try node.get("amount_off")
+        created = try node.get("created")
+        currency = try node.get("currency")
+        duration = try node.get("duration")
+        duration_in_months = try node.get("duration_in_months")
+        livemode = try node.get("livemode")
+        max_redemptions = try node.get("max_redemptions")
+        percent_off = try node.get("percent_off")
+        redeem_by = try node.get("redeem_by")
+        times_redeemed = try node.get("times_redeemed")
+        valid = try node.get("valid")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "id" : .string(id),
             "created" : .number(.double(created.timeIntervalSince1970)),
-            "duration" : try duration.makeNode(),
+            "duration" : try duration.makeNode(in: context),
             "livemode" : .bool(livemode),
             "max_redemptions" : .number(.int(max_redemptions)),
             "percent_off" : .number(.int(percent_off)),

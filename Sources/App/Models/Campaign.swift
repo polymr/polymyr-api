@@ -8,14 +8,17 @@
 
 import Vapor
 import Fluent
-import Sanitized
+import FluentProvider
 import Foundation
+import Node
 
-final class Campaign: Model, Preparation, JSONConvertible, Sanitizable {
+final class Campaign: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
     
     static var permitted: [String] = ["units", "purchasedUnits", "endDate", "amountOff", "product_id", "maker_id"]
+
+    let storage = Storage()
     
-    var id: Node?
+    var id: Identifier?
     var exists = false
     
     let units: Int
@@ -24,22 +27,22 @@ final class Campaign: Model, Preparation, JSONConvertible, Sanitizable {
     let endDate: Date
     let amountOff: Double
     
-    var product_id: Node?
-    var maker_id: Node?
+    var product_id: Identifier
+    var maker_id: Identifier
     
-    init(node: Node, in context: Context) throws {
-        id = node["id"]
-        units = try node.extract("units")
-        purchasedUnits = (try? node.extract("purchasedUnits")) ?? 0
+    init(node: Node) throws {
+        id = try node.get("id")
+        units = try node.get("units")
+        purchasedUnits = (try? node.get("purchasedUnits")) ?? 0
         
-        endDate = try node.extract("endDate")
-        amountOff = try node.extract("amountOff")
+        endDate = try node.get("endDate")
+        amountOff = try node.get("amountOff")
         
-        product_id = node["product_id"]
-        maker_id = node["maker_id"]
+        product_id = try node.get("product_id")
+        maker_id = try node.get("maker_id")
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "units" : .number(.int(units)),
             "purchasedUnits" : .number(.int(purchasedUnits)),
@@ -53,29 +56,29 @@ final class Campaign: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(self.entity, closure: { campaign in
-            campaign.id()
+        try database.create(Campaign.self) { campaign in
+            campaign.id(for: Campaign.self)
             campaign.int("units")
             campaign.int("purchasedUnits")
             campaign.string("endDate")
             campaign.double("amountOff")
-            campaign.parent(Product.self)
-            campaign.parent(Maker.self)
-        })
+            campaign.parent(idKey: "product_id", idType: .int)
+            campaign.parent(idKey: "maker_id", idType: .int)
+        }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(self.entity)
+        try database.delete(Campaign.self)
     }
 }
 
 extension Campaign {
 
-    func maker() throws -> Parent<Maker> {
-        return try parent(maker_id)
+    func maker() -> Parent<Campaign, Maker> {
+        return parent(id: "maker_id")
     }
 
-    func product() throws -> Parent<Product> {
-        return try parent(product_id)
+    func product() -> Parent<Campaign, Product> {
+        return parent(id: "product_id")
     }
 }

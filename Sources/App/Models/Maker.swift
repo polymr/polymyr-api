@@ -8,26 +8,16 @@
 
 import Vapor
 import Fluent
-import Auth
-import Turnstile
+import FluentProvider
 import BCrypt
-import Sanitized
 import Foundation
+import Node
+import AuthProvider
 
-extension Node {
+extension Hash: PasswordVerifier {
 
-    func autoextract<T: Model>(type: T.Type, key: String) throws -> Node? {
-
-        if var object = try? self.extract(key) as T {
-            try object.save()
-            return object.id
-        }
-
-        guard let object_id: String = try self.extract("\(key)_id") else {
-            throw Abort.custom(status: .badRequest, message: "Missing value for \(key) or \(key)_id")
-        }
-        
-        return .string(object_id)
+    public func verify(password: String, matchesHash: String) throws -> Bool {
+        return try Hash.verify(message: password, matches: matchesHash.makeBytes())
     }
 }
 
@@ -38,7 +28,7 @@ enum ApplicationState: String, NodeConvertible {
     case rejected = "rejected"
     case accepted = "accepted"
     
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         
         guard let state = node.string.flatMap ({ ApplicationState(rawValue: $0) }) else {
             throw Abort.custom(status: .badRequest, message: "Invalid value for application state.")
@@ -47,27 +37,30 @@ enum ApplicationState: String, NodeConvertible {
         self = state
     }
     
-    func makeNode(context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return .string(rawValue)
     }
 }
 
-extension BCryptSalt: NodeInitializable {
+extension Salt: NodeInitializable {
     
-    public init(node: Node, in context: Context) throws {
-        guard let salt = try node.string.flatMap ({ try BCryptSalt(string: $0) }) else {
+    public init(node: Node) throws {
+
+        guard let salt = try node.string.flatMap({ try Salt(bytes: $0.makeBytes()) }) else {
             throw Abort.custom(status: .badRequest, message: "Invalid salt.")
         }
-        
+
         self = salt
     }
 }
 
-final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
+final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+
+    let storage = Storage()
     
     static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "stripe_id", "keys", "missingFields", "needsIdentityUpload", "address_id", "password"]
     
-    var id: Node?
+    var id: Identifier?
     var exists = false
     
     let email: String
@@ -77,16 +70,16 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     let contactName: String
     let contactPhone: String
     let contactEmail: String
-    let address_id: Node?
+    let address_id: Identifier
     
     let location: String
     let createdOn: Date
     let cut: Double
     
     var username: String
-    var password: String
-    let pass: String
-    var salt: BCryptSalt
+    var password: String?
+    var pass: String?
+    var hashedPassword: String
     
     var stripe_id: String?
     var keys: Keys?
@@ -96,50 +89,47 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     
     var sub_id: String?
     
-    init(node: Node, in context: Context) throws {
+    init(node: Node) throws {
         
-        id = node["id"]
+        id = try node.get("id")
         
-        username = try node.extract("username")
-        let password = try node.extract("password") as String
+        username = try node.get("username")
         pass = password
-        
-        if let salt = try? node.extract("salt") as String {
-            self.salt = try BCryptSalt(string: salt)
-            self.password = password
+
+        if let password = try? node.get("password") as String {
+            self.hashedPassword = try Hash.make(message: password.makeBytes(), with: Salt()).string()
         } else {
-            self.salt = try BCryptSalt(workFactor: 10)
-            self.password = try BCrypt.digest(password: password, salt: salt)
+            self.hashedPassword = try node.get("hashedPassword") as String
         }
         
-        email = try node.extract("email")
-        businessName = try node.extract("businessName")
-        publicWebsite = try node.extract("publicWebsite")
+        email = try node.get("email")
+        businessName = try node.get("businessName")
+        publicWebsite = try node.get("publicWebsite")
         
-        contactName = try node.extract("contactName")
-        contactPhone = try node.extract("contactPhone")
-        contactEmail = try node.extract("contactEmail")
-        address_id = node["address_id"]
+        contactName = try node.get("contactName")
+        contactPhone = try node.get("contactPhone")
+        contactEmail = try node.get("contactEmail")
+        address_id = try node.get("address_id")
         
-        location = try node.extract("location")
-        createdOn = try node.extract("createdOn") ?? Date()
-        cut = try node.extract("cut") ?? 0.08
-        sub_id = try node.extract("sub_id")
+        location = try node.get("location")
+        createdOn = try node.get("createdOn") ?? Date()
+        cut = try node.get("cut") ?? 0.08
+        sub_id = try node.get("sub_id")
         
-        stripe_id = try node.extract("stripe_id")
+        stripe_id = try node.get("stripe_id")
         
-        missingFields = (try? node.extract("missingFields")) ?? false
-        needsIdentityUpload = (try? node.extract("needsIdentityUpload")) ?? false
+        missingFields = (try? node.get("missingFields")) ?? false
+        needsIdentityUpload = (try? node.get("needsIdentityUpload")) ?? false
         
         if stripe_id != nil {
-            let publishable: String = try node.extract("publishableKey")
-            let secret: String = try node.extract("secretKey")
+            let publishable: String = try node.get("publishableKey")
+            let secret: String = try node.get("secretKey")
             
             keys = try Keys(node: Node(node: ["secret" : secret, "publishable" : publishable]))
         }
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "email" : .string(email),
             "businessName" : .string(businessName),
@@ -154,9 +144,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             "cut" : .number(.double(cut)),
             
             "username" : .string(username),
-            "password" : .string(password),
-            "salt" : .string(salt.string),
-            "pass" : .string(pass),
+            "hashedPassword" : .string(hashedPassword),
             
             "missingFields" : .bool(missingFields),
             "needsIdentityUpload" : .bool(needsIdentityUpload)
@@ -166,7 +154,8 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
              "publishableKey" : keys?.publishable,
              "secretKey" : keys?.secret,
              "address_id" : address_id,
-             "sub_id" : sub_id
+             "sub_id" : sub_id,
+             "pass" : pass,
         ])
     }
     
@@ -175,8 +164,8 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(self.entity, closure: { maker in
-            maker.id()
+        try database.create(Maker.self) { maker in
+            maker.id(for: Maker.self)
             maker.string("email")
             maker.string("businessName")
             maker.string("publicWebsite")
@@ -184,7 +173,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             maker.string("contactName")
             maker.string("contactPhone")
             maker.string("contactEmail")
-            maker.parent(idKey: "address_id", optional: true)
+            maker.parent(idKey: "address_id", idType: .int)
             
             maker.string("location")
             maker.string("createdOn")
@@ -204,11 +193,11 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             maker.string("stripe_id", optional: true)
             maker.bool("missingFields")
             maker.bool("needsIdentityUpload")
-        })
+        }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(self.entity)
+        try database.delete(Maker.self)
     }
     
     func fetchConnectAccount(for customer: Customer, with card: String) throws -> String {
@@ -238,7 +227,7 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
             let token = try Stripe.shared.createToken(for: stripeCustomerId, representing: card, on: secretKey)
             let stripeCustomer = try Stripe.shared.createStandaloneAccount(for: customer, from: token, on: secretKey)
             
-            var makerCustomer = try StripeMakerCustomer(maker: self, customer: customer, account: stripeCustomer.id)
+            let makerCustomer = try StripeMakerCustomer(maker: self, customer: customer, account: stripeCustomer.id)
             try makerCustomer.save()
             
             return makerCustomer.stripeCustomerId
@@ -246,92 +235,176 @@ final class Maker: Model, Preparation, JSONConvertible, Sanitizable {
     }
 }
 
-extension Entity {
-    public func fix_children<T: Entity>(_ child: T.Type = T.self) -> Children<T> {
-        return Children(parent: self, foreignKey: "\(Self.name)_\(Self.idKey)")
-    }
-}
-
 extension Maker {
     
-    func products() -> Children<Product> {
-        return fix_children()
+    func products() -> Children<Maker, Product> {
+        return children()
     }
     
-    func connectAccountCustomers() throws -> Children<StripeMakerCustomer> {
-        return fix_children()
+    func connectAccountCustomers() throws -> Children<Maker, StripeMakerCustomer> {
+        return children()
     }
     
-    func address() throws -> Parent<MakerAddress> {
-        return try parent(address_id)
+    func address() -> Parent<Maker, MakerAddress> {
+        return parent(id: "address_id")
     }
 
-    func orders() -> Children<Order> {
+    func orders() -> Children<Maker, Order> {
+        return children()
+    }
+
+    func sessions() -> Children<Maker, MakerSessionToken> {
         return children()
     }
 }
 
-extension Maker: User {
-    
-    static func authenticate(credentials: Credentials) throws -> Auth.User {
-        
-        switch credentials {
-            
-        case let token as AccessToken:
-            guard let _maker = try? Session.session(forToken: token, type: .maker).maker().first(), let maker = _maker else {
-                throw AuthError.invalidCredentials
-            }
-            
-            return maker
+import HTTP
 
-        case let usernamePassword as UsernamePassword:
-            guard let _maker = try? Maker.query().filter("username", usernamePassword.username).first(), let maker = _maker else {
-                throw AuthError.invalidCredentials
-            }
-            
-            guard let result = try? BCrypt.verify(password: usernamePassword.password, matchesHash: maker.password), result else {
-                throw AuthError.invalidCredentials
-            }
-            
-            return maker
+private let sessionEntityId = "maker-session"
 
-        case let jwt as JWTCredentials:
-            if jwt.subject.hasPrefix("__force__") {
-                if let _user = try? Customer.query().filter("sub_id", jwt.subject).first(), let user = _user {
-                    return user
-                }
-            }
+extension Maker: SessionPersistable {
 
-            guard let ruby = drop.config["servers", "default", "ruby"]?.string else {
-                throw Abort.custom(status: .internalServerError, message: "Missing path to ruby executable")
-            }
+    public func persist(for req: Request) throws {
+        try req.session().data.set(sessionEntityId, id)
+    }
 
-            let result: String
+    public func unpersist(for req: Request) throws {
+        try req.session().data.set(sessionEntityId, nil)
+    }
 
-            do {
-                result = try drop.console.backgroundExecute(program: ruby, arguments: [drop.workDir + "identity/verifiy_identity.rb", jwt.token, jwt.subject, drop.workDir])
-            } catch {
-                throw Abort.custom(status: .internalServerError, message: "Failed to decode token. \(error)")
-            }
+    public static func fetchPersisted(for request: Request) throws -> Customer? {
+        guard let id = try request.session().data[sessionEntityId] else {
+            return nil
+        }
 
-            drop.console.info("ruby result : \(result)")
+        guard let user = try Customer.find(id) else {
+            return nil
+        }
 
-            guard result == "success" else {
-                print(result)
-                throw AuthError.invalidCredentials
-            }
+        return user
+    }
+}
 
-            guard let _maker = try? Maker.query().filter("sub_id", jwt.subject).first(), let maker = _maker else {
-                throw AuthError.invalidCredentials
-            }
+final class MakerSessionToken: Model, Preparation, JSONConvertible, NodeConvertible {
 
-            return maker
-        default:
-            throw AuthError.unsupportedCredentials
+    let storage = Storage()
+
+    var id: Identifier?
+
+    let maker_id: Identifier
+    let token: String
+
+    init(node: Node) throws  {
+        maker_id = try node.get("maker_id")
+        token = try node.get("token")
+    }
+
+    func makeNode(in context: Context?) throws -> Node {
+        return try Node(node: [
+            "token" : token
+        ]).add(objects: [
+            "maker_id" : maker_id
+        ])
+    }
+
+    static func prepare(_ database: Database) throws {
+        try database.create(MakerSessionToken.self) { session in
+            session.id(for: MakerSessionToken.self)
+            session.parent(idKey: "maker_id", idType: .int)
+            session.string("token")
         }
     }
-    
-    static func register(credentials: Credentials) throws -> Auth.User {
-        throw Abort.custom(status: .badRequest, message: "Register not supported.")
+
+    static func revert(_ database: Database) throws {
+        try database.delete(MakerSessionToken.self)
     }
+}
+
+extension Maker: TokenAuthenticatable {
+
+    typealias TokenType = MakerSessionToken
+
+    public static var tokenKey: String {
+        return "token"
+    }
+}
+
+struct MakerPasswordVerifier: PasswordVerifier {
+
+    func verify(password: String, matchesHash: String) throws -> Bool {
+        return try Hash.verify(message: password, matches: matchesHash.makeBytes())
+    }
+}
+
+extension Maker: PasswordAuthenticatable {
+
+    public static var usernameKey: String {
+        return "username"
+    }
+
+    public static var passwordVerifier: PasswordVerifier? {
+        return MakerPasswordVerifier()
+    }
+    
+//    static func authenticate(credentials: Credentials) throws -> Auth.User {
+//        
+//        switch credentials {
+//            
+//        case let token as AccessToken:
+//            guard let _maker = try? Session.session(forToken: token, type: .maker).maker().first(), let maker = _maker else {
+//                throw AuthError.invalidCredentials
+//            }
+//            
+//            return maker
+//
+//        case let usernamePassword as UsernamePassword:
+//            guard let _maker = try? Maker.query().filter("username", usernamePassword.username).first(), let maker = _maker else {
+//                throw AuthError.invalidCredentials
+//            }
+//            
+//            guard let result = try? BCrypt.verify(password: usernamePassword.password, matchesHash: maker.password), result else {
+//                throw AuthError.invalidCredentials
+//            }
+//            
+//            return maker
+//
+//        case let jwt as JWTCredentials:
+//            if jwt.subject.hasPrefix("__force__") {
+//                if let _user = try? Customer.query().filter("sub_id", jwt.subject).first(), let user = _user {
+//                    return user
+//                }
+//            }
+//
+//            guard let ruby = drop.config["servers", "default", "ruby"]?.string else {
+//                throw Abort.custom(status: .internalServerError, message: "Missing path to ruby executable")
+//            }
+//
+//            let result: String
+//
+//            do {
+//                result = try drop.console.backgroundExecute(program: ruby, arguments: [drop.workDir + "identity/verifiy_identity.rb", jwt.token, jwt.subject, drop.workDir])
+//            } catch {
+//                throw Abort.custom(status: .internalServerError, message: "Failed to decode token. \(error)")
+//            }
+//
+//            drop.console.info("ruby result : \(result)")
+//
+//            guard result == "success" else {
+//                print(result)
+//                throw AuthError.invalidCredentials
+//            }
+//
+//            guard let _maker = try? Maker.query().filter("sub_id", jwt.subject).first(), let maker = _maker else {
+//                throw AuthError.invalidCredentials
+//            }
+//
+//            return maker
+//        default:
+//            throw AuthError.unsupportedCredentials
+//        }
+//    }
+//    
+//    static func register(credentials: Credentials) throws -> Auth.User {
+//        throw Abort.custom(status: .badRequest, message: "Register not supported.")
+//    }
 }

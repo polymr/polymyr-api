@@ -57,23 +57,23 @@ public final class EventData: NodeConvertible {
     public let object: NodeConvertible
     public let previous_attributes: Node
     
-    public init(node: Node, in context: Context) throws {
+    public init(node: Node) throws {
         
-        guard let dictionaryContext = context as? [String : EventResource], let resource = dictionaryContext["resource"] else {
+        guard let dictionaryContext = node.context as? ObjectContext<String, EventResource>, let resource = dictionaryContext.object["resource"] else {
             throw Abort.custom(status: .internalServerError, message: "Missing resource in context.")
         }
-        
-        guard let objectNode = node["object"] else {
+
+        guard let objectNode: Node = try node.get("object") else {
             throw Abort.custom(status: .internalServerError, message: "Missing object node in event.")
         }
         
         object = try resource.internalModelType.init(node: objectNode)
-        previous_attributes = try node.extract("previous_attributes")
+        previous_attributes = try node.get("previous_attributes")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            "object" : try object.makeNode(),
+            "object" : try object.makeNode(in: context),
             "previous_attributes" : previous_attributes
         ])
     }
@@ -98,31 +98,31 @@ public final class Event: NodeConvertible {
         return type.1
     }
 
-    public init(node: Node, in context: Context = EmptyNode) throws {
-        id = try node.extract("id")
-        api_version = try node.extract("api_version")
-        created = try node.extract("created")
-        livemode = try node.extract("livemode")
-        pending_webhooks = try node.extract("pending_webhooks")
-        request = try node.extract("request")
+    public init(node: Node) throws {
+        id = try node.get("id")
+        api_version = try node.get("api_version")
+        created = try node.get("created")
+        livemode = try node.get("livemode")
+        pending_webhooks = try node.get("pending_webhooks")
+        request = try node.get("request")
         
-        type = try node.extract("type") { (typeString: String) -> (EventResource, EventAction) in
+        type = try node.get("type") { (typeString: String) -> (EventResource, EventAction) in
             return try parseEvent(from: typeString)
         }
         
-        guard let dataNode = node["data"] else {
+        guard let dataNode: Node = try node.get("data") else {
             throw Abort.custom(status: .badRequest, message: "Missing data field on event.")
         }
         
-        data = try EventData(node: dataNode, in: ["resource" : type.0])
+        data = try EventData(node: dataNode, in: ObjectContext<String, EventResource>(["resource" : type.0]))
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "id" : .string(id),
             "api_version" : .string(api_version),
-            "created" : try created.makeNode(),
-            "data" : try data.makeNode(),
+            "created" : try created.makeNode(in: context),
+            "data" : try data.makeNode(in: context),
             "livemode" : .bool(livemode),
             "pending_webhooks" : .number(.int(pending_webhooks)),
             "type" : .string("\(resource).\(action)")

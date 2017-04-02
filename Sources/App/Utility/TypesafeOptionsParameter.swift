@@ -8,20 +8,20 @@
 
 import Vapor
 import HTTP
-
 import TypeSafeRouting
 import Node
 import Fluent
+import FluentProvider
 import Vapor
 import HTTP
 
 extension QueryRepresentable {
     
-    func apply(_ option: QueryModifiable) throws -> Query<T> {
+    func apply(_ option: QueryModifiable) throws -> Query<E> {
         return try option.modify(self.makeQuery())
     }
     
-    func apply(_ option: QueryModifiable?) throws -> Query<T> {
+    func apply(_ option: QueryModifiable?) throws -> Query<E> {
         if let option = option {
             return try option.modify(self.makeQuery())
         }
@@ -32,7 +32,7 @@ extension QueryRepresentable {
 
 protocol QueryModifiable {
     
-    func modify<T: Entity>(_ query: Query<T>) throws -> Query<T>
+    func modify<E: Entity>(_ query: Query<E>) throws -> Query<E>
 }
 
 protocol QueryInitializable: NodeInitializable {
@@ -54,7 +54,7 @@ extension TypesafeOptionsParameter {
         return "Valid values are : [\(Self.values.joined(separator: ", "))]"
     }
     
-    func modify<T : Entity>(_ query: Query<T>) throws -> Query<T> {
+    func modify<E : Entity>(_ query: Query<E>) throws -> Query<E> {
         return query
     }
 }
@@ -73,7 +73,7 @@ extension RawRepresentable where Self: TypesafeOptionsParameter, RawValue == Str
         self.init(rawValue: string)
     }
     
-    init(node: Node, in context: Context = EmptyNode) throws {
+    init(node: Node) throws {
         if node.isNull {
             
             guard let defaultValue = Self.defaultValue else {
@@ -85,7 +85,7 @@ extension RawRepresentable where Self: TypesafeOptionsParameter, RawValue == Str
         }
         
         guard let string = node.string else {
-            throw NodeError.unableToConvert(node: node, expected: "\(String.self)")
+            throw NodeError.unableToConvert(input: node, expectation: "\(String.self)", path: ["self"])
         }
         
         guard let value = Self.init(rawValue: string) else {
@@ -95,7 +95,7 @@ extension RawRepresentable where Self: TypesafeOptionsParameter, RawValue == Str
         self = value
     }
     
-    func makeNode(context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return Node.string(self.rawValue)
     }
 }
@@ -111,7 +111,7 @@ extension Request {
     }
     
     func extract<T: TypesafeOptionsParameter>() throws -> [T] where T: RawRepresentable, T.RawValue == String {
-        guard let optionsArray = self.query?[T.key]?.nodeArray else {
+        guard let optionsArray = self.query?[T.key]?.array else {
             throw Abort.custom(status: .badRequest, message: "Missing query option at key \(T.key). Acceptable values are \(T.values)")
         }
         

@@ -8,15 +8,18 @@
 
 import Vapor
 import Fluent
-import Sanitized
+import FluentProvider
+import Node
 
 fileprivate let separator = "@@@<<<>>>@@@"
 
-final class Question: Model, Preparation, JSONConvertible, Sanitizable {
+final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+
+    let storage = Storage()
     
     static var permitted: [String] = ["text", "qualifiers", "campaign_id", "section_id"]
     
-    var id: Node?
+    var id: Identifier?
     var exists = false
     
     // One will be provided
@@ -26,16 +29,16 @@ final class Question: Model, Preparation, JSONConvertible, Sanitizable {
     let campaign_id: Node?
     let section_id: Node?
     
-    init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
-        text = try node.extract("text")
+    init(node: Node) throws {
+        id = try node.get("id")
+        text = try node.get("text")
         qualifiers = try? node.parseList(at: "qualifiers", with: separator)
         
-        campaign_id = node["campaign_id"]
-        section_id = node["section_id"]
+        campaign_id = try node.get("campaign_id")
+        section_id = try node.get("section_id")
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: []).add(objects: [
             "campaign_id" : campaign_id,
             "section_id" : section_id,
@@ -46,15 +49,15 @@ final class Question: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(self.entity, closure: { question in
-            question.id()
+        try database.create(Question.self) { question in
+            question.id(for: Question.self)
             question.string("text")
-            question.parent(Campaign.self)
-            question.parent(idKey: "section_id")
-        })
+            question.parent(idKey: "campaign_id", idType: .int)
+            question.parent(idKey: "section_id", idType: .int)
+        }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(self.entity)
+        try database.delete(Question.self)
     }
 }

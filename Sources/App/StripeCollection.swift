@@ -11,6 +11,7 @@ import Routing
 import Vapor
 import Node
 import Foundation
+import TypeSafeRouting
 
 extension Sequence where Iterator.Element == Bool {
     
@@ -22,7 +23,7 @@ extension Sequence where Iterator.Element == Bool {
 extension NodeConvertible {
 
     public func makeResponse() throws -> Response {
-        return try Response(status: .ok, json: self.makeNode().makeJSON())
+        return try Response(status: .ok, json: JSON(makeNode(in: jsonContext)))
     }
 }
 
@@ -45,14 +46,14 @@ fileprivate func stripeKeyPathFor(base: String, appending: String) -> String {
     return "\(base)[\(appending)]"
 }
 
-extension Node {
+extension StructuredData {
     
     var isLeaf : Bool {
         switch self {
         case .array(_), .object(_):
             return false
             
-        case .bool(_), .bytes(_), .string(_), .number(_), .null:
+        case .bool(_), .bytes(_), .string(_), .number(_), .null, .date(_):
             return true
         }
     }
@@ -69,7 +70,7 @@ extension Node {
         case let .object(object):
             return object.map { $1.collectLeaves(prefix: stripeKeyPathFor(base: prefix, appending: $0)) }.joined().reduceDictionary()
             
-        case .bool(_), .bytes(_), .string(_), .number(_):
+        case .bool(_), .bytes(_), .string(_), .number(_), .date(_):
             return [prefix : string ?? ""]
             
         case .null:
@@ -78,13 +79,13 @@ extension Node {
     }
 }
 
-class StripeCollection: RouteCollection, EmptyInitializable {
+class StripeCollection: EmptyInitializable {
 
     required init() { }
 
     typealias Wrapped = HTTP.Responder
 
-    func build<B: RouteBuilder>(_ builder: B) where B.Value == Wrapped {
+    func build(_ builder: RouteBuilder) {
 
         builder.group("stripe") { stripe in
     
@@ -92,7 +93,7 @@ class StripeCollection: RouteCollection, EmptyInitializable {
 
                 customer.group("sources") { sources in
                     
-                    sources.post("default", String.self) { request, source in
+                    sources.post("default", String.init(from:)) { request, source in
                         guard let id = try request.customer().stripe_id else {
                             throw try Abort.custom(status: .badRequest, message: "user \(request.customer().throwableId()) doesn't have a stripe account")
                         }
@@ -100,9 +101,9 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                         return try Stripe.shared.update(customer: id, parameters: ["default_source" : source]).makeResponse()
                     }
 
-                    sources.post(String.self) { request, source in
+                    sources.post(String.init(from:)) { request, source in
 
-                        guard var customer = try? request.customer() else {
+                        guard let customer = try? request.customer() else {
                             throw Abort.custom(status: .forbidden, message: "Log in first.")
                         }
                         
@@ -116,7 +117,7 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                         }
                     }
 
-                    sources.delete(String.self) { request, source in
+                    sources.delete(String.init(from:)) { request, source in
 
                         guard let customer = try? request.customer() else {
                             throw Abort.custom(status: .forbidden, message: "Log in first.")
@@ -134,28 +135,28 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                             throw Abort.badRequest
                         }
                         
-                        let cards = try Stripe.shared.paymentInformation(for: stripeId).map { try $0.makeNode() }
+                        let cards = try Stripe.shared.paymentInformation(for: stripeId).map { try $0.makeNode(in: emptyContext) }
                         return try Node.array(cards).makeResponse()
                     }
                 }
             }
             
-            stripe.get("country", "verification", String.self) { request, country_code in
+            stripe.get("country", "verification", String.init(from:)) { request, country_code in
                 guard let country = try? CountryCode(node: country_code) else {
                     throw Abort.custom(status: .badRequest, message: "\(country_code) is not a valid country code.")
                 }
                 
-                return try Stripe.shared.verificationRequiremnts(for: country).makeNode().makeResponse()
+                return try Stripe.shared.verificationRequiremnts(for: country).makeNode(in: emptyContext).makeResponse()
             }
 
             stripe.group("maker") { maker in
 
                 maker.get("disputes") { request in
-                    return try Stripe.shared.disputes().makeNode().makeResponse()
+                    return try Stripe.shared.disputes().makeNode(in: emptyContext).makeResponse()
                 }
 
                 maker.post("create") { request in
-                    var maker = try request.maker()
+                    let maker = try request.maker()
                     let account = try Stripe.shared.createManagedAccount(email: maker.contactEmail, local_id: maker.id?.int)
                     
                     maker.stripe_id = account.id
@@ -165,14 +166,14 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                     return try maker.makeResponse()
                 }
 
-                maker.post("acceptedtos", String.self) { request, ip in
+                maker.post("acceptedtos", String.init(from:)) { request, ip in
                     let maker = try request.maker()
 
                     guard let stripe_id = maker.stripe_id else {
                         throw Abort.custom(status: .badRequest, message: "Missing stripe id")
                     }
 
-                    return try Stripe.shared.acceptedTermsOfService(for: stripe_id, ip: ip).makeNode().makeResponse()
+                    return try Stripe.shared.acceptedTermsOfService(for: stripe_id, ip: ip).makeNode(in: emptyContext).makeResponse()
                 }
                 
                 maker.get("verification") { request in
@@ -184,13 +185,13 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                     
                     let account = try Stripe.shared.makerInformation(for: stripe_id)
 
-                    return try Node.object([
-                        "fields" : try account.descriptionsForNeededFields().makeNode()
+                    return try Node(node :[
+                        "fields" : try account.descriptionsForNeededFields().makeNode(in: emptyContext)
                     ]).add(objects: [
                         "due_by" : account.verification.due_by?.ISO8601String,
                         "disabled_reason" : account.verification.disabled_reason?.rawValue,
-                        "identity" : account.legal_entity.verification.status != .verified ? account.legal_entity.verification.makeNode() : nil
-                    ]).makeJSON()
+                        "identity" : account.legal_entity.verification.status != .verified ? account.legal_entity.verification.makeNode(in: emptyContext) : nil
+                    ]).makeResponse()
                 }
                 
                 maker.get("payouts") { request in
@@ -200,7 +201,7 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                         throw Abort.custom(status: .badRequest, message: "maker is missing stripe id.")
                     }
                     
-                    return try Stripe.shared.transfers(for: secretKey).makeNode().makeResponse()
+                    return try Stripe.shared.transfers(for: secretKey).makeNode(in: emptyContext).makeResponse()
                 }
                 
                 maker.post("verification") { request in
@@ -212,28 +213,31 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                     
                     let account = try Stripe.shared.makerInformation(for: stripe_id)
                     let fieldsNeeded = account.filteredNeededFieldsWithCombinedDateOfBirth()
-                    var node = try request.json().permit(fieldsNeeded).node
+
+                    guard var object = try request.json().permit(fieldsNeeded).node.object else {
+                        throw NodeError.invalidContainer(container: "object", element: "self")
+                    }
                     
-                    if node.nodeObject?.keys.contains(where: { $0.hasPrefix("external_account") }) ?? false {
-                        node["external_account.object"] = "bank_account"
+                    if object.keys.contains(where: { $0.hasPrefix("external_account") }) {
+                        object["external_account.object"] = "bank_account"
                     }
 
-                    if node["legal_entity.dob"] != nil {
-                        guard let unix = node["legal_entity.dob"]?.string else { throw Abort.custom(status: .badRequest, message: "Could not parse unix time from updates)") }
+                    if object.keys.contains("legal_entity.dob") {
+                        guard let unix: String = object["legal_entity.dob"]?.string else { throw Abort.custom(status: .badRequest, message: "Could not parse unix time from updates)") }
                         guard let timestamp = Int(unix) else { throw Abort.custom(status: .badRequest, message: "Could not get number from unix : \(unix)") }
-                        
+
                         let calendar = Calendar.current
                         let date = Date(timeIntervalSince1970: Double(timestamp))
-                        
-                        node["legal_entity.dob"] = nil
-                        node["legal_entity.dob.day"] = .string("\(calendar.component(.day, from: date))")
-                        node["legal_entity.dob.month"] = .string("\(calendar.component(.month, from: date))")
-                        node["legal_entity.dob.year"] = .string("\(calendar.component(.year, from: date))")
+
+                        object["legal_entity.dob"] = nil
+                        object["legal_entity.dob.day"] = .string("\(calendar.component(.day, from: date))")
+                        object["legal_entity.dob.month"] = .string("\(calendar.component(.month, from: date))")
+                        object["legal_entity.dob.year"] = .string("\(calendar.component(.year, from: date))")
                     }
                     
                     var updates: [String : String] = [:]
                     
-                    try node.nodeObject?.forEach {
+                    try object.forEach {
                         guard let string = $1.string else {
                             throw Abort.custom(status: .badRequest, message: "could not convert object at key \($0) to string.")
                         }
@@ -254,33 +258,6 @@ class StripeCollection: RouteCollection, EmptyInitializable {
                     }
                     
                     return try Stripe.shared.updateAccount(id: stripe_id, parameters: updates).makeResponse()
-                }
-                
-                maker.post("upload", String.self) { request, _uploadReason in
-                    let maker = try request.maker()
-                    
-                    guard let uploadReason = try UploadReason(from: _uploadReason) else {
-                        throw Abort.custom(status: .badRequest, message: "\(_uploadReason) is not an acceptable reason.")
-                    }
-                    
-                    if uploadReason != .identity_document {
-                        throw Abort.custom(status: .badRequest, message: "Currently only \(UploadReason.identity_document.rawValue) is supported")
-                    }
-                    
-                    guard let fileField = request.formData?.allItems.first?.1 else {
-                        throw Abort.custom(status: .badRequest, message: "Missing file to upload.")
-                    }
-                    
-                    guard let name = fileField.filename, let type = NSURL(fileURLWithPath: name).deletingPathExtension?.lastPathComponent, let fileType = try FileType(from: type) else {
-                        throw Abort.custom(status: .badRequest, message: "Misisng upload file type.")
-                    }
-                    
-                    guard let stripe_id = maker.stripe_id else {
-                        throw Abort.custom(status: .badRequest, message: "maker with id \(maker.id?.int ?? 0) does't have a stripe acocunt yet. Call /maker/create/{token_id} to create one.")
-                    }
-                    
-                    let fileUpload = try Stripe.shared.upload(file: fileField.part.body, with: uploadReason, type: fileType)
-                    return try Stripe.shared.updateAccount(id: stripe_id, parameters: ["legal_entity[verification][document]" : fileUpload.id]).makeResponse()
                 }
             }
         }

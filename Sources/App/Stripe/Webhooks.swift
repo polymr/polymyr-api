@@ -10,9 +10,9 @@ import HTTP
 import Routing
 import Vapor
 
-public final class StripeWebhookManager: RouteCollection {
+public final class StripeWebhookManagerCollection {
 
-    public static let shared = StripeWebhookManager()
+    public static let shared = StripeWebhookManagerCollection()
 
     public typealias Wrapped = HTTP.Responder
 
@@ -25,7 +25,7 @@ public final class StripeWebhookManager: RouteCollection {
         webhookHandlers[resource] = resourceHanderGroup
     }
 
-    public func build<B: RouteBuilder>(_ builder: B) where B.Value == Wrapped {
+    public func build(_ builder: RouteBuilder) {
 
         builder.grouped("stripe").group("webhook") { webhook in
 

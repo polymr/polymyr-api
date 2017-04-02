@@ -7,20 +7,27 @@
 //
 
 import Fluent
+import FluentProvider
 import Vapor
 
-extension Array where Element : NodeRepresentable {
-    
-    public func makeJSON() throws -> JSON {
-        let node = try Node.array(self.map { try $0.makeNode() })
-        return try JSON(node: node)
+extension Model where Self: NodeConvertible {
+
+    public init(row: Row) throws {
+        try self.init(node: Node(row.wrapped, in: nil))
+    }
+
+    public func makeRow() throws -> Row {
+        return try Row(self.makeNode(in: rowContext).wrapped, in: rowContext)
     }
 }
 
-extension Array where Element : NodeInitializable {
-    
+extension Model where Self: NodeConvertible {
+
     public init(json: JSON) throws {
-        let node = json.makeNode()
-        try self.init(node: node)
+        try self.init(node: Node(json.wrapped, in: nil))
+    }
+
+    public func makeJSON() throws -> JSON {
+        return try JSON(self.makeNode(in: jsonContext).wrapped)
     }
 }

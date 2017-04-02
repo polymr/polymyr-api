@@ -31,25 +31,25 @@ public final class Plan: NodeConvertible {
     public let statement_descriptor: String?
     public let trial_period_days: Int?
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
+    public init(node: Node) throws {
         
-        guard try node.extract("object") == Plan.type else {
-            throw NodeError.unableToConvert(node: node, expected: Plan.type)
+        guard try node.get("object") == Plan.type else {
+            throw NodeError.unableToConvert(input: node, expectation: Plan.type, path: ["object"])
         }
         
-        id = try node.extract("id")
-        amount = try node.extract("amount")
-        created = try node.extract("created")
-        currency = try node.extract("currency")
-        interval = try node.extract("interval")
-        interval_count = try node.extract("interval_count")
-        livemode = try node.extract("livemode")
-        name = try node.extract("name")
-        statement_descriptor = try node.extract("statement_descriptor")
-        trial_period_days = try node.extract("trial_period_days")
+        id = try node.get("id")
+        amount = try node.get("amount")
+        created = try node.get("created")
+        currency = try node.get("currency")
+        interval = try node.get("interval")
+        interval_count = try node.get("interval_count")
+        livemode = try node.get("livemode")
+        name = try node.get("name")
+        statement_descriptor = try node.get("statement_descriptor")
+        trial_period_days = try node.get("trial_period_days")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "id" : .string(id),
             "amount" : .number(.int(amount)),

@@ -8,55 +8,57 @@
 
 import Vapor
 import Fluent
-import Sanitized
+import FluentProvider
+import Node
 
 fileprivate let separator = "@@@<<<>>>@@@"
 
-final class Order: Model, Preparation, JSONConvertible, Sanitizable {
+final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+
+    let storage = Storage()
     
     static var permitted: [String] = ["campaign_id", "product_id", "maker_id", "customer_id", "customeraddress_id", "card"]
     
-    var id: Node?
+    var id: Identifier?
     var exists = false
     
-    let product_id: Node?
-    var campaign_id: Node?
-    var maker_id: Node?
+    let product_id: Identifier
+    var campaign_id: Identifier
+    var maker_id: Identifier
     
-    let customer_id: Node?
-    let customeraddress_id: Node?
+    let customer_id: Identifier
+    let customeraddress_id: Identifier
     
     var charge_id: String?
     let card: String
 
     let fulfilled: Bool
     
-    init(node: Node, in context: Context) throws {
-        id = node["id"]
+    init(node: Node) throws {
+        id = try node.get("id")
         
-        card = try node.extract("card")
-        charge_id = try node.extract("charge_id")
+        card = try node.get("card")
+        charge_id = try node.get("charge_id")
         
-        product_id = node["product_id"]
-        customeraddress_id = node["customeraddress_id"]
-        customer_id = node["customer_id"]
-        
-        campaign_id = node["campaign_id"]
-        maker_id = node["maker_id"]
+        product_id = try node.get("product_id")
+        customeraddress_id = try node.get("customeraddress_id")
+        customer_id = try node.get("customer_id")
 
-        fulfilled = (try? node.extract("fulfilled")) ?? false
-        
-        if let product_id = product_id, campaign_id == nil || maker_id == nil {
-            guard let product = try Product.find(product_id) else {
-                throw NodeError.unableToConvert(node: Node.null, expected: "product_id pointing to correct product")
-            }
-            
-            campaign_id = try product.campaign().first()?.id
-            maker_id = product.maker_id
+        fulfilled = (try? node.get("fulfilled")) ?? false
+
+        guard let product = try Product.find(product_id) else {
+            throw NodeError.unableToConvert(input: product_id.makeNode(in: emptyContext), expectation: "product_id pointing to correct product", path: ["product_id"])
         }
+        
+        guard let campaign_id = try product.campaign().first()?.id else {
+            throw try Abort.custom(status: .badGateway, message: "missing campaign id in linked product \(product.throwableId())")
+        }
+
+        self.campaign_id = campaign_id
+        maker_id = product.maker_id
     }
     
-    func makeNode(context: Context) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "card" : card
         ]).add(objects: [
@@ -71,40 +73,40 @@ final class Order: Model, Preparation, JSONConvertible, Sanitizable {
     }
     
     static func prepare(_ database: Database) throws {
-        try database.create(self.entity, closure: { order in
-            order.id()
+        try database.create(Order.self) { order in
+            order.id(for: Order.self)
             order.string("card")
             order.string("charge_id")
             order.bool("fulfilled", default: false)
-            order.parent(Campaign.self)
-            order.parent(Product.self)
-            order.parent(Maker.self)
-            order.parent(Customer.self)
-            order.parent(CustomerAddress.self)
-        })
+            order.parent(idKey: "campaign_id", idType: .int)
+            order.parent(idKey: "product_id", idType: .int)
+            order.parent(idKey: "maker_id", idType: .int)
+            order.parent(idKey: "customer_id", idType: .int)
+            order.parent(idKey: "customeraddress_id", idType: .int)
+        }
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(self.entity)
+        try database.delete(Order.self)
     }
 }
 
 extension Order {
     
-    func maker() throws -> Parent<Maker> {
-        return try parent(maker_id)
+    func maker() -> Parent<Order, Maker> {
+        return parent(id: maker_id)
     }
     
-    func campaign() throws -> Parent<Campaign> {
-        return try parent(campaign_id)
+    func campaign() -> Parent<Order, Campaign> {
+        return parent(id: campaign_id)
     }
     
-    func product() throws -> Parent<Product> {
-        return try parent(product_id)
+    func product() -> Parent<Order, Product> {
+        return parent(id: product_id)
     }
     
-    func customer() throws -> Parent<Customer> {
-        return try parent(customer_id)
+    func customer() -> Parent<Order, Customer> {
+        return parent(id: customer_id)
     }
 }
 

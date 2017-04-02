@@ -12,9 +12,9 @@ import Transport
 import Vapor
 import Foundation
 
-fileprivate func merge(query: [String: CustomStringConvertible?], with metadata: [String: CustomStringConvertible]) -> [String: CustomStringConvertible] {
+fileprivate func merge(query: [String: NodeRepresentable?], with metadata: [String: NodeRepresentable]) -> [String: NodeRepresentable] {
     let arguments = metadata.map { ("metadata[\($0)]", $1) }
-    var result: [String: CustomStringConvertible] = [:]
+    var result: [String: NodeRepresentable] = [:]
     
     arguments.forEach {
         result[$0] = $1
@@ -22,7 +22,6 @@ fileprivate func merge(query: [String: CustomStringConvertible?], with metadata:
     
     query.forEach {
         if ($1 != nil) {
-            print("Merging \($0) \($1)")
             result[$0] = $1
         }
     }
@@ -56,7 +55,7 @@ public final class Stripe {
     }
 
     public func createManagedAccount(email: String, local_id: Int?) throws -> StripeAccount {
-        let defaultQuery: [String: CustomStringConvertible] = ["managed" : true, "country" : "US", "email" : email, "legal_entity[type]" : "company"]
+        let defaultQuery: [String: NodeRepresentable] = ["managed" : true, "country" : "US", "email" : email, "legal_entity[type]" : "company"]
         print(defaultQuery)
         let query = local_id.flatMap { merge(query: defaultQuery, with: ["id" : "\($0)"]) } ?? defaultQuery
         print(query)
@@ -76,14 +75,14 @@ public final class Stripe {
         return try base.post("customer/\(id)", query: parameters)
     }
 
-    public func subscribe(user userId: String, to planId: String, with frequency: Interval = .month, oneTime: Bool, cut: Double, coupon: String? = nil, metadata: [String : CustomStringConvertible], under publishableKey: String) throws -> StripeSubscription {
+    public func subscribe(user userId: String, to planId: String, with frequency: Interval = .month, oneTime: Bool, cut: Double, coupon: String? = nil, metadata: [String : NodeRepresentable], under publishableKey: String) throws -> StripeSubscription {
         let subscription: StripeSubscription = try base.post("subscriptions", query: merge(query: ["customer" : userId, "plan" : planId, "application_fee_percent" : cut, "coupon" : coupon], with: metadata), token: publishableKey)
 
         if oneTime {
             let json = try base.delete("/subscriptions/\(subscription.id)", query: ["at_period_end" : true])
 
             guard json["cancel_at_period_end"]?.bool == true else {
-                throw Abort.custom(status: .internalServerError, message: json.makeNode().nodeObject?.description ?? "Fuck.")
+                throw Abort.custom(status: .internalServerError, message: json.makeNode(in: emptyContext).object?.description ?? "Fuck.")
             }
         }
 
@@ -99,7 +98,7 @@ public final class Stripe {
     }
 
     public func paymentInformation(for customer: String, under account: String = token) throws -> [Card] {
-        return try base.get("customers/\(customer)/sources", query: ["object" : "card"], token: account)
+        return try base.get_list("customers/\(customer)/sources", query: ["object" : "card"], token: account)
     }
 
     public func customerInformation(for customer: String) throws -> StripeCustomer {
@@ -111,7 +110,7 @@ public final class Stripe {
     }
     
     public func transfers(for secretKey: String) throws -> [Transfer] {
-        return try base.get("https://api.stripe.com/v1/transfers", token: secretKey)
+        return try base.get_list("https://api.stripe.com/v1/transfers", token: secretKey)
     }
 
     public func delete(payment: String, from customer: String) throws -> JSON {
@@ -119,7 +118,7 @@ public final class Stripe {
     }
 
     public func disputes() throws -> [Dispute] {
-        return try base.get("disputes")
+        return try base.get_list("disputes")
     }
 
     public func verificationRequiremnts(for country: CountryCode) throws -> Country {
@@ -136,9 +135,5 @@ public final class Stripe {
     
     public func updateAccount(id: String, parameters: [String : String]) throws -> StripeAccount {
         return try base.post("accounts/\(id)", query: parameters)
-    }
-    
-    public func upload(file bytes: Bytes, with reason: UploadReason, type: FileType) throws -> FileUpload {
-        return try uploads.upload("files", name: "file", bytes: bytes)
     }
 }

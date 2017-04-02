@@ -76,26 +76,26 @@ public final class FileUpload: NodeConvertible {
     public let type: FileType
     public let url: String?
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
-        guard try node.extract("object") == FileUpload.type else {
-            throw NodeError.unableToConvert(node: node, expected: FileUpload.type)
+    public init(node: Node) throws {
+        guard try node.get("object") == FileUpload.type else {
+            throw NodeError.unableToConvert(input: node, expectation: FileUpload.type, path: ["object"])
         }
         
-        id = try node.extract("id")
-        created = try node.extract("created")
-        purpose = try node.extract("purpose")
-        size = try node.extract("size")
-        type = try node.extract("type")
-        url = try node.extract("url")
+        id = try node.get("id")
+        created = try node.get("created")
+        purpose = try node.get("purpose")
+        size = try node.get("size")
+        type = try node.get("type")
+        url = try node.get("url")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "id" : .string(id),
-            "created" : try created.makeNode(),
-            "purpose" : try purpose.makeNode(),
+            "created" : try created.makeNode(in: context),
+            "purpose" : try purpose.makeNode(in: context),
             "size" : .number(.int(size)),
-            "type" : try type.makeNode()
+            "type" : try type.makeNode(in: context)
         ]).add(objects: [
             "url" : url
         ])

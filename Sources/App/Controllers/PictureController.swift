@@ -9,13 +9,14 @@
 import HTTP
 import Vapor
 import Fluent
+import FluentProvider
 import Routing
 
-extension RouteBuilder where Value == Responder {
+extension RouteBuilder {
     
-    func picture<PictureType: Picture>(base path: String, slug: String, picture controller: PictureController<PictureType>) {
+    func picture<PictureType: Picture, OwnerType: Entity>(base path: String, slug: String, picture controller: PictureController<PictureType, OwnerType>) {
         self.add(.get, path, ":\(slug)", "pictures") { request in
-            guard let owner = request.parameters[slug]?.int else {
+            guard let owner = request.parameters[slug]?.converted(to: Identifier.self) else {
                 throw TypeSafeRoutingError.missingParameter
             }
         
@@ -23,7 +24,7 @@ extension RouteBuilder where Value == Responder {
         }
         
         self.add(.post, path, ":\(slug)", "pictures") { request in
-            guard let owner = request.parameters[slug]?.int else {
+            guard let owner = request.parameters[slug]?.converted(to: Identifier.self) else {
                 throw TypeSafeRoutingError.missingParameter
             }
 
@@ -31,7 +32,7 @@ extension RouteBuilder where Value == Responder {
         }
         
         self.add(.delete, path, ":\(slug)", "pictures", ":picture_id") { request in
-            guard let owner = request.parameters[slug]?.int else {
+            guard let owner = request.parameters[slug]?.converted(to: Identifier.self) else {
                 throw TypeSafeRoutingError.missingParameter
             }
             
@@ -44,33 +45,34 @@ extension RouteBuilder where Value == Responder {
     }
 }
 
-final class PictureController<PictureType: Picture> {
+final class PictureController<PictureType: Picture, OwnerType: Entity> {
     
-    func index(_ request: Request, owner: Int) throws -> ResponseRepresentable {
-        return try PictureType.query().filter("owner_id", owner).all().makeJSON()
+    func index(_ request: Request, owner: Identifier) throws -> ResponseRepresentable {
+        return try PictureType.query().filter("owner_id", owner.int).all().makeJSON()
     }
 
-    func createPicture(from nodeObject: Node, with owner: Int) throws -> ProductPicture {
-        var picture: ProductPicture = try ProductPicture(node: nodeObject, in: OwnerContext(with: owner))
+    func createPicture(from nodeObject: Node, with owner: Identifier) throws -> PictureType {
+        let context = ParentContext(parent_id: owner)
+        let picture = try PictureType(node: Node(nodeObject.wrapped, in: context))
         try picture.save()
         return picture
     }
 
-    func create(_ request: Request, owner: Int) throws -> ResponseRepresentable {
+    func create(_ request: Request, owner: Identifier) throws -> ResponseRepresentable {
         guard let node = request.json?.node else {
             throw Abort.custom(status: .badRequest, message: "Missing json.")
         }
 
-        if let array = node.nodeArray {
-            return try array.map {
-                try createPicture(from: $0, with: owner)
-                }.makeNode().makeJSON()
+        if let array = node.array {
+            return try Node.array(array.map {
+                try createPicture(from: $0, with: owner).makeNode(in: jsonContext)
+            }).makeResponse()
         } else {
             return try createPicture(from: node, with: owner).makeJSON()
         }
     }
     
-    func delete(_ request: Request, owner: Int, picture: Int) throws -> ResponseRepresentable {
+    func delete(_ request: Request, owner: Identifier, picture: Int) throws -> ResponseRepresentable {
         guard let picture = try PictureType.find(picture) else {
             throw Abort.custom(status: .badRequest, message: "No such picture exists.")
         }

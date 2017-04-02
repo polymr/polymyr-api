@@ -14,15 +14,15 @@ public final class Period: NodeConvertible {
     public let start: Date
     public let end: Date
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
-        start = try node.extract("start")
-        end = try node.extract("end")
+    public init(node: Node) throws {
+        start = try node.get("start")
+        end = try node.get("end")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            "start" : try start.makeNode(),
-            "end" : try end.makeNode()
+            "start" : try start.makeNode(in: context),
+            "end" : try end.makeNode(in: context)
             ] as [String : Node])
     }
 }
@@ -52,42 +52,42 @@ public final class LineItem: NodeConvertible {
     public let subscription_item: String
     public let type: LineItemType
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
-        guard try node.extract("object") == LineItem.type else {
-            throw NodeError.unableToConvert(node: node, expected: LineItem.type)
+    public init(node: Node) throws {
+        guard try node.get("object") == LineItem.type else {
+            throw NodeError.unableToConvert(input: node, expectation: LineItem.type, path: ["object"])
         }
         
-        id = try node.extract("id")
-        amount = try node.extract("amount")
-        currency = try node.extract("currency")
-        description = try node.extract("description")
-        discountable = try node.extract("discountable")
-        livemode = try node.extract("livemode")
-        metadata = try node.extract("metadata")
-        period = try node.extract("period")
-        plan = try node.extract("plan")
-        proration = try node.extract("proration")
-        quantity = try node.extract("quantity")
-        subscription = try node.extract("subscription")
-        subscription_item = try node.extract("subscription_item")
-        type = try node.extract("type")
+        id = try node.get("id")
+        amount = try node.get("amount")
+        currency = try node.get("currency")
+        description = try node.get("description")
+        discountable = try node.get("discountable")
+        livemode = try node.get("livemode")
+        metadata = try node.get("metadata")
+        period = try node.get("period")
+        plan = try node.get("plan")
+        proration = try node.get("proration")
+        quantity = try node.get("quantity")
+        subscription = try node.get("subscription")
+        subscription_item = try node.get("subscription_item")
+        type = try node.get("type")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "id" : .string(id),
             "amount" : .number(.int(amount)),
-            "currency" : try currency.makeNode(),
+            "currency" : try currency.makeNode(in: context),
             "discountable" : .bool(discountable),
             "livemode" : .bool(livemode),
             "metadata" : metadata,
-            "period" : try period.makeNode(),
-            "plan" : try plan.makeNode(),
+            "period" : try period.makeNode(in: context),
+            "plan" : try plan.makeNode(in: context),
             "proration" : .bool(proration),
             "quantity" : .number(.int(quantity)),
-            "subscription" : try subscription.makeNode(),
+            "subscription" : try subscription.makeNode(in: context),
             "subscription_item" : .string(subscription_item),
-            "type" : try type.makeNode()
+            "type" : try type.makeNode(in: context)
             ] as [String : Node]).add(objects: [
                 "description" : description
                 ])

@@ -35,33 +35,31 @@ public final class ExternalAccount: NodeConvertible {
     public let routing_number: String
     public let status: ExternalAccountVerificationStatus
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
+    public init(node: Node) throws {
         
-        guard try node.extract("object") == ExternalAccount.type else {
-            throw NodeError.unableToConvert(node: node, expected: ExternalAccount.type)
+        guard try node.get("object") == ExternalAccount.type else {
+            throw NodeError.unableToConvert(input: node, expectation: ExternalAccount.type, path: ["object"])
         }
         
-        id = try node.extract("id")
-        account = try node.extract("account")
-        account_holder_name = try node.extract("account_holder_name")
-        account_holder_type = try node.extract("account_holder_type")
-        bank_name = try node.extract("bank_name")
-        country = try node.extract("country")
-        currency = try node.extract("currency")
-        default_for_currency = try node.extract("default_for_currency")
-        fingerprint = try node.extract("fingerprint")
-        last4 = try node.extract("last4")
-        metadata = try node.extract("metadata")
-        routing_number = try node.extract("routing_number")
-        status = try node.extract("status")
+        id = try node.get("id")
+        account = try node.get("account")
+        account_holder_name = try node.get("account_holder_name")
+        account_holder_type = try node.get("account_holder_type")
+        bank_name = try node.get("bank_name")
+        country = try node.get("country")
+        currency = try node.get("currency")
+        default_for_currency = try node.get("default_for_currency")
+        fingerprint = try node.get("fingerprint")
+        last4 = try node.get("last4")
+        metadata = try node.get("metadata")
+        routing_number = try node.get("routing_number")
+        status = try node.get("status")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "id" : id,
             "account" : account,
-            "account_holder_name" : account_holder_name,
-            "account_holder_type" : account_holder_type,
             "bank_name" : bank_name,
             "country" : country,
             "currency" : currency,
@@ -71,6 +69,9 @@ public final class ExternalAccount: NodeConvertible {
             "metadata" : metadata,
             "routing_number" : routing_number,
             "status" : status
+        ]).add(objects: [
+            "account_holder_name" : account_holder_name,
+            "account_holder_type" : account_holder_type,
         ])
     }
     

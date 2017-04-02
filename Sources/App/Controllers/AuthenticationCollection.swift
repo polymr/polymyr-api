@@ -8,10 +8,23 @@
 
 import Vapor
 import HTTP
-import Turnstile
-import Auth
 import Fluent
+import FluentProvider
 import Routing
+import Node
+import JWT
+import AuthProvider
+
+enum SessionType: String, TypesafeOptionsParameter {
+    case customer
+    case maker
+    case none
+
+    static let key = "type"
+    static let values = [SessionType.customer.rawValue, SessionType.maker.rawValue, SessionType.none.rawValue]
+
+    static var defaultValue: SessionType? = .none
+}
 
 final class ProviderData: NodeConvertible {
 
@@ -21,15 +34,15 @@ final class ProviderData: NodeConvertible {
     public let email: String
     public let providerId: String?
 
-    init(node: Node, in context: Context = EmptyNode) throws {
-        uid = try node.extract("uid")
-        displayName = try node.extract("displayName")
-        photoURL = try node.extract("photoURL")
-        email = try node.extract("email")
-        providerId = try node.extract("providerId")
+    init(node: Node) throws {
+        uid = try node.get("uid")
+        displayName = try node.get("displayName")
+        photoURL = try node.get("photoURL")
+        email = try node.get("email")
+        providerId = try node.get("providerId")
     }
 
-    func makeNode(context: Context = EmptyNode) throws -> Node {
+    func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "displayName" : .string(displayName),
             "email" : .string(email),
@@ -41,7 +54,7 @@ final class ProviderData: NodeConvertible {
     }
 }
 
-final class JWTCredentials: Credentials {
+final class JWTCredentials {
 
     public let token: String
     public let subject: String
@@ -67,71 +80,18 @@ extension JSON {
     }
 }
 
-final class AuthenticationCollection: RouteCollection {
+final class AuthenticationCollection {
     
     typealias Wrapped = HTTP.Responder
     
-    func build<B: RouteBuilder>(_ builder: B) where B.Value == Wrapped {
+    func build(_ builder: RouteBuilder) {
         
-        builder.post("authentication") { request in
-            
-            let type = try request.extract() as SessionType
-
-            guard let credentials: Credentials = request.auth.header?.usernamePassword ?? request.json?.jwt else {
-                throw AuthError.invalidCredentials
-            }
-            
-            switch type {
-            case .customer:
-                try request.userSubject().login(credentials: credentials, persist: true)
-            case .maker:
-                try request.makerSubject().login(credentials: credentials, persist: true)
-            case .none:
-                throw Abort.custom(status: .badRequest, message: "Can not log in with a session type of none.")
-            }
-            
-            let modelSubject: JSONConvertible = type == .customer ? try request.customer() : try request.maker()
-            return try Response(status: .ok, json: modelSubject.makeJSON())
-        }
-    }
-}
-
-extension Authorization {
-    public var usernamePassword: UsernamePassword? {
-        guard let range = header.range(of: "Basic ") else {
-            return nil
-        }
-        
-        let authString = header.substring(from: range.upperBound)
-        
-        guard let decodedAuthString = try? authString.base64Decoded.string() else {
-            return nil
-        }
-        
-        guard let separatorRange = decodedAuthString.range(of: ":") else {
-            return nil
-        }
-        
-        let username = decodedAuthString.substring(to: separatorRange.lowerBound)
-        let password = decodedAuthString.substring(from: separatorRange.upperBound)
-        
-        return UsernamePassword(username: username, password: password)
+        // TODO : jwt
     }
 }
 
 extension Request {
-    
-    func has(session type: SessionType) -> Bool {
-        switch type {
-        case .customer:
-            return (try? customer()) != nil
-        case .maker:
-            return (try? maker()) != nil
-        case .none:
-            return type == .none
-        }
-    }
-    
+
     var sessionType: SessionType {
         if (try? customer()) != nil {
             return .customer
@@ -140,33 +100,5 @@ extension Request {
         } else {
             return .none
         }
-    }
-    
-    func customer() throws -> Customer {
-        let subject = try userSubject()
-        
-        guard let details = subject.authDetails else {
-            throw AuthError.notAuthenticated
-        }
-        
-        guard let customer = details.account as? Customer else {
-            throw AuthError.invalidAccountType
-        }
-        
-        return customer
-    }
-    
-    func maker() throws -> Maker {
-        let subject = try makerSubject()
-        
-        guard let details = subject.authDetails else {
-            throw AuthError.notAuthenticated
-        }
-        
-        guard let maker = details.account as? Maker else {
-            throw AuthError.invalidAccountType
-        }
-        
-        return maker
     }
 }

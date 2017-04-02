@@ -19,22 +19,22 @@ public final class Discount: NodeConvertible {
     public let start: Date
     public let subscription: String
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
+    public init(node: Node) throws {
         
-        guard try node.extract("object") == Discount.type else {
-            throw NodeError.unableToConvert(node: node, expected: Discount.type)
+        guard try node.get("object") == Discount.type else {
+            throw NodeError.unableToConvert(input: node, expectation: Discount.type, path: ["object"])
         }
         
-        coupon = try node.extract("coupon")
-        customer = try node.extract("customer")
-        end = try node.extract("end")
-        start = try node.extract("start")
-        subscription = try node.extract("subscription")
+        coupon = try node.get("coupon")
+        customer = try node.get("customer")
+        end = try node.get("end")
+        start = try node.get("start")
+        subscription = try node.get("subscription")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            "coupon" : coupon.makeNode(),
+            "coupon" : coupon.makeNode(in: context),
             "customer" : .string(customer),
             "end" : .number(.double(end.timeIntervalSince1970)),
             "start" : .number(.double(start.timeIntervalSince1970)),

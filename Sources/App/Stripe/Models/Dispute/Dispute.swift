@@ -16,17 +16,17 @@ public final class DisputeInfo: NodeConvertible {
     public let past_due: Bool
     public let submission_count: Int
 
-    public init(node: Node, in context: Context = EmptyNode) throws {
+    public init(node: Node) throws {
 
-        due_by = try node.extract("due_by")
-        has_evidence = try node.extract("has_evidence")
-        past_due = try node.extract("past_due")
-        submission_count = try node.extract("submission_count")
+        due_by = try node.get("due_by")
+        has_evidence = try node.get("has_evidence")
+        past_due = try node.get("past_due")
+        submission_count = try node.get("submission_count")
     }
 
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            "due_by" : try due_by.makeNode(),
+            "due_by" : try due_by.makeNode(in: context),
             "has_evidence" : .bool(has_evidence),
             "past_due" : .bool(past_due),
             "submission_count" : .number(.int(submission_count))
@@ -81,38 +81,38 @@ public final class Dispute: NodeConvertible {
     public let reason: DisputeReason
     public let status: DisputeStatus
 
-    public required init(node: Node, in context: Context = EmptyNode) throws {
+    public required init(node: Node) throws {
 
-        guard try node.extract("object") == Dispute.type else {
-            throw NodeError.unableToConvert(node: node, expected: Dispute.type)
+        guard try node.get("object") == Dispute.type else {
+            throw NodeError.unableToConvert(input: node, expectation: Dispute.type, path: ["object"])
         }
 
-        amount = try node.extract("amount")
-        balance_transactions = try node.extract("balance_transactions")
-        charge = try node.extract("charge")
-        created = try node.extract("created")
-        currency = try node.extract("currency")
-        evidence = try node.extract("evidence")
-        evidence_details = try node.extract("evidence_details")
-        is_charge_refundable = try node.extract("is_charge_refundable")
-        livemode = try node.extract("livemode")
-        reason = try node.extract("reason")
-        status = try node.extract("status")
+        amount = try node.get("amount")
+        balance_transactions = try node.get("balance_transactions")
+        charge = try node.get("charge")
+        created = try node.get("created")
+        currency = try node.get("currency")
+        evidence = try node.get("evidence")
+        evidence_details = try node.get("evidence_details")
+        is_charge_refundable = try node.get("is_charge_refundable")
+        livemode = try node.get("livemode")
+        reason = try node.get("reason")
+        status = try node.get("status")
     }
 
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node : [
             "amount" : .number(.int(amount)),
             "balance_transactions" : balance_transactions,
             "charge" : .string(charge),
-            "created" : try created.makeNode(),
-            "currency" : try currency.makeNode(),
-            "evidence" : try evidence.makeNode(),
-            "evidence_details" : try evidence_details.makeNode(),
+            "created" : try created.makeNode(in: context),
+            "currency" : try currency.makeNode(in: context),
+            "evidence" : try evidence.makeNode(in: context),
+            "evidence_details" : try evidence_details.makeNode(in: context),
             "is_charge_refundable" : .bool(is_charge_refundable),
             "livemode" : .bool(livemode),
-            "reason" : try reason.makeNode(),
-            "status" : try status.makeNode()
+            "reason" : try reason.makeNode(in: context),
+            "status" : try status.makeNode(in: context)
         ] as [String : Node])
     }
 }

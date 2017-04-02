@@ -8,8 +8,7 @@
 
 import Vapor
 import HTTP
-import Turnstile
-import Auth
+import AuthProvider
 
 extension Maker {
     
@@ -36,23 +35,25 @@ final class MakerController: ResourceRepresentable {
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
-        var maker: Maker = try request.extractModel()
+        let maker: Maker = try request.extractModel()
         try maker.save()
         
         let node = try request.json().node
-        let username: String = try node.extract("username")
-        let password: String = try node.extract("password")
+        let username: String = try node.get("username")
+        let password: String = try node.get("password")
         
-        let usernamePassword = UsernamePassword(username: username, password: password)
-        try request.makerSubject().login(credentials: usernamePassword, persist: true)
-        
+        let usernamePassword = Password(username: username, password: password)
+
+        let user = try Maker.authenticate(usernamePassword)
+        request.auth.authenticate(user)
+
         return maker
     }
 
     func modify(_ request: Request, maker: Maker) throws -> ResponseRepresentable {
         try maker.shouldAllow(request: request)
         
-        var maker: Maker = try request.patchModel(maker)
+        let maker: Maker = try request.patchModel(maker)
         try maker.save()
         return try Response(status: .ok, json: maker.makeJSON())
     }

@@ -17,18 +17,18 @@ public final class Address: NodeConvertible {
     public let postal_code: String?
     public let state: String?
     
-    public init(node: Node, in context: Context = EmptyNode) throws {
-        city = try node.extract("city")
-        country = try node.extract("country")
-        line1 = try node.extract("line1")
-        line2 = try node.extract("line2")
-        postal_code = try node.extract("postal_code")
-        state = try node.extract("state")
+    public init(node: Node) throws {
+        city = try node.get("city")
+        country = try node.get("country")
+        line1 = try node.get("line1")
+        line2 = try node.get("line2")
+        postal_code = try node.get("postal_code")
+        state = try node.get("state")
     }
     
-    public func makeNode(context: Context = EmptyNode) throws -> Node {
+    public func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
-            "country" : try country.makeNode(),
+            "country" : try country.makeNode(in: context),
         ] as [String : Node]).add(objects: [
             "city" : city,
             "line1" : line1,
