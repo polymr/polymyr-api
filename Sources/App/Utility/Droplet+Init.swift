@@ -52,6 +52,7 @@ extension Droplet {
                                   MakerPicture.self,
                                   CustomerPicture.self,
                                   ProductPicture.self,
+                                  FluentCache.CacheEntity.self,
                                   Tag.self] as [Preparation.Type]
 
             return drop
