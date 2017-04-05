@@ -22,17 +22,17 @@ public final class Token: NodeConvertible {
     public let card: Card
 
     public required init(node: Node) throws {
-        guard try node.get("object") == Token.type else {
+        guard try node.extract("object") == Token.type else {
             throw NodeError.unableToConvert(input: node, expectation: Token.type, path: ["object"])
         }
 
-        id = try node.get("id")
-        client_ip = try node.get("client_ip")
-        created = try node.get("created")
-        livemode = try node.get("livemode")
-        type = try node.get("type")
-        used = try node.get("used")
-        card = try node.get("card")
+        id = try node.extract("id")
+        client_ip = try node.extract("client_ip")
+        created = try node.extract("created")
+        livemode = try node.extract("livemode")
+        type = try node.extract("type")
+        used = try node.extract("used")
+        card = try node.extract("card")
     }
 
     public func makeNode(in context: Context?) throws -> Node {

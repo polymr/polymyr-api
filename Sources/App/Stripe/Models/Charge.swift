@@ -22,8 +22,8 @@ public final class Rule: NodeConvertible {
 
     public required init(node: Node) throws {
 
-        action = try node.get("action")
-        predicate = try node.get("predicate")
+        action = try node.extract("action")
+        predicate = try node.extract("predicate")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -67,11 +67,11 @@ public final class Outcome: NodeConvertible {
 
     public required init(node: Node) throws {
 
-        network_status = try node.get("network_status")
-        reason = try node.get("reason")
-        risk_level = try node.get("risk_level")
-        seller_message = try node.get("seller_message")
-        type = try node.get("type")
+        network_status = try node.extract("network_status")
+        reason = try node.extract("reason")
+        risk_level = try node.extract("risk_level")
+        seller_message = try node.extract("seller_message")
+        type = try node.extract("type")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -105,10 +105,10 @@ public final class StripeShipping: NodeConvertible {
 
     public required init(node: Node) throws {
 
-        address = try node.get("address")
-        name = try node.get("name")
-        tracking_number = try node.get("tracking_number")
-        phone = try node.get("phone")
+        address = try node.extract("address")
+        name = try node.extract("name")
+        tracking_number = try node.extract("tracking_number")
+        phone = try node.extract("phone")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -167,42 +167,42 @@ public final class Charge: NodeConvertible {
 
     public required init(node: Node) throws {
 
-        guard try node.get("object") == Charge.type else {
+        guard try node.extract("object") == Charge.type else {
             throw NodeError.unableToConvert(input: node, expectation: Token.type, path: ["object"])
         }
 
-        id = try node.get("id")
-        amount = try node.get("amount")
-        amount_refunded = try node.get("amount_refunded")
-        application = try node.get("application")
-        application_fee = try node.get("application_fee")
-        balance_transaction = try node.get("balance_transaction")
-        captured = try node.get("captured")
-        created = try node.get("created")
-        currency = try node.get("currency")
-        customer = try node.get("customer")
-        description = try node.get("description")
-        destination = try node.get("destination")
-        dispute = try node.get("dispute")
-        failure_code = try node.get("failure_code")
-        failure_message = try node.get("failure_message")
-        fraud_details = try node.get("fraud_details")
-        invoice = try node.get("invoice")
-        livemode = try node.get("livemode")
-        order = try node.get("order")
-        outcome = try node.get("outcome")
-        paid = try node.get("paid")
-        receipt_email = try node.get("receipt_email")
-        receipt_number = try node.get("receipt_number")
-        refunded = try node.get("refunded")
-        refunds = try node.get("refunds")
-        review = try node.get("review")
-        shipping = try node.get("shipping")
-        source = try node.get("source")
-        source_transfer = try node.get("source_transfer")
-        statement_descriptor = try node.get("statement_descriptor")
-        status = try node.get("status")
-        transfer = try node.get("transfer")
+        id = try node.extract("id")
+        amount = try node.extract("amount")
+        amount_refunded = try node.extract("amount_refunded")
+        application = try node.extract("application")
+        application_fee = try node.extract("application_fee")
+        balance_transaction = try node.extract("balance_transaction")
+        captured = try node.extract("captured")
+        created = try node.extract("created")
+        currency = try node.extract("currency")
+        customer = try node.extract("customer")
+        description = try node.extract("description")
+        destination = try node.extract("destination")
+        dispute = try node.extract("dispute")
+        failure_code = try node.extract("failure_code")
+        failure_message = try node.extract("failure_message")
+        fraud_details = try node.extract("fraud_details")
+        invoice = try node.extract("invoice")
+        livemode = try node.extract("livemode")
+        order = try node.extract("order")
+        outcome = try node.extract("outcome")
+        paid = try node.extract("paid")
+        receipt_email = try node.extract("receipt_email")
+        receipt_number = try node.extract("receipt_number")
+        refunded = try node.extract("refunded")
+        refunds = try node.extract("refunds")
+        review = try node.extract("review")
+        shipping = try node.extract("shipping")
+        source = try node.extract("source")
+        source_transfer = try node.extract("source_transfer")
+        statement_descriptor = try node.extract("statement_descriptor")
+        status = try node.extract("status")
+        transfer = try node.extract("transfer")
     }
 
     public func makeNode(in context: Context?) throws -> Node {

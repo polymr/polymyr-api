@@ -26,7 +26,10 @@ final class FluentCacheProvider: Vapor.Provider {
     }
 
     public func beforeRun(_ drop: Droplet) {
-        drop.addConfigurable(middleware: SessionsMiddleware(CacheSessions(drop.cache)), name: "fluent-sessions")
+        if let database = drop.database {
+            drop.addConfigurable(cache: MySQLCache(database), name: "mysql-cache")
+            drop.addConfigurable(middleware: SessionsMiddleware(CacheSessions(drop.cache)), name: "fluent-sessions")
+        }
     }
 }
 
@@ -57,7 +60,7 @@ extension Droplet {
                                   MakerPicture.self,
                                   CustomerPicture.self,
                                   ProductPicture.self,
-                                  FluentCache.CacheEntity.self,
+                                  MySQLCache.MySQLCacheEntity.self,
                                   Tag.self] as [Preparation.Type]
 
             return drop

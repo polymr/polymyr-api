@@ -63,12 +63,12 @@ public final class EventData: NodeConvertible {
             throw Abort.custom(status: .internalServerError, message: "Missing resource in context.")
         }
 
-        guard let objectNode: Node = try node.get("object") else {
+        guard let objectNode: Node = try node.extract("object") else {
             throw Abort.custom(status: .internalServerError, message: "Missing object node in event.")
         }
         
         object = try resource.internalModelType.init(node: objectNode)
-        previous_attributes = try node.get("previous_attributes")
+        previous_attributes = try node.extract("previous_attributes")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -99,18 +99,18 @@ public final class Event: NodeConvertible {
     }
 
     public init(node: Node) throws {
-        id = try node.get("id")
-        api_version = try node.get("api_version")
-        created = try node.get("created")
-        livemode = try node.get("livemode")
-        pending_webhooks = try node.get("pending_webhooks")
-        request = try node.get("request")
+        id = try node.extract("id")
+        api_version = try node.extract("api_version")
+        created = try node.extract("created")
+        livemode = try node.extract("livemode")
+        pending_webhooks = try node.extract("pending_webhooks")
+        request = try node.extract("request")
         
-        type = try node.get("type") { (typeString: String) -> (EventResource, EventAction) in
+        type = try node.extract("type") { (typeString: String) -> (EventResource, EventAction) in
             return try parseEvent(from: typeString)
         }
         
-        guard let dataNode: Node = try node.get("data") else {
+        guard let dataNode: Node = try node.extract("data") else {
             throw Abort.custom(status: .badRequest, message: "Missing data field on event.")
         }
         

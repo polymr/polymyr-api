@@ -10,7 +10,7 @@
     {
       "package": "AuthProvider",
       "reason": null,
-      "repositoryURL": "https://github.com/vapor/auth-provider.git",
+      "repositoryURL": "https://github.com/hhanesand/auth-provider.git",
       "version": "0.3.0"
     },
     {

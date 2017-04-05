@@ -38,10 +38,10 @@ final class StripeMakerCustomer: Model, JSONConvertible, NodeConvertible, Prepar
     }
     
     init(node: Node) throws {
-        id = try node.get("id")
-        customer_id = try node.get("customer_id")
-        maker_id = try node.get("maker_id")
-        stripeCustomerId = try node.get("stripeCustomerId")
+        id = try? node.extract("id")
+        customer_id = try node.extract("customer_id")
+        maker_id = try node.extract("maker_id")
+        stripeCustomerId = try node.extract("stripeCustomerId")
     }
     
     func makeNode(in context: Context?) throws -> Node {

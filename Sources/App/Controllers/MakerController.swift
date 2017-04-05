@@ -39,8 +39,8 @@ final class MakerController: ResourceRepresentable {
         try maker.save()
         
         let node = try request.json().node
-        let username: String = try node.get("username")
-        let password: String = try node.get("password")
+        let username: String = try node.extract("username")
+        let password: String = try node.extract("password")
         
         let usernamePassword = Password(username: username, password: password)
 

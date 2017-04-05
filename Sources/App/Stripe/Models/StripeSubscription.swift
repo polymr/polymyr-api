@@ -43,28 +43,28 @@ public final class StripeSubscription: NodeConvertible {
     
     public init(node: Node) throws {
         
-        guard try node.get("object") == StripeSubscription.type else {
+        guard try node.extract("object") == StripeSubscription.type else {
             throw NodeError.unableToConvert(input: node, expectation: StripeSubscription.type, path: ["object"])
         }
         
-        id = try node.get("id")
-        application_fee_percent = try node.get("application_fee_percent")
-        cancel_at_period_end = try node.get("cancel_at_period_end")
-        canceled_at = try node.get("canceled_at")
-        created = try node.get("created")
-        current_period_end = try node.get("current_period_end")
-        current_period_start = try node.get("current_period_start")
-        customer = try node.get("customer")
-        discount = try node.get("discount")
-        ended_at = try node.get("ended_at")
-        livemode = try node.get("livemode")
-        plan = try node.get("plan")
-        quantity = try node.get("quantity")
-        start = try node.get("start")
-        status = try node.get("status")
-        tax_percent = try node.get("tax_percent")
-        trial_end = try node.get("trial_end")
-        trial_start = try node.get("trial_start")
+        id = try node.extract("id")
+        application_fee_percent = try node.extract("application_fee_percent")
+        cancel_at_period_end = try node.extract("cancel_at_period_end")
+        canceled_at = try node.extract("canceled_at")
+        created = try node.extract("created")
+        current_period_end = try node.extract("current_period_end")
+        current_period_start = try node.extract("current_period_start")
+        customer = try node.extract("customer")
+        discount = try node.extract("discount")
+        ended_at = try node.extract("ended_at")
+        livemode = try node.extract("livemode")
+        plan = try node.extract("plan")
+        quantity = try node.extract("quantity")
+        start = try node.extract("start")
+        status = try node.extract("status")
+        tax_percent = try node.extract("tax_percent")
+        trial_end = try node.extract("trial_end")
+        trial_start = try node.extract("trial_start")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

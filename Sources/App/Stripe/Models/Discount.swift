@@ -21,15 +21,15 @@ public final class Discount: NodeConvertible {
     
     public init(node: Node) throws {
         
-        guard try node.get("object") == Discount.type else {
+        guard try node.extract("object") == Discount.type else {
             throw NodeError.unableToConvert(input: node, expectation: Discount.type, path: ["object"])
         }
         
-        coupon = try node.get("coupon")
-        customer = try node.get("customer")
-        end = try node.get("end")
-        start = try node.get("start")
-        subscription = try node.get("subscription")
+        coupon = try node.extract("coupon")
+        customer = try node.extract("customer")
+        end = try node.extract("end")
+        start = try node.extract("start")
+        subscription = try node.extract("subscription")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

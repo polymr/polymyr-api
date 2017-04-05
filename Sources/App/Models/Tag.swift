@@ -23,8 +23,8 @@ final class Tag: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizab
     let name: String
     
     init(node: Node) throws {
-        id = try node.get("id")
-        name = try node.get("name")
+        id = try? node.extract("id")
+        name = try node.extract("name")
     }
     
     func makeNode(in context: Context?) throws -> Node {

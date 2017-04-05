@@ -82,39 +82,39 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     
     init(node: Node) throws {
         
-        id = try node.get("id")
+        id = try? node.extract("id")
         
-        username = try node.get("username")
-        password = try node.get("password")
+        username = try node.extract("username")
+        password = try? node.extract("password")
 
-        if let password = try? node.get("password") as String {
+        if let password = try? node.extract("password") as String {
             self.hash = try Hash.make(message: password.makeBytes(), with: Salt()).string()
         } else {
-            self.hash = try node.get("hash") as String
+            self.hash = try node.extract("hash") as String
         }
         
-        email = try node.get("email")
-        businessName = try node.get("businessName")
-        publicWebsite = try node.get("publicWebsite")
+        email = try node.extract("email")
+        businessName = try node.extract("businessName")
+        publicWebsite = try node.extract("publicWebsite")
         
-        contactName = try node.get("contactName")
-        contactPhone = try node.get("contactPhone")
-        contactEmail = try node.get("contactEmail")
-        address_id = try node.get("address_id")
+        contactName = try node.extract("contactName")
+        contactPhone = try node.extract("contactPhone")
+        contactEmail = try node.extract("contactEmail")
+        address_id = try? node.extract("address_id")
         
-        location = try node.get("location")
-        createdOn = (try? node.get("createdOn")) ?? Date()
-        cut = try node.get("cut") ?? 0.08
-        sub_id = try node.get("sub_id")
+        location = try node.extract("location")
+        createdOn = (try? node.extract("createdOn")) ?? Date()
+        cut = try node.extract("cut") ?? 0.08
+        sub_id = try node.extract("sub_id")
         
-        stripe_id = try node.get("stripe_id")
+        stripe_id = try? node.extract("stripe_id")
         
-        missingFields = (try? node.get("missingFields")) ?? false
-        needsIdentityUpload = (try? node.get("needsIdentityUpload")) ?? false
+        missingFields = (try? node.extract("missingFields")) ?? false
+        needsIdentityUpload = (try? node.extract("needsIdentityUpload")) ?? false
         
         if stripe_id != nil {
-            let publishable: String = try node.get("publishableKey")
-            let secret: String = try node.get("secretKey")
+            let publishable: String = try node.extract("publishableKey")
+            let secret: String = try node.extract("secretKey")
             
             keys = try Keys(node: Node(node: ["secret" : secret, "publishable" : publishable]))
         }
@@ -262,8 +262,8 @@ final class MakerSessionToken: Model, Preparation, JSONConvertible, NodeConverti
     let token: String
 
     init(node: Node) throws  {
-        maker_id = try node.get("maker_id")
-        token = try node.get("token")
+        maker_id = try node.extract("maker_id")
+        token = try node.extract("token")
     }
 
     func makeNode(in context: Context?) throws -> Node {

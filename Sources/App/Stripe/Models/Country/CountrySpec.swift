@@ -61,16 +61,16 @@ public final class Country: NodeConvertible {
     
     public init(node: Node) throws {
         
-        guard try node.get("object") == Country.type else {
+        guard try node.extract("object") == Country.type else {
             throw NodeError.unableToConvert(input: node, expectation: Country.type, path: ["object"])
         }
         
-        id = try node.get("id")
-        default_currency = try node.get("default_currency")
-        supported_bank_account_currencies = try node.get("supported_bank_account_currencies")
-        supported_payment_currencies = try node.get("supported_payment_currencies")
-        supported_payment_methods = try node.get("supported_payment_methods")
-        verification_fields = try node.get("verification_fields")
+        id = try node.extract("id")
+        default_currency = try node.extract("default_currency")
+        supported_bank_account_currencies = try node.extract("supported_bank_account_currencies")
+        supported_payment_currencies = try node.extract("supported_payment_currencies")
+        supported_payment_methods = try node.extract("supported_payment_methods")
+        verification_fields = try node.extract("verification_fields")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

@@ -28,14 +28,14 @@ final class MakerAddress: Model, Preparation, JSONConvertible, NodeConvertible, 
     let zip: String
     
     init(node: Node) throws {
-        id = try node.get("id")
+        id = try? node.extract("id")
         
-        address = try node.get("address")
-        city = try node.get("city")
-        state = try node.get("state")
-        zip = try node.get("zip")
+        address = try node.extract("address")
+        city = try node.extract("city")
+        state = try node.extract("state")
+        zip = try node.extract("zip")
         
-        apartment = try node.get("apartment")
+        apartment = try? node.extract("apartment")
     }
     
     func makeNode(in context: Context?) throws -> Node {

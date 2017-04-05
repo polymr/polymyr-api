@@ -32,16 +32,16 @@ public final class StripeReview: NodeConvertible {
 
     public required init(node: Node) throws {
 
-        guard try node.get("object") == StripeReview.type else {
+        guard try node.extract("object") == StripeReview.type else {
             throw NodeError.unableToConvert(input: node, expectation: StripeReview.type, path: ["object"])
         }
 
-        id = try node.get("id")
-        charge = try node.get("charge")
-        created = try node.get("created")
-        livemode = try node.get("livemode")
-        open = try node.get("open")
-        reason = try node.get("reason")
+        id = try node.extract("id")
+        charge = try node.extract("charge")
+        created = try node.extract("created")
+        livemode = try node.extract("livemode")
+        open = try node.extract("open")
+        reason = try node.extract("reason")
     }
 
     public func makeNode(in context: Context?) throws -> Node {

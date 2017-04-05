@@ -39,11 +39,11 @@ final class QuestionSection: Model, Preparation, JSONConvertible, NodeConvertibl
     let isRating: Bool
     
     init(node: Node) throws {
-        id = try node.get("id")
-        name = try node.get("name")
+        id = try? node.extract("id")
+        name = try node.extract("name")
         suggestions = try node.parseList(at: "suggestions", with: separator)
-        description = try node.get("description")
-        isRating = try node.get("isRating")
+        description = try node.extract("description")
+        isRating = try node.extract("isRating")
     }
     
     func makeNode(in context: Context?) throws -> Node {

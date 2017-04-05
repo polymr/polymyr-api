@@ -38,7 +38,7 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     let name: String
     let email: String
 
-    var default_shipping_id: Identifier
+    var default_shipping_id: Identifier?
     var stripe_id: String?
     
     var sub_id: String?
@@ -46,24 +46,23 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     init(subject: String, request: Request) throws {
         sub_id = subject
 
-        guard let providerData: Node = try request.json?.get("providerData") else {
+        guard let providerData: Node = try request.json?.extract("providerData") else {
             throw Abort.custom(status: .badRequest, message: "Missing json body...")
         }
 
-        self.name = try providerData.get("name")
-        self.email = try providerData.get("email")
-        default_shipping_id = .null
+        self.name = try providerData.extract("name")
+        self.email = try providerData.extract("email")
     }
     
     init(node: Node) throws {
-        id = try node.get("id")
-        default_shipping_id = try node.get("default_shipping_id")
+        id = try? node.extract("id")
+        default_shipping_id = try? node.extract("default_shipping_id")
         
         // Name and email are always mandatory
-        email = try node.get("email")
-        name = try node.get("name")
-        stripe_id = try node.get("stripe_id")
-        sub_id = try node.get("sub_id")
+        email = try node.extract("email")
+        name = try node.extract("name")
+        stripe_id = try? node.extract("stripe_id")
+        sub_id = try? node.extract("sub_id")
     }
     
     func makeNode(in context: Context?) throws -> Node {
@@ -79,9 +78,9 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     }
     
     func postValidate() throws {
-        if default_shipping_id != .null {
+        if default_shipping_id != nil {
             guard (try? defaultShipping().first()) ?? nil != nil else {
-                throw ModelError.missingLink(from: Customer.self, to: CustomerAddress.self, id: default_shipping_id.int ?? -1)
+                throw ModelError.missingLink(from: Customer.self, to: CustomerAddress.self, id: default_shipping_id?.int ?? -1)
             }
         }
     }
@@ -127,8 +126,8 @@ final class CustomerSessionToken: Model, Preparation, JSONConvertible, NodeConve
     let token: String
 
     init(node: Node) throws  {
-        customer_id = try node.get("customer_id")
-        token = try node.get("token")
+        customer_id = try node.extract("customer_id")
+        token = try node.extract("token")
     }
 
     func makeNode(in context: Context?) throws -> Node {

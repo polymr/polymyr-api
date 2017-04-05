@@ -13,6 +13,49 @@ import FluentProvider
 import Vapor
 import Foundation
 
+extension NodeError {
+    func appendPath(_ path: [PathIndexer]) -> NodeError {
+        switch self {
+        case .unableToConvert(
+            input: let input,
+            expectation: let expectation,
+            path: let existing
+            ) where existing.isEmpty:
+            return .unableToConvert(input: input, expectation: expectation, path: path)
+        default:
+            return self
+        }
+    }
+}
+
+extension StructuredDataWrapper {
+    public func extract<T : NodeInitializable>(_ indexers: PathIndexer...) throws -> T {
+        return try extract(indexers)
+    }
+
+    public func extract<T : NodeInitializable>(_ indexers: [PathIndexer]) throws -> T {
+        if let value = self[indexers], value != .null {
+            return try T(node: value)
+        }
+
+        throw try NodeError.unableToConvert(input: self.makeNode(in: nil), expectation: "\(T.self)", path: indexers)
+    }
+
+    public func extract<T, InputType: NodeInitializable>(_ indexers: PathIndexer..., transform: (InputType) throws -> T) throws -> T {
+        return try get(path: indexers, transform: transform)
+    }
+
+    public func extract<T, InputType: NodeInitializable>(path indexers: [PathIndexer], transform: (InputType) throws -> T) throws -> T {
+        if let value = self[indexers], value != .null {
+            let input = try InputType(node: value, in: context)
+            return try transform(input)
+        }
+
+        throw try NodeError.unableToConvert(input: self.makeNode(in: nil), expectation: "\(Node.self)", path: indexers)
+    }
+}
+
+
 extension Node {
     
     mutating func substitute(key: String, model: Model) throws -> Node {
@@ -122,7 +165,7 @@ public extension Node {
             throw NodeError.unableToConvert(input: self, expectation: "stripe list", path: path)
         }
         
-        guard try node.get("object") as String == "list" else {
+        guard try node.extract("object") as String == "list" else {
             throw NodeError.unableToConvert(input: node, expectation: "list", path: ["object"])
         }
         

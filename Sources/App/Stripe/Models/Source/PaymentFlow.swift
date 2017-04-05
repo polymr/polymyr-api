@@ -20,14 +20,14 @@ public final class Owner: NodeConvertible {
     public let verified_phone: String
     
     public init(node: Node) throws {
-        address = try node.get("address")
-        email = try node.get("email")
-        name = try node.get("name")
-        phone = try node.get("phone")
-        verified_address = try node.get("verified_address")
-        verified_email = try node.get("verified_email")
-        verified_name = try node.get("verified_name")
-        verified_phone = try node.get("verified_phone")
+        address = try node.extract("address")
+        email = try node.extract("email")
+        name = try node.extract("name")
+        phone = try node.extract("phone")
+        verified_address = try node.extract("verified_address")
+        verified_email = try node.extract("verified_email")
+        verified_name = try node.extract("verified_name")
+        verified_phone = try node.extract("verified_phone")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -54,12 +54,12 @@ public final class Reciever: NodeConvertible {
     public let refund_attributes_status: String?
     
     public init(node: Node) throws {
-        address = try node.get("address")
-        amount_charged = try node.get("amount_charged")
-        amount_received = try node.get("amount_received")
-        amount_returned = try node.get("amount_returned")
-        refund_attributes_method = try node.get("refund_attributes_method")
-        refund_attributes_status = try node.get("refund_attributes_status")
+        address = try node.extract("address")
+        amount_charged = try node.extract("amount_charged")
+        amount_received = try node.extract("amount_received")
+        amount_returned = try node.extract("amount_returned")
+        refund_attributes_method = try node.extract("refund_attributes_method")
+        refund_attributes_status = try node.extract("refund_attributes_status")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -101,8 +101,8 @@ public final class VerificationInformation: NodeConvertible {
     public let status: SourceStatus
     
     public init(node: Node) throws {
-        attempts_remaining = try node.get("attempts_remaining")
-        status = try node.get("status")
+        attempts_remaining = try node.extract("attempts_remaining")
+        status = try node.extract("status")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

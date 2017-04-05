@@ -35,16 +35,16 @@ final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     let fulfilled: Bool
     
     init(node: Node) throws {
-        id = try node.get("id")
+        id = try? node.extract("id")
         
-        card = try node.get("card")
-        charge_id = try node.get("charge_id")
+        card = try node.extract("card")
+        charge_id = try? node.extract("charge_id")
         
-        product_id = try node.get("product_id")
-        customeraddress_id = try node.get("customeraddress_id")
-        customer_id = try node.get("customer_id")
+        product_id = try node.extract("product_id")
+        customeraddress_id = try node.extract("customeraddress_id")
+        customer_id = try node.extract("customer_id")
 
-        fulfilled = (try? node.get("fulfilled")) ?? false
+        fulfilled = (try? node.extract("fulfilled")) ?? false
 
         guard let product = try Product.find(product_id) else {
             throw NodeError.unableToConvert(input: product_id.makeNode(in: emptyContext), expectation: "product_id pointing to correct product", path: ["product_id"])

@@ -31,13 +31,13 @@ final class Answer: Model, Preparation, JSONConvertible, NodeConvertible, Saniti
     var campaign_id: Identifier
     
     init(node: Node) throws {
-        id = try node.get("id")
-        text = try node.get("text")
-        ratings = (try? node.parseList(at: "ratings", with: separator).map { $0.int }.flatMap { $0 })
+        id = try? node.extract("id")
+        text = try? node.extract("text")
+        ratings = try? node.parseList(at: "ratings", with: separator).map { $0.int }.flatMap { $0 }
         
-        question_id = try node.get("question_id")
-        order_id = try node.get("order_id")
-        campaign_id = try node.get("campaign_id")
+        question_id = try node.extract("question_id")
+        order_id = try node.extract("order_id")
+        campaign_id = try node.extract("campaign_id")
     }
     
     func makeNode(in context: Context?) throws -> Node {

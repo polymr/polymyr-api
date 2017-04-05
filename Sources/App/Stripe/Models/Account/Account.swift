@@ -16,8 +16,8 @@ public final class DeclineChargeRules: NodeConvertible {
     public let cvc_failure: Bool
     
     public required init(node: Node) throws {
-        avs_failure = try node.get("avs_failure")
-        cvc_failure = try node.get("cvc_failure")
+        avs_failure = try node.extract("avs_failure")
+        cvc_failure = try node.extract("cvc_failure")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -35,9 +35,9 @@ public final class Document: NodeConvertible {
     public let size: Int
 
     public required init(node: Node) throws {
-        id = try node.get("id")
-        created = try node.get("created")
-        size = try node.get("size")
+        id = try node.extract("id")
+        created = try node.extract("created")
+        size = try node.extract("size")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -58,9 +58,9 @@ public final class DateOfBirth: NodeConvertible {
 
 
     public required init(node: Node) throws {
-        day = try node.get("day")
-        month = try node.get("month")
-        year = try node.get("year")
+        day = try node.extract("day")
+        month = try node.extract("month")
+        year = try node.extract("year")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -79,9 +79,9 @@ public final class TermsOfServiceAgreement: NodeConvertible {
     public let user_agent: String?
 
     public required init(node: Node) throws {
-        date = try node.get("date")
-        ip = try node.get("ip")
-        user_agent = try node.get("user_agent")
+        date = try node.extract("date")
+        ip = try node.extract("ip")
+        user_agent = try node.extract("user_agent")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -99,8 +99,8 @@ public final class TransferSchedule: NodeConvertible {
     public let interval: Interval
 
     public required init(node: Node) throws {
-        delay_days = try node.get("delay_days")
-        interval = try node.get("interval")
+        delay_days = try node.extract("delay_days")
+        interval = try node.extract("interval")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -117,8 +117,8 @@ public final class Keys: NodeConvertible {
     public let publishable: String
     
     public required init(node: Node) throws {
-        secret = try node.get("secret")
-        publishable = try node.get("publishable")
+        secret = try node.extract("secret")
+        publishable = try node.extract("publishable")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -176,37 +176,37 @@ public final class StripeAccount: NodeConvertible {
 
     public required init(node: Node) throws {
         
-        guard try node.get("object") == StripeAccount.type else {
+        guard try node.extract("object") == StripeAccount.type else {
             throw NodeError.unableToConvert(input: node, expectation: StripeAccount.type, path: ["object"])
         }
         
-        id = try node.get("id")
-        business_logo = try node.get("business_logo")
-        business_name = try node.get("business_name")
-        business_url = try node.get("business_url")
-        charges_enabled = try node.get("charges_enabled")
-        country = try node.get("country")
-        debit_negative_balances = try node.get("debit_negative_balances")
-        decline_charge_on = try node.get("decline_charge_on")
-        default_currency = try node.get("default_currency")
-        details_submitted = try node.get("details_submitted")
-        display_name = try node.get("display_name")
-        email = try node.get("email")
+        id = try node.extract("id")
+        business_logo = try node.extract("business_logo")
+        business_name = try node.extract("business_name")
+        business_url = try node.extract("business_url")
+        charges_enabled = try node.extract("charges_enabled")
+        country = try node.extract("country")
+        debit_negative_balances = try node.extract("debit_negative_balances")
+        decline_charge_on = try node.extract("decline_charge_on")
+        default_currency = try node.extract("default_currency")
+        details_submitted = try node.extract("details_submitted")
+        display_name = try node.extract("display_name")
+        email = try node.extract("email")
         external_accounts = try node.extractList("external_accounts")
-        legal_entity = try node.get("legal_entity")
-        managed = try node.get("managed")
-        product_description = try node.get("product_description")
-        statement_descriptor = try node.get("statement_descriptor")
-        support_email = try node.get("support_email")
-        support_phone = try node.get("support_phone")
-        timezone = try node.get("timezone")
-        tos_acceptance = try node.get("tos_acceptance")
-        transfer_schedule = try node.get("transfer_schedule")
-        transfer_statement_descriptor = try node.get("transfer_statement_descriptor")
-        transfers_enabled = try node.get("transfers_enabled")
-        verification = try node.get("verification")
-        keys = try node.get("keys")
-        metadata = try node.get("metadata")
+        legal_entity = try node.extract("legal_entity")
+        managed = try node.extract("managed")
+        product_description = try node.extract("product_description")
+        statement_descriptor = try node.extract("statement_descriptor")
+        support_email = try node.extract("support_email")
+        support_phone = try node.extract("support_phone")
+        timezone = try node.extract("timezone")
+        tos_acceptance = try node.extract("tos_acceptance")
+        transfer_schedule = try node.extract("transfer_schedule")
+        transfer_statement_descriptor = try node.extract("transfer_statement_descriptor")
+        transfers_enabled = try node.extract("transfers_enabled")
+        verification = try node.extract("verification")
+        keys = try node.extract("keys")
+        metadata = try node.extract("metadata")
     }
 
     public func makeNode(in context: Context?) throws -> Node {

@@ -26,16 +26,16 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     let text: String?
     let qualifiers: [String]?
     
-    let campaign_id: Node?
-    let section_id: Node?
+    let campaign_id: Identifier
+    let section_id: Identifier
     
     init(node: Node) throws {
-        id = try node.get("id")
-        text = try node.get("text")
+        id = try? node.extract("id")
+        text = try? node.extract("text")
         qualifiers = try? node.parseList(at: "qualifiers", with: separator)
         
-        campaign_id = try node.get("campaign_id")
-        section_id = try node.get("section_id")
+        campaign_id = try node.extract("campaign_id")
+        section_id = try node.extract("section_id")
     }
     
     func makeNode(in context: Context?) throws -> Node {

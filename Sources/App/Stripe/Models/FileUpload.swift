@@ -77,16 +77,16 @@ public final class FileUpload: NodeConvertible {
     public let url: String?
     
     public init(node: Node) throws {
-        guard try node.get("object") == FileUpload.type else {
+        guard try node.extract("object") == FileUpload.type else {
             throw NodeError.unableToConvert(input: node, expectation: FileUpload.type, path: ["object"])
         }
         
-        id = try node.get("id")
-        created = try node.get("created")
-        purpose = try node.get("purpose")
-        size = try node.get("size")
-        type = try node.get("type")
-        url = try node.get("url")
+        id = try node.extract("id")
+        created = try node.extract("created")
+        purpose = try node.extract("purpose")
+        size = try node.extract("size")
+        type = try node.extract("type")
+        url = try node.extract("url")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

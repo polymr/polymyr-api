@@ -155,7 +155,7 @@ final class ProductController: ResourceRepresentable {
             return try JSON(result.makeNode(in: jsonContext))
         }
         
-        if var campaignNode: Node = try node.get("campaign") {
+        if var campaignNode: Node = try node.extract("campaign") {
             campaignNode = try campaignNode.add(objects: ["maker_id" : request.maker().throwableId(), "product_id" : product.throwableId()])
             let campaign: Campaign = try Campaign(node: campaignNode, in: emptyContext)
             try campaign.save()
@@ -163,7 +163,7 @@ final class ProductController: ResourceRepresentable {
             result["campaign"] = try campaign.makeNode(in: emptyContext)
         }
 
-        if let pictureNode: [Node] = try node.get("pictures") {
+        if let pictureNode: [Node] = try node.extract("pictures") {
 
             let pictures = try pictureNode.map { (object: Node) -> ProductPicture in
                 let picture: ProductPicture = try ProductPicture(node: object, in: ParentContext(parent_id: product_id))
@@ -174,7 +174,7 @@ final class ProductController: ResourceRepresentable {
             result["pictures"] = try pictures.makeNode(in: emptyContext)
         }
         
-        if let node = request.json?.node, let tags: [Int] = try node.get("tags") {
+        if let node = request.json?.node, let tags: [Int] = try node.extract("tags") {
         
             let tags = try tags.map { (id: Int) -> Tag? in
                 guard let tag = try Tag.find(id) else {

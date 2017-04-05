@@ -31,15 +31,15 @@ final class Campaign: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     var maker_id: Identifier
     
     init(node: Node) throws {
-        id = try node.get("id")
-        units = try node.get("units")
-        purchasedUnits = (try? node.get("purchasedUnits")) ?? 0
+        id = try? node.extract("id")
+        units = try node.extract("units")
+        purchasedUnits = (try? node.extract("purchasedUnits")) ?? 0
         
-        endDate = try node.get("endDate")
-        amountOff = try node.get("amountOff")
+        endDate = try node.extract("endDate")
+        amountOff = try node.extract("amountOff")
         
-        product_id = try node.get("product_id")
-        maker_id = try node.get("maker_id")
+        product_id = try node.extract("product_id")
+        maker_id = try node.extract("maker_id")
     }
     
     func makeNode(in context: Context?) throws -> Node {

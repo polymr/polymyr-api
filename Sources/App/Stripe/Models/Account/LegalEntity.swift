@@ -37,10 +37,10 @@ public final class LegalEntityIdentityVerification: NodeConvertible {
     public let details_code: LegalEntityVerificationFailureReason?
     
     public required init(node: Node) throws {
-        status = try node.get("status")
-        document = try node.get("document")
-        details = try node.get("details")
-        details_code = try node.get("details_code")
+        status = try node.extract("status")
+        document = try node.extract("document")
+        details = try node.extract("details")
+        details_code = try node.extract("details_code")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -75,17 +75,17 @@ public final class LegalEntity: NodeConvertible {
     public let verification: LegalEntityIdentityVerification
     
     public required init(node: Node) throws {
-        address = try node.get("address")
-        business_name = try node.get("business_name")
-        business_tax_id_provided = try node.get("business_tax_id_provided")
-        dob = try node.get("dob")
-        first_name = try node.get("first_name")
-        last_name = try node.get("last_name")
-        personal_address = try node.get("personal_address")
-        personal_id_number_provided = try node.get("personal_id_number_provided")
-        ssn_last_4_provided = try node.get("ssn_last_4_provided")
-        type = try node.get("type")
-        verification = try node.get("verification")
+        address = try node.extract("address")
+        business_name = try node.extract("business_name")
+        business_tax_id_provided = try node.extract("business_tax_id_provided")
+        dob = try node.extract("dob")
+        first_name = try node.extract("first_name")
+        last_name = try node.extract("last_name")
+        personal_address = try node.extract("personal_address")
+        personal_id_number_provided = try node.extract("personal_id_number_provided")
+        ssn_last_4_provided = try node.extract("ssn_last_4_provided")
+        type = try node.extract("type")
+        verification = try node.extract("verification")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

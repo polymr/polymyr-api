@@ -15,37 +15,27 @@ import AuthProvider
 
 let drop = Droplet.create()
 
-AuthenticationCollection().build(drop)
+drop.group(middleware: [PersistMiddleware(Customer.self), PersistMiddleware(Maker.self)]) { persistable in
+    AuthenticationCollection().build(persistable)
 
-let makerPasswordAuthMiddleWare = PasswordAuthenticationMiddleware(Maker.self)
+    persistable.resource("makers", MakerController())
+    persistable.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture, Maker>())
 
-let userTokenAuthMiddleware = TokenAuthenticationMiddleware(Customer.self)
-let makerTokenAuthMiddleware = TokenAuthenticationMiddleware(Maker.self)
+    persistable.resource("customers", CustomerController())
+    persistable.picture(base: "customers", slug: "customer_id", picture: PictureController<CustomerPicture, Customer>())
 
-drop.group(middleware: [PersistMiddleware(Customer.self), PersistMiddleware(Maker.self)]) { drop in
+    persistable.resource("products", ProductController())
+    persistable.picture(base: "products", slug: "products_id", picture: PictureController<ProductPicture, Product>())
 
-    drop.resource("makers", MakerController())
-    drop.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture, Maker>())
-
-    drop.resource("customers", CustomerController())
-    drop.picture(base: "customers", slug: "customer_id", picture: PictureController<CustomerPicture, Customer>())
-
-    drop.resource("products", ProductController())
-    drop.picture(base: "products", slug: "products_id", picture: PictureController<ProductPicture, Product>())
-
-    drop.resource("questions", QuestionController())
-    drop.resource("campaigns", CampaignController())
-    drop.resource("answers", AnswerController())
-    drop.resource("orders", OrderController())
-    drop.resource("sections", SectionController())
-    drop.resource("customerAddresses", CustomerAddressController())
-    drop.resource("tags", TagController())
+    persistable.resource("questions", QuestionController())
+    persistable.resource("campaigns", CampaignController())
+    persistable.resource("answers", AnswerController())
+    persistable.resource("orders", OrderController())
+    persistable.resource("sections", SectionController())
+    persistable.resource("customerAddresses", CustomerAddressController())
+    persistable.resource("tags", TagController())
 
     StripeCollection().build(drop)
-
-    drop.group(middleware: [makerTokenAuthMiddleware, userTokenAuthMiddleware]) { authenticated in
-
-    }
 }
 
 do {

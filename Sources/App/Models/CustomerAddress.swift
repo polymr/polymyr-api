@@ -34,17 +34,17 @@ final class CustomerAddress: Model, Preparation, JSONConvertible, NodeConvertibl
     var customer_id: Identifier
     
     init(node: Node) throws {
-        id = try node.get("id")
+        id = try? node.extract("id")
         
-        customer_id = try node.get("customer_id")
-        address = try node.get("address")
-        firstName = try node.get("firstName")
-        lastName = try node.get("lastName")
-        city = try node.get("city")
-        state = try node.get("state")
-        zip = try node.get("zip")
-        phoneNumber = try node.get("phoneNumber")
-        apartment = try node.get("apartment")
+        customer_id = try node.extract("customer_id")
+        address = try node.extract("address")
+        firstName = try node.extract("firstName")
+        lastName = try node.extract("lastName")
+        city = try node.extract("city")
+        state = try node.extract("state")
+        zip = try node.extract("zip")
+        phoneNumber = try? node.extract("phoneNumber")
+        apartment = try? node.extract("apartment")
     }
     
     func makeNode(in context: Context?) throws -> Node {

@@ -28,22 +28,22 @@ public final class Source: NodeConvertible {
     
     public init(node: Node) throws {
         
-        guard try node.get("object") == Source.type else {
+        guard try node.extract("object") == Source.type else {
             throw NodeError.unableToConvert(input: node, expectation: Source.type, path: ["object"])
         }
         
-        id = try node.get("id")
-        amount = try node.get("amount")
-        client_secret = try node.get("client_secret")
-        created = try node.get("created")
-        currency = try node.get("currency")
-        flow = try node.get("flow")
-        livemode = try node.get("livemode")
-        owner = try node.get("owner")
-        receiver = try node.get("receiver")
-        status = try node.get("status")
-        type = try node.get("type")
-        usage = try node.get("usage")
+        id = try node.extract("id")
+        amount = try node.extract("amount")
+        client_secret = try node.extract("client_secret")
+        created = try node.extract("created")
+        currency = try node.extract("currency")
+        flow = try node.extract("flow")
+        livemode = try node.extract("livemode")
+        owner = try node.extract("owner")
+        receiver = try node.extract("receiver")
+        status = try node.extract("status")
+        type = try node.extract("type")
+        usage = try node.extract("usage")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

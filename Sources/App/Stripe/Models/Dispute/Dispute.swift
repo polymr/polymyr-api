@@ -18,10 +18,10 @@ public final class DisputeInfo: NodeConvertible {
 
     public init(node: Node) throws {
 
-        due_by = try node.get("due_by")
-        has_evidence = try node.get("has_evidence")
-        past_due = try node.get("past_due")
-        submission_count = try node.get("submission_count")
+        due_by = try node.extract("due_by")
+        has_evidence = try node.extract("has_evidence")
+        past_due = try node.extract("past_due")
+        submission_count = try node.extract("submission_count")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
@@ -83,21 +83,21 @@ public final class Dispute: NodeConvertible {
 
     public required init(node: Node) throws {
 
-        guard try node.get("object") == Dispute.type else {
+        guard try node.extract("object") == Dispute.type else {
             throw NodeError.unableToConvert(input: node, expectation: Dispute.type, path: ["object"])
         }
 
-        amount = try node.get("amount")
-        balance_transactions = try node.get("balance_transactions")
-        charge = try node.get("charge")
-        created = try node.get("created")
-        currency = try node.get("currency")
-        evidence = try node.get("evidence")
-        evidence_details = try node.get("evidence_details")
-        is_charge_refundable = try node.get("is_charge_refundable")
-        livemode = try node.get("livemode")
-        reason = try node.get("reason")
-        status = try node.get("status")
+        amount = try node.extract("amount")
+        balance_transactions = try node.extract("balance_transactions")
+        charge = try node.extract("charge")
+        created = try node.extract("created")
+        currency = try node.extract("currency")
+        evidence = try node.extract("evidence")
+        evidence_details = try node.extract("evidence_details")
+        is_charge_refundable = try node.extract("is_charge_refundable")
+        livemode = try node.extract("livemode")
+        reason = try node.extract("reason")
+        status = try node.extract("status")
     }
 
     public func makeNode(in context: Context?) throws -> Node {

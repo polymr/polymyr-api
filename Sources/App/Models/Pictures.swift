@@ -27,16 +27,16 @@ class Picture: Model, JSONConvertible, NodeConvertible, Sanitizable {
     required init(node: Node) throws {
         _ = node.context
 
-        id = try node.get("id")
-        url = try node.get("url")
+        id = try? node.extract("id")
+        url = try node.extract("url")
 
         if let context: ParentContext = node.context as? ParentContext {
             owner_id = context.parent_id
         } else {
-            owner_id = try node.get("owner_id")
+            owner_id = try node.extract("owner_id")
         }
 
-        index = try node.get("index")
+        index = try? node.extract("index")
     }
     
     func makeNode(in context: Context?) throws -> Node {
@@ -87,7 +87,7 @@ final class ProductPicture: Picture, Preparation {
     let type: Int?
     
     required init(node: Node) throws {
-        type = try node.get("type")
+        type = try node.extract("type")
             
         try super.init(node: node)
     }

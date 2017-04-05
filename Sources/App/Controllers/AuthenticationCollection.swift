@@ -47,11 +47,11 @@ final class ProviderData: NodeConvertible {
     public let providerId: String?
 
     init(node: Node) throws {
-        uid = try node.get("uid")
-        displayName = try node.get("displayName")
-        photoURL = try node.get("photoURL")
-        email = try node.get("email")
-        providerId = try node.get("providerId")
+        uid = try node.extract("uid")
+        displayName = try node.extract("displayName")
+        photoURL = try node.extract("photoURL")
+        email = try node.extract("email")
+        providerId = try node.extract("providerId")
     }
 
     func makeNode(in context: Context?) throws -> Node {
@@ -106,16 +106,15 @@ final class AuthenticationCollection {
     
     func build(_ builder: RouteBuilder) {
 
-        let makerPasswordMiddleware = PasswordAuthenticationMiddleware(Maker.self)
-        builder.grouped(makerPasswordMiddleware).get("login") { request in
+        builder.grouped(PasswordAuthenticationMiddleware(Maker.self)).get("login") { request in
             return try request.auth.assertAuthenticated(Maker.self).makeResponse()
         }
 
         builder.post("authentication") { request in
 
             guard
-                let token: String = try request.json?.get("token"),
-                let subject: String = try request.json?.get("subject")
+                let token: String = try request.json?.extract("token"),
+                let subject: String = try request.json?.extract("subject")
             else {
                 throw AuthenticationError.notAuthenticated
             }
@@ -126,7 +125,7 @@ final class AuthenticationCollection {
             }
 
             let jwt = try JWT(token: token)
-            let key = try self.fetchSigningKey(for: jwt.headers.get("kid") as String)
+            let key = try self.fetchSigningKey(for: jwt.headers.extract("kid") as String)
 
             // TODO : IssuedAtClaim should be in the past
 

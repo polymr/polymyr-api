@@ -37,23 +37,23 @@ public final class ExternalAccount: NodeConvertible {
     
     public init(node: Node) throws {
         
-        guard try node.get("object") == ExternalAccount.type else {
+        guard try node.extract("object") == ExternalAccount.type else {
             throw NodeError.unableToConvert(input: node, expectation: ExternalAccount.type, path: ["object"])
         }
         
-        id = try node.get("id")
-        account = try node.get("account")
-        account_holder_name = try node.get("account_holder_name")
-        account_holder_type = try node.get("account_holder_type")
-        bank_name = try node.get("bank_name")
-        country = try node.get("country")
-        currency = try node.get("currency")
-        default_for_currency = try node.get("default_for_currency")
-        fingerprint = try node.get("fingerprint")
-        last4 = try node.get("last4")
-        metadata = try node.get("metadata")
-        routing_number = try node.get("routing_number")
-        status = try node.get("status")
+        id = try node.extract("id")
+        account = try node.extract("account")
+        account_holder_name = try node.extract("account_holder_name")
+        account_holder_type = try node.extract("account_holder_type")
+        bank_name = try node.extract("bank_name")
+        country = try node.extract("country")
+        currency = try node.extract("currency")
+        default_for_currency = try node.extract("default_for_currency")
+        fingerprint = try node.extract("fingerprint")
+        last4 = try node.extract("last4")
+        metadata = try node.extract("metadata")
+        routing_number = try node.extract("routing_number")
+        status = try node.extract("status")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

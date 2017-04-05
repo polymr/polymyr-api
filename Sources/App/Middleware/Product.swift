@@ -27,14 +27,14 @@ final class Product: Model, Preparation, JSONConvertible, Sanitizable {
     let maker_id: Identifier
     
     init(node: Node) throws {
-        id = try node.get("id")
+        id = try node.extract("id")
         
-        name = try node.get("name")
-        fullPrice = try node.get("fullPrice")
-        shortDescription = try node.get("shortDescription")
-        longDescription = try node.get("longDescription")
+        name = try node.extract("name")
+        fullPrice = try node.extract("fullPrice")
+        shortDescription = try node.extract("shortDescription")
+        longDescription = try node.extract("longDescription")
         
-        maker_id = try node.get("maker_id")
+        maker_id = try node.extract("maker_id")
     }
     
     func makeNode(in context: Context?) throws -> Node {

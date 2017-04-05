@@ -15,8 +15,8 @@ public final class VerificationRequirement: NodeConvertible {
     public let additional: [String]
     
     public init(node: Node) throws {
-        minimum = try node.get("minimum")
-        additional = try node.get("additional")
+        minimum = try node.extract("minimum")
+        additional = try node.extract("additional")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -33,8 +33,8 @@ public final class CountryVerificationFields: NodeConvertible {
     public let company: VerificationRequirement
 
     public required init(node: Node) throws {
-        individual = try node.get("individual")
-        company = try node.get("company")
+        individual = try node.extract("individual")
+        company = try node.extract("company")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
