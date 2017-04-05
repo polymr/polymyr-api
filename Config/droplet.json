@@ -3,7 +3,11 @@
     "client": "engine",
     "console": "terminal",
     "log": "console",
-    "hash": "crypto",
-    "cipher": "crypto",
-    "cache" : "fluent"
+    "hash": "bcrypt",
+    "cipher": "bcrypt",
+    "cache" : "fluent",
+    "middleware" : [
+        "file",
+        "fluent-sessions"
+    ]
 }

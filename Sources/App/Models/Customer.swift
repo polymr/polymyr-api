@@ -13,6 +13,7 @@ import BCrypt
 import Node
 import Turnstile
 import AuthProvider
+import HTTP
 
 extension Stripe {
     
@@ -25,7 +26,7 @@ extension Stripe {
     }
 }
 
-final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable, JWTInitializable, SessionPersistable {
     
     static var permitted: [String] = ["email", "name", "default_shipping_id"]
 
@@ -37,20 +38,26 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     let name: String
     let email: String
 
-    var default_shipping_id: Node?
+    var default_shipping_id: Identifier
     var stripe_id: String?
     
     var sub_id: String?
 
-    init(name: String, email: String, subject_id: String) {
-        self.name = name
-        self.email = email
-        sub_id = subject_id
+    init(subject: String, request: Request) throws {
+        sub_id = subject
+
+        guard let providerData: Node = try request.json?.get("providerData") else {
+            throw Abort.custom(status: .badRequest, message: "Missing json body...")
+        }
+
+        self.name = try providerData.get("name")
+        self.email = try providerData.get("email")
+        default_shipping_id = .null
     }
     
     init(node: Node) throws {
         id = try node.get("id")
-        default_shipping_id = try? node.get("default_shipping_id")
+        default_shipping_id = try node.get("default_shipping_id")
         
         // Name and email are always mandatory
         email = try node.get("email")
@@ -72,9 +79,9 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     }
     
     func postValidate() throws {
-        if default_shipping_id != nil {
+        if default_shipping_id != .null {
             guard (try? defaultShipping().first()) ?? nil != nil else {
-                throw ModelError.missingLink(from: Customer.self, to: CustomerAddress.self, id: default_shipping_id?.int ?? -1)
+                throw ModelError.missingLink(from: Customer.self, to: CustomerAddress.self, id: default_shipping_id.int ?? -1)
             }
         }
     }
@@ -151,33 +158,6 @@ extension Customer: TokenAuthenticatable {
 
     public static var tokenKey: String {
         return "token"
-    }
-}
-
-import HTTP
-
-private let sessionEntityId = "user-session"
-
-extension Customer: SessionPersistable {
-
-    public func persist(for req: Request) throws {
-        try req.session().data.set(sessionEntityId, id)
-    }
-
-    public func unpersist(for req: Request) throws {
-        try req.session().data.set(sessionEntityId, nil)
-    }
-
-    public static func fetchPersisted(for request: Request) throws -> Customer? {
-        guard let id = try request.session().data[sessionEntityId] else {
-            return nil
-        }
-
-        guard let user = try Customer.find(id) else {
-            return nil
-        }
-
-        return user
     }
 }
 

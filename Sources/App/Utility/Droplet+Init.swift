@@ -15,12 +15,18 @@ import HTTP
 import Console
 import MySQLProvider
 import AuthProvider
+import Sessions
 
-extension SessionsMiddleware {
-    
-    class func createSessionsMiddleware() -> SessionsMiddleware {
-        let memory = MemorySessions()
-        return SessionsMiddleware(memory)
+final class FluentCacheProvider: Vapor.Provider {
+
+    public init(config: Config) throws { }
+
+    public func boot(_ drop: Droplet) throws {
+
+    }
+
+    public func beforeRun(_ drop: Droplet) {
+        drop.addConfigurable(middleware: SessionsMiddleware(CacheSessions(drop.cache)), name: "fluent-sessions")
     }
 }
 
@@ -29,12 +35,11 @@ extension Droplet {
     internal static func create() -> Droplet {
 
         do {
-            let drop = try Droplet()
-
-            drop.log.enabled = LogLevel.all
+            let drop = try Droplet(environment: Environment(id: "debugging"))
 
             try drop.addProvider(AuthProvider.Provider.self)
             try drop.addProvider(MySQLProvider.Provider.self)
+            try drop.addProvider(FluentCacheProvider.self)
 
             drop.preparations += [Product.self,
                                   Maker.self,

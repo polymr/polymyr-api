@@ -42,19 +42,7 @@ enum ApplicationState: String, NodeConvertible {
     }
 }
 
-extension Salt: NodeInitializable {
-    
-    public init(node: Node) throws {
-
-        guard let salt = try node.string.flatMap({ try Salt(bytes: $0.makeBytes()) }) else {
-            throw Abort.custom(status: .badRequest, message: "Invalid salt.")
-        }
-
-        self = salt
-    }
-}
-
-final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable, JWTInitializable, SessionPersistable {
 
     let storage = Storage()
     
@@ -70,7 +58,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     let contactName: String
     let contactPhone: String
     let contactEmail: String
-    let address_id: Identifier
+    let address_id: Identifier?
     
     let location: String
     let createdOn: Date
@@ -78,8 +66,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     
     var username: String
     var password: String?
-    var pass: String?
-    var hashedPassword: String
+    var hash: String
     
     var stripe_id: String?
     var keys: Keys?
@@ -88,18 +75,22 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     var needsIdentityUpload: Bool
     
     var sub_id: String?
+
+    init(subject: String, request: Request) throws {
+        fatalError("Not supported")
+    }
     
     init(node: Node) throws {
         
         id = try node.get("id")
         
         username = try node.get("username")
-        pass = password
+        password = try node.get("password")
 
         if let password = try? node.get("password") as String {
-            self.hashedPassword = try Hash.make(message: password.makeBytes(), with: Salt()).string()
+            self.hash = try Hash.make(message: password.makeBytes(), with: Salt()).string()
         } else {
-            self.hashedPassword = try node.get("hashedPassword") as String
+            self.hash = try node.get("hash") as String
         }
         
         email = try node.get("email")
@@ -112,7 +103,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
         address_id = try node.get("address_id")
         
         location = try node.get("location")
-        createdOn = try node.get("createdOn") ?? Date()
+        createdOn = (try? node.get("createdOn")) ?? Date()
         cut = try node.get("cut") ?? 0.08
         sub_id = try node.get("sub_id")
         
@@ -144,7 +135,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             "cut" : .number(.double(cut)),
             
             "username" : .string(username),
-            "hashedPassword" : .string(hashedPassword),
+            "hash" : .string(hash),
             
             "missingFields" : .bool(missingFields),
             "needsIdentityUpload" : .bool(needsIdentityUpload)
@@ -155,7 +146,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
              "secretKey" : keys?.secret,
              "address_id" : address_id,
              "sub_id" : sub_id,
-             "pass" : pass,
+             "password" : (context?.isRow ?? false) ? password : nil
         ])
     }
     
@@ -173,7 +164,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             maker.string("contactName")
             maker.string("contactPhone")
             maker.string("contactEmail")
-            maker.parent(idKey: "address_id", idType: .int)
+            maker.parent(idKey: "address_id", idType: .int, optional: true)
             
             maker.string("location")
             maker.string("createdOn")
@@ -184,7 +175,8 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             
             maker.string("username")
             maker.string("password")
-            maker.string("salt")
+            maker.string("pass")
+            maker.string("hash")
             
             maker.string("publishableKey", optional: true)
             maker.string("secretKey", optional: true)
@@ -260,31 +252,6 @@ extension Maker {
 
 import HTTP
 
-private let sessionEntityId = "maker-session"
-
-extension Maker: SessionPersistable {
-
-    public func persist(for req: Request) throws {
-        try req.session().data.set(sessionEntityId, id)
-    }
-
-    public func unpersist(for req: Request) throws {
-        try req.session().data.set(sessionEntityId, nil)
-    }
-
-    public static func fetchPersisted(for request: Request) throws -> Customer? {
-        guard let id = try request.session().data[sessionEntityId] else {
-            return nil
-        }
-
-        guard let user = try Customer.find(id) else {
-            return nil
-        }
-
-        return user
-    }
-}
-
 final class MakerSessionToken: Model, Preparation, JSONConvertible, NodeConvertible {
 
     let storage = Storage()
@@ -340,6 +307,10 @@ extension Maker: PasswordAuthenticatable {
 
     public static var usernameKey: String {
         return "username"
+    }
+
+    var hashedPassword: String? {
+        return self.hash
     }
 
     public static var passwordVerifier: PasswordVerifier? {

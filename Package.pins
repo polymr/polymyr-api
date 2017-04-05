@@ -71,13 +71,13 @@
       "package": "Fluent",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/fluent.git",
-      "version": "2.0.0-beta.2"
+      "version": "2.0.0-beta.4"
     },
     {
       "package": "FluentProvider",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/fluent-provider.git",
-      "version": "1.0.0-beta.1"
+      "version": "1.0.0-beta.3"
     },
     {
       "package": "JSON",
@@ -113,13 +113,13 @@
       "package": "MySQLDriver",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/mysql-driver.git",
-      "version": "2.0.0-beta.3"
+      "version": "2.0.0-beta.5"
     },
     {
       "package": "MySQLProvider",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/mysql-provider.git",
-      "version": "2.0.0-beta.1"
+      "version": "2.0.0-beta.2"
     },
     {
       "package": "Node",
@@ -155,7 +155,7 @@
       "package": "Sockets",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/socks.git",
-      "version": "2.0.0-beta.1"
+      "version": "2.0.0-beta.2"
     },
     {
       "package": "TLS",

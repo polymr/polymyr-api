@@ -36,6 +36,8 @@ extension Stripe {
 final class OrderController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
+
+
         let type: SessionType = try request.extract()
 
         switch type {
@@ -49,7 +51,7 @@ final class OrderController: ResourceRepresentable {
             }
 
             return try request.maker().orders().all().makeJSON()
-        case .none:
+        case .anonymous:
             return try Order.all().makeJSON()
         }
     }
