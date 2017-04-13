@@ -20,7 +20,7 @@ final class CampaignController: ResourceRepresentable {
     func create(_ request: Request) throws -> ResponseRepresentable {
         let campaign: Campaign = try request.extractModel(injecting: request.makerInjectable())
         try campaign.save()
-        return campaign
+        return try campaign.makeResponse()
     }
     
     func delete(_ request: Request, campaign: Campaign) throws -> ResponseRepresentable {

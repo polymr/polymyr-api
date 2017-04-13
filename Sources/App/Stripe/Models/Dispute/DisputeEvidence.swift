@@ -70,9 +70,7 @@ public final class DisputeEvidence: NodeConvertible {
     }
 
     public func makeNode(in context: Context?) throws -> Node {
-        // TODO : Make init method that accepts optional values
-        
-        return try Node(node: [:]).add(objects: [
+        return try Node.object([:]).add(objects: [
             "access_activity_log" : access_activity_log,
             "billing_address" : billing_address,
             "cancellation_policy" : cancellation_policy,

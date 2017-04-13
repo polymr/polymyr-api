@@ -38,9 +38,9 @@ public final class LegalEntityIdentityVerification: NodeConvertible {
     
     public required init(node: Node) throws {
         status = try node.extract("status")
-        document = try node.extract("document")
-        details = try node.extract("details")
-        details_code = try node.extract("details_code")
+        document = try? node.extract("document")
+        details = try? node.extract("details")
+        details_code = try? node.extract("details_code")
     }
     
     public func makeNode(in context: Context?) throws -> Node {
@@ -76,15 +76,15 @@ public final class LegalEntity: NodeConvertible {
     
     public required init(node: Node) throws {
         address = try node.extract("address")
-        business_name = try node.extract("business_name")
+        business_name = try? node.extract("business_name")
         business_tax_id_provided = try node.extract("business_tax_id_provided")
         dob = try node.extract("dob")
-        first_name = try node.extract("first_name")
-        last_name = try node.extract("last_name")
+        first_name = try? node.extract("first_name")
+        last_name = try? node.extract("last_name")
         personal_address = try node.extract("personal_address")
         personal_id_number_provided = try node.extract("personal_id_number_provided")
         ssn_last_4_provided = try node.extract("ssn_last_4_provided")
-        type = try node.extract("type")
+        type = try? node.extract("type")
         verification = try node.extract("verification")
     }
     

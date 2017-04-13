@@ -39,11 +39,11 @@ public final class StripeCoupon: NodeConvertible {
         }
         
         id = try node.extract("id")
-        amount_off = try node.extract("amount_off")
+        amount_off = try? node.extract("amount_off")
         created = try node.extract("created")
-        currency = try node.extract("currency")
+        currency = try? node.extract("currency")
         duration = try node.extract("duration")
-        duration_in_months = try node.extract("duration_in_months")
+        duration_in_months = try? node.extract("duration_in_months")
         livemode = try node.extract("livemode")
         max_redemptions = try node.extract("max_redemptions")
         percent_off = try node.extract("percent_off")

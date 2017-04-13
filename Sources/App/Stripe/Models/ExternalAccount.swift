@@ -43,8 +43,8 @@ public final class ExternalAccount: NodeConvertible {
         
         id = try node.extract("id")
         account = try node.extract("account")
-        account_holder_name = try node.extract("account_holder_name")
-        account_holder_type = try node.extract("account_holder_type")
+        account_holder_name = try? node.extract("account_holder_name")
+        account_holder_type = try? node.extract("account_holder_type")
         bank_name = try node.extract("bank_name")
         country = try node.extract("country")
         currency = try node.extract("currency")

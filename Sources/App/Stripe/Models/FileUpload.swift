@@ -86,7 +86,7 @@ public final class FileUpload: NodeConvertible {
         purpose = try node.extract("purpose")
         size = try node.extract("size")
         type = try node.extract("type")
-        url = try node.extract("url")
+        url = try? node.extract("url")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

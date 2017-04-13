@@ -3,37 +3,46 @@ import Node
 import Vapor
 import FluentProvider
 
+extension StructuredDataWrapper {
+    
+    public func permit(_ keys: [String]) -> Self {
+        guard var object = wrapped.object else {
+            return self
+        }
+        
+        object.forEach { key, _ in
+            if !keys.contains(key) {
+                object[key] = nil
+            }
+        }
+        
+        return Self(object, in: jsonContext)
+    }
+}
+
 extension Request {
 
-    public func extractModel<M: Model>() throws -> M where M: Sanitizable {
-        return try extractModel(injecting: .null)
+    public func extractModel<M: Model>() throws -> M where M: Sanitizable & NodeConvertible  {
+        return try extractModel(injecting: Node.null)
     }
 
-    public func extractModel<M: Model>(injecting values: Node) throws -> M where M: Sanitizable {
-        guard let json = self.json else {
+    public func extractModel<M: Model>(injecting: Node) throws -> M where M: Sanitizable & NodeConvertible {
+        guard var json = self.json?.permit(M.permitted) else {
             throw Abort.badRequest
         }
         
-        var sanitized = json.permit(M.permitted)
-        values.object?.forEach { key, value in
-            sanitized[key] = JSON(value)
+        injecting.object?.forEach { key, value in
+            json[key] = JSON(value)
         }
         
-        try M.preValidate(data: sanitized)
-        
-        let model: M
-        do {
-            model = try M(node: sanitized)
-        } catch {
-            let error = M.updateThrownError(error)
-            throw error
-        }
-        
+        let model = try M(node: json)
+        try model.save()
         try model.postValidate()
+        
         return model
     }
 
-    public func patchModel<M: Model>(id: NodeRepresentable) throws -> M where M: Sanitizable {
+    public func patchModel<M: Model>(id: NodeRepresentable) throws -> M where M: Sanitizable & NodeConvertible {
         guard let model = try M.find(id) else {
             throw Abort.notFound
         }
@@ -41,27 +50,17 @@ extension Request {
         return try patchModel(model)
     }
 
-    public func patchModel<M: Model>(_ model: M) throws -> M where M: Sanitizable {
-        // consider making multiple lines
-        guard let requestJSON = self.json?.permit(M.permitted).makeNode(in: emptyContext).object else {
+    public func patchModel<M: Model>(_ model: M) throws -> M where M: Sanitizable & NodeConvertible {
+        guard let json = json?.permit(M.permitted).wrapped.object else {
             throw Abort.badRequest
         }
         
         var modelJSON = try model.makeNode(in: emptyContext)
+        json.forEach { modelJSON[$0.key] = Node($0.value) }
         
-        requestJSON.forEach {
-            modelJSON[$0.key] = $0.value
-        }
-        
-        var model: M
-        do {
-            model = try M(node: modelJSON)
-        } catch {
-            let error = M.updateThrownError(error)
-            throw error
-        }
-        
+        let model = try M(node: modelJSON)
         model.exists = true
+        
         try model.postValidate()
         return model
     }

@@ -11,32 +11,38 @@ import Fluent
 import FluentProvider
 import Node
 
-class Picture: Model, JSONConvertible, NodeConvertible, Sanitizable {
+protocol Picture: Model, JSONConvertible, NodeConvertible, Sanitizable, Preparation {
 
+    static func pictures(for owner: Identifier) throws -> Query<Self>
+}
+
+final class MakerPicture: Picture {
+    
     let storage = Storage()
-
-    static var permitted: [String] = ["owner_id", "url", "type"]
+    
+    static var permitted: [String] = ["maker_id", "url"]
     
     var exists: Bool = false
     
     var id: Identifier?
-    let owner_id: Identifier
+    let maker_id: Identifier
     let url: String
-    let index: Int?
-
-    required init(node: Node) throws {
+    
+    static func pictures(for owner: Identifier) throws -> Query<MakerPicture> {
+        return try self.makeQuery().filter("maker_id", owner.int)
+    }
+    
+    init(node: Node) throws {
         _ = node.context
-
+        
         id = try? node.extract("id")
         url = try node.extract("url")
-
+        
         if let context: ParentContext = node.context as? ParentContext {
-            owner_id = context.parent_id
+            maker_id = context.parent_id
         } else {
-            owner_id = try node.extract("owner_id")
+            maker_id = try node.extract("maker_id")
         }
-
-        index = try? node.extract("index")
     }
     
     func makeNode(in context: Context?) throws -> Node {
@@ -44,20 +50,15 @@ class Picture: Model, JSONConvertible, NodeConvertible, Sanitizable {
             "url" : .string(url)
         ]).add(objects: [
             "id" : id,
-            "owner_id" : owner_id,
-            "index" : index
+            "maker_id" : maker_id
         ])
     }
-}
-
-final class MakerPicture: Picture, Preparation {
 
     class func prepare(_ database: Database) throws {
         try database.create(MakerPicture.self) { picture in
             picture.id(for: CustomerPicture.self)
             picture.string("url")
-            picture.string("type")
-            picture.parent(idKey: "owner_id", idType: .int)
+            picture.parent(idKey: "maker_id", idType: .int)
         }
     }
 
@@ -66,14 +67,49 @@ final class MakerPicture: Picture, Preparation {
     }
 }
 
-final class CustomerPicture: Picture, Preparation {
+final class CustomerPicture: Picture {
+    
+    let storage = Storage()
+    
+    static var permitted: [String] = ["customer_id", "url"]
+    
+    var exists: Bool = false
+    
+    var id: Identifier?
+    let customer_id: Identifier
+    let url: String
+    
+    static func pictures(for owner: Identifier) throws -> Query<CustomerPicture> {
+        return try self.makeQuery().filter("customer_id", owner.int)
+    }
+    
+    init(node: Node) throws {
+        _ = node.context
+        
+        id = try? node.extract("id")
+        url = try node.extract("url")
+        
+        if let context: ParentContext = node.context as? ParentContext {
+            customer_id = context.parent_id
+        } else {
+            customer_id = try node.extract("customer_id")
+        }
+    }
+    
+    func makeNode(in context: Context?) throws -> Node {
+        return try Node(node: [
+            "url" : .string(url)
+        ]).add(objects: [
+            "id" : id,
+            "customer_id" : customer_id
+        ])
+    }
 
     class func prepare(_ database: Database) throws {
         try database.create(CustomerPicture.self) { picture in
             picture.id(for: CustomerPicture.self)
             picture.string("url")
-            picture.string("type")
-            picture.parent(idKey: "owner_id", idType: .int)
+            picture.parent(idKey: "customer_id", idType: .int)
         }
     }
 
@@ -82,26 +118,50 @@ final class CustomerPicture: Picture, Preparation {
     }
 }
 
-final class ProductPicture: Picture, Preparation {
-
-    let type: Int?
+final class ProductPicture: Picture {
     
-    required init(node: Node) throws {
-        type = try node.extract("type")
-            
-        try super.init(node: node)
+    let storage = Storage()
+    
+    static var permitted: [String] = ["product_id", "url", "type"]
+    
+    var id: Identifier?
+    
+    let url: String
+    let type: Int?
+    let product_id: Identifier
+    
+    static func pictures(for owner: Identifier) throws -> Query<ProductPicture> {
+        return try self.makeQuery().filter("product_id", owner.int)
     }
     
-    override func makeNode(in context: Context?) throws -> Node {
-        return try super.makeNode(in: context).add(objects: ["type" : type])
+    init(node: Node) throws {
+        id = try? node.extract("id")
+        url = try node.extract("url")
+        type = try? node.extract("type")
+        
+        if let context: ParentContext = node.context as? ParentContext {
+            product_id = context.parent_id
+        } else {
+            product_id = try node.extract("product_id")
+        }
+    }
+    
+    func makeNode(in context: Context?) throws -> Node {
+        return try Node(node: [
+            "url" : .string(url),
+        ]).add(objects: [
+            "id" : id,
+            "product_id" : product_id,
+            "type" : type
+        ])
     }
     
     class func prepare(_ database: Database) throws {
         try database.create(ProductPicture.self) { picture in
             picture.id(for: ProductPicture.self)
             picture.string("url")
-            picture.string("type")
-            picture.parent(idKey: "owner_id", idType: .int)
+            picture.int("type")
+            picture.parent(idKey: "product_id", idType: .int)
         }
     }
 

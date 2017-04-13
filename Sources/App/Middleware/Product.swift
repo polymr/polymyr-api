@@ -10,7 +10,7 @@ import Vapor
 import Fluent
 import FluentProvider
 
-final class Product: Model, Preparation, JSONConvertible, Sanitizable {
+final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
 
     let storage = Storage()
     
@@ -27,7 +27,7 @@ final class Product: Model, Preparation, JSONConvertible, Sanitizable {
     let maker_id: Identifier
     
     init(node: Node) throws {
-        id = try node.extract("id")
+        id = try? node.extract("id")
         
         name = try node.extract("name")
         fullPrice = try node.extract("fullPrice")
@@ -68,7 +68,7 @@ final class Product: Model, Preparation, JSONConvertible, Sanitizable {
 extension Product {
     
     func maker() -> Parent<Product, Maker> {
-        return parent(id: "maker_id")
+        return parent(id: maker_id)
     }
     
     func campaign() -> Children<Product, Campaign> {

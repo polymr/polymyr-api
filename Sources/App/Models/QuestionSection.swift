@@ -11,19 +11,6 @@ import Fluent
 import FluentProvider
 import Node
 
-fileprivate let separator = "@@@<<<>>>@@@"
-
-extension Sequence where Iterator.Element == String {
-    
-    func serialize(with _context: Context?, with separator: String = "@@@<<<>>>@@@") -> Node {
-        if let context = _context, context.isMySQL {
-            return .string(self.joined(separator: separator))
-        }
-        
-        return .array(self.map { Node.string($0) })
-    }
-}
-
 final class QuestionSection: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
 
     let storage = Storage()
@@ -41,16 +28,25 @@ final class QuestionSection: Model, Preparation, JSONConvertible, NodeConvertibl
     init(node: Node) throws {
         id = try? node.extract("id")
         name = try node.extract("name")
-        suggestions = try node.parseList(at: "suggestions", with: separator)
+        suggestions = try node.extract("suggestions")
         description = try node.extract("description")
         isRating = try node.extract("isRating")
+    }
+    
+    convenience init(row: Row) throws {
+        var node = row.makeNode(in: rowContext)
+        
+        let parsed = try JSON(serialized: row.extract("suggestions") as String)
+        node["suggestions"] = parsed.converted(to: Node.self)
+        
+        try self.init(node: node)
     }
     
     func makeNode(in context: Context?) throws -> Node {
         return try Node(node: [
             "name" : .string(name),
             "description" : .string(description),
-            "suggestions" :  suggestions.serialize(with: context),
+            "suggestions" : serialize(suggestions, in: context) as Node,
             "isRating" : .bool(isRating)
         ]).add(objects: [
             "id" : id

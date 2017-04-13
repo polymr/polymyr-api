@@ -29,6 +29,7 @@ extension NodeError {
 }
 
 extension StructuredDataWrapper {
+    
     public func extract<T : NodeInitializable>(_ indexers: PathIndexer...) throws -> T {
         return try extract(indexers)
     }
@@ -58,15 +59,6 @@ extension StructuredDataWrapper {
 
 extension Node {
     
-    mutating func substitute(key: String, model: Model) throws -> Node {
-        precondition(!key.hasSuffix("_id"))
-        
-        self["\(key)_id"] = nil
-        self[key] = try model.makeNode(in: context)
-        
-        return self
-    }
-    
     mutating func merge(with json: JSON) throws -> Node {
         guard let update = json.node.object else {
             throw Abort.custom(status: .badRequest, message: "Expected [String : Object] node but got \(json.node)")
@@ -94,7 +86,9 @@ extension Node {
     }
     
     func add(objects: [String : NodeConvertible?]) throws -> Node {
-        guard var previous = self.object else { throw NodeError.invalidContainer(container: "object", element: "self") }
+        guard var previous = self.object else {
+            throw NodeError.invalidContainer(container: "object", element: "self")
+        }
         
         for (name, object) in objects {
             previous[name] = try object.makeNode(in: emptyContext)
@@ -129,31 +123,6 @@ public extension RawRepresentable where Self: NodeConvertible, RawValue == Strin
         }
         
         self = value
-    }
-}
-
-public extension Date {
-    
-    public init(ISO8601String: String) throws {
-        let dateFormatter = DateFormatter()
-        let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.locale = enUSPosixLocale
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-        
-        guard let date = dateFormatter.date(from: ISO8601String) else {
-            throw Abort.custom(status: .internalServerError, message: "Error parsing date string : \(ISO8601String)")
-        }
-        
-        self = date
-    }
-    
-    public var ISO8601String: String {
-        let dateFormatter = DateFormatter()
-        let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.locale = enUSPosixLocale
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-        
-        return dateFormatter.string(from: self)
     }
 }
 

@@ -45,8 +45,8 @@ public final class Plan: NodeConvertible {
         interval_count = try node.extract("interval_count")
         livemode = try node.extract("livemode")
         name = try node.extract("name")
-        statement_descriptor = try node.extract("statement_descriptor")
-        trial_period_days = try node.extract("trial_period_days")
+        statement_descriptor = try? node.extract("statement_descriptor")
+        trial_period_days = try? node.extract("trial_period_days")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

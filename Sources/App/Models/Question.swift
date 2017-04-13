@@ -11,8 +11,6 @@ import Fluent
 import FluentProvider
 import Node
 
-fileprivate let separator = "@@@<<<>>>@@@"
-
 final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
 
     let storage = Storage()
@@ -32,19 +30,28 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     init(node: Node) throws {
         id = try? node.extract("id")
         text = try? node.extract("text")
-        qualifiers = try? node.parseList(at: "qualifiers", with: separator)
+        qualifiers = try? node.extract("qualifiers")
         
         campaign_id = try node.extract("campaign_id")
         section_id = try node.extract("section_id")
     }
     
+    convenience init(row: Row) throws {
+        var node = row.makeNode(in: rowContext)
+        
+        let parsed = try JSON(serialized: row.extract("qualifiers") as String)
+        node["qualifiers"] = parsed.converted(to: Node.self)
+        
+        try self.init(node: node)
+    }
+    
     func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: []).add(objects: [
+        return try Node.object([:]).add(objects: [
             "campaign_id" : campaign_id,
             "section_id" : section_id,
             "id" : id,
             "text" : text,
-            "qualifiers" : qualifiers?.serialize(with: context)
+            "qualifiers" : serialize(qualifiers, in: context) as Node
         ])
     }
     
@@ -52,6 +59,7 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
         try database.create(Question.self) { question in
             question.id(for: Question.self)
             question.string("text")
+            question.string("qualifiers")
             question.parent(idKey: "campaign_id", idType: .int)
             question.parent(idKey: "section_id", idType: .int)
         }

@@ -68,8 +68,8 @@ public final class Outcome: NodeConvertible {
     public required init(node: Node) throws {
 
         network_status = try node.extract("network_status")
-        reason = try node.extract("reason")
-        risk_level = try node.extract("risk_level")
+        reason = try? node.extract("reason")
+        risk_level = try? node.extract("risk_level")
         seller_message = try node.extract("seller_message")
         type = try node.extract("type")
     }

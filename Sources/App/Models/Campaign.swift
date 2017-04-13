@@ -46,12 +46,12 @@ final class Campaign: Model, Preparation, JSONConvertible, NodeConvertible, Sani
         return try Node(node: [
             "units" : .number(.int(units)),
             "purchasedUnits" : .number(.int(purchasedUnits)),
-            "endDate" : .string(endDate.ISO8601String),
             "amountOff" : .number(.double(amountOff))
         ]).add(objects: [
             "id" : id,
             "product_id" : product_id,
-            "maker_id" : maker_id
+            "maker_id" : maker_id,
+            "endDate" : Node.date(endDate).string,
         ])
     }
     
@@ -75,10 +75,10 @@ final class Campaign: Model, Preparation, JSONConvertible, NodeConvertible, Sani
 extension Campaign {
 
     func maker() -> Parent<Campaign, Maker> {
-        return parent(id: "maker_id")
+        return parent(id: maker_id)
     }
 
     func product() -> Parent<Campaign, Product> {
-        return parent(id: "product_id")
+        return parent(id: product_id)
     }
 }

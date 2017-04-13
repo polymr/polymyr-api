@@ -20,13 +20,6 @@ extension Sequence where Iterator.Element == Bool {
     }
 }
 
-extension NodeConvertible {
-
-    public func makeResponse() throws -> Response {
-        return try Response(status: .ok, json: JSON(makeNode(in: jsonContext)))
-    }
-}
-
 extension Sequence where Iterator.Element == (key: String, value: String) {
     
     func reduceDictionary() -> [String : String] {
@@ -93,7 +86,7 @@ class StripeCollection: EmptyInitializable {
 
                 customer.group("sources") { sources in
                     
-                    sources.post("default", String.init(from:)) { request, source in
+                    sources.post("default", String.init(stringLiteral:)) { request, source in
                         guard let id = try request.customer().stripe_id else {
                             throw try Abort.custom(status: .badRequest, message: "user \(request.customer().throwableId()) doesn't have a stripe account")
                         }
@@ -101,7 +94,7 @@ class StripeCollection: EmptyInitializable {
                         return try Stripe.shared.update(customer: id, parameters: ["default_source" : source]).makeResponse()
                     }
 
-                    sources.post(String.init(from:)) { request, source in
+                    sources.post(String.init(stringLiteral:)) { request, source in
 
                         guard let customer = try? request.customer() else {
                             throw Abort.custom(status: .forbidden, message: "Log in first.")
@@ -117,7 +110,7 @@ class StripeCollection: EmptyInitializable {
                         }
                     }
 
-                    sources.delete(String.init(from:)) { request, source in
+                    sources.delete(String.init(stringLiteral:)) { request, source in
 
                         guard let customer = try? request.customer() else {
                             throw Abort.custom(status: .forbidden, message: "Log in first.")
@@ -141,7 +134,7 @@ class StripeCollection: EmptyInitializable {
                 }
             }
             
-            stripe.get("country", "verification", String.init(from:)) { request, country_code in
+            stripe.get("country", "verification", String.init(stringLiteral:)) { request, country_code in
                 guard let country = try? CountryCode(node: country_code) else {
                     throw Abort.custom(status: .badRequest, message: "\(country_code) is not a valid country code.")
                 }
@@ -166,7 +159,7 @@ class StripeCollection: EmptyInitializable {
                     return try maker.makeResponse()
                 }
 
-                maker.post("acceptedtos", String.init(from:)) { request, ip in
+                maker.post("acceptedtos", String.init(stringLiteral:)) { request, ip in
                     let maker = try request.maker()
 
                     guard let stripe_id = maker.stripe_id else {
@@ -188,7 +181,7 @@ class StripeCollection: EmptyInitializable {
                     return try Node(node :[
                         "fields" : try account.descriptionsForNeededFields().makeNode(in: emptyContext)
                     ]).add(objects: [
-                        "due_by" : account.verification.due_by?.ISO8601String,
+                        "due_by" : account.verification.due_by.flatMap { Node.date($0).string },
                         "disabled_reason" : account.verification.disabled_reason?.rawValue,
                         "identity" : account.legal_entity.verification.status != .verified ? account.legal_entity.verification.makeNode(in: emptyContext) : nil
                     ]).makeResponse()

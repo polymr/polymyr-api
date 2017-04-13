@@ -24,7 +24,7 @@ final class TagController: ResourceRepresentable {
     func create(_ request: Request) throws -> ResponseRepresentable {
         let tag: Tag = try request.extractModel()
         try tag.save()
-        return tag
+        return try tag.makeResponse()
     }
     
     func delete(_ request: Request, tag: Tag) throws -> ResponseRepresentable {
@@ -42,6 +42,7 @@ final class TagController: ResourceRepresentable {
         return Resource(
             index: index,
             store: create,
+            show: show,
             modify: modify,
             destroy: delete
         )

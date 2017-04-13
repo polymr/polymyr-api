@@ -66,32 +66,6 @@ final class ProviderData: NodeConvertible {
     }
 }
 
-//final class JWTCredentials {
-//
-//    public let token: String
-//    public let subject: String
-//    public let providerData: ProviderData?
-//
-//    public init(token: String, subject: String, providerData: Node?) throws {
-//        self.token = token
-//        self.subject = subject
-//        self.providerData = try? ProviderData(node: providerData)
-//    }
-//}
-//
-//extension JSON {
-//
-//    var jwt: JWTCredentials? {
-//        guard let token = self["token"]?.string, let subject = self["subject"]?.string else {
-//            return nil
-//        }
-//
-//        let providerData = self["providerData"]?.node
-//
-//        return try? JWTCredentials(token: token, subject: subject, providerData: providerData)
-//    }
-//}
-
 protocol JWTInitializable {
 
     init(subject: String, request: Request) throws
@@ -197,7 +171,7 @@ final class AuthenticationCollection {
     }
 
     func getAuthenticationSubject<T: AuthenticationSubject>(subject: String, request: Request? = nil, create new: Bool = true) throws -> T {
-        if let callee = try T.query().filter("sub_id", subject).first() {
+        if let callee = try T.makeQuery().filter("sub_id", subject).first() {
             return callee
         }
 

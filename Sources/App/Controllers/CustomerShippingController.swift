@@ -34,7 +34,7 @@ final class CustomerAddressController: ResourceRepresentable {
         
         let address: CustomerAddress = try request.extractModel(injecting: request.customerInjectable())
         try address.save()
-        return address
+        return try address.makeResponse()
     }
     
     func delete(_ request: Request, address: CustomerAddress) throws -> ResponseRepresentable {
@@ -47,7 +47,7 @@ final class CustomerAddressController: ResourceRepresentable {
         try address.shouldAllow(request: request)
         let updated: CustomerAddress = try request.patchModel(address)
         try updated.save()
-        return updated
+        return try updated.makeResponse()
     }
     
     func makeResource() -> Resource<CustomerAddress> {

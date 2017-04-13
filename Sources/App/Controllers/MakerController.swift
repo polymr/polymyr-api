@@ -47,7 +47,7 @@ final class MakerController: ResourceRepresentable {
         let user = try Maker.authenticate(usernamePassword)
         request.auth.authenticate(user)
 
-        return maker
+        return try maker.makeResponse()
     }
 
     func modify(_ request: Request, maker: Maker) throws -> ResponseRepresentable {

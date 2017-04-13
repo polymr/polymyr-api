@@ -105,7 +105,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
         location = try node.extract("location")
         createdOn = (try? node.extract("createdOn")) ?? Date()
         cut = try node.extract("cut") ?? 0.08
-        sub_id = try node.extract("sub_id")
+        sub_id = try? node.extract("sub_id")
         
         stripe_id = try? node.extract("stripe_id")
         
@@ -131,7 +131,6 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             "contactEmail" : .string(contactEmail),
             
             "location" : .string(location),
-            "createdOn" : .string(createdOn.ISO8601String),
             "cut" : .number(.double(cut)),
             
             "username" : .string(username),
@@ -146,6 +145,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
              "secretKey" : keys?.secret,
              "address_id" : address_id,
              "sub_id" : sub_id,
+             "createdOn" : Node.date(createdOn).string,
              "password" : (context?.isRow ?? false) ? password : nil
         ])
     }
@@ -170,12 +170,8 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             maker.string("createdOn")
             maker.double("cut")
             
-            maker.string("google_id", optional: true)
-            maker.string("facebook_id", optional: true)
-            
             maker.string("username")
             maker.string("password")
-            maker.string("pass")
             maker.string("hash")
             
             maker.string("publishableKey", optional: true)
@@ -238,7 +234,7 @@ extension Maker {
     }
     
     func address() -> Parent<Maker, MakerAddress> {
-        return parent(id: "address_id")
+        return parent(id: address_id)
     }
 
     func orders() -> Children<Maker, Order> {

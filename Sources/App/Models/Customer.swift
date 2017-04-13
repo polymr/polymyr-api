@@ -11,7 +11,6 @@ import Fluent
 import FluentProvider
 import BCrypt
 import Node
-import Turnstile
 import AuthProvider
 import HTTP
 
@@ -104,7 +103,7 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
 extension Customer {
 
     func defaultShipping() -> Parent<Customer, CustomerAddress> {
-        return parent(id: "default_shipping_id")
+        return parent(id: default_shipping_id)
     }
     
     func shippingAddresses() -> Children<Customer, CustomerAddress> {

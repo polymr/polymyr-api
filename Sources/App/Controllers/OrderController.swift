@@ -75,7 +75,7 @@ final class OrderController: ResourceRepresentable {
         order.charge_id = charge.id
 
         try order.save()
-        return order
+        return try order.makeResponse()
     }
     
     func delete(_ request: Request, order: Order) throws -> ResponseRepresentable {

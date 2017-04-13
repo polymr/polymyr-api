@@ -20,7 +20,7 @@ final class AnswerController: ResourceRepresentable {
     func create(_ request: Request) throws -> ResponseRepresentable {
         let answer: Answer = try request.extractModel(injecting: request.customerInjectable())
         try answer.save()
-        return answer
+        return try answer.makeResponse()
     }
     
     func delete(_ request: Request, answer: Answer) throws -> ResponseRepresentable {

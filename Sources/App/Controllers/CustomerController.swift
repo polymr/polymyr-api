@@ -72,7 +72,7 @@ final class CustomerController {
     func create(_ request: Request) throws -> ResponseRepresentable {
         let customer: Customer = try request.extractModel()
         try customer.save()
-        return customer
+        return try customer.makeResponse()
     }
     
     func modify(_ request: Request, customer: Customer) throws -> ResponseRepresentable {

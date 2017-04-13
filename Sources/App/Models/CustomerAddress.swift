@@ -92,6 +92,6 @@ final class CustomerAddress: Model, Preparation, JSONConvertible, NodeConvertibl
 extension CustomerAddress {
     
     func customer() -> Parent<CustomerAddress, Customer> {
-        return parent(id: "customer_id")
+        return parent(id: customer_id)
     }
 }

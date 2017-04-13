@@ -15,32 +15,12 @@ import FluentProvider
 import Vapor
 import HTTP
 
-extension QueryRepresentable {
-    
-    func apply(_ option: QueryModifiable) throws -> Query<E> {
-        return try option.modify(self.makeQuery())
-    }
-    
-    func apply(_ option: QueryModifiable?) throws -> Query<E> {
-        if let option = option {
-            return try option.modify(self.makeQuery())
-        }
-        
-        return try self.makeQuery()
-    }
-}
-
-protocol QueryModifiable {
-    
-    func modify<E: Entity>(_ query: Query<E>) throws -> Query<E>
-}
-
 protocol QueryInitializable: NodeInitializable {
     
     static var key: String { get }
 }
 
-protocol TypesafeOptionsParameter: StringInitializable, NodeConvertible, QueryModifiable {
+protocol TypesafeOptionsParameter: StringInitializable, NodeConvertible {
     
     static var key: String { get }
     static var values: [String] { get }

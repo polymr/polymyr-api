@@ -48,12 +48,12 @@ extension RouteBuilder {
 final class PictureController<PictureType: Picture, OwnerType: Entity> {
     
     func index(_ request: Request, owner: Identifier) throws -> ResponseRepresentable {
-        return try PictureType.query().filter("owner_id", owner.int).all().makeJSON()
+        return try PictureType.pictures(for: owner).all().makeJSON()
     }
 
     func createPicture(from nodeObject: Node, with owner: Identifier) throws -> PictureType {
         let context = ParentContext(parent_id: owner)
-        let picture = try PictureType(node: Node(nodeObject.wrapped, in: context))
+        let picture = try PictureType(node: Node(nodeObject.permit(PictureType.permitted).wrapped, in: context))
         try picture.save()
         return picture
     }

@@ -20,7 +20,7 @@ final class SectionController: ResourceRepresentable {
     func create(_ request: Request) throws -> ResponseRepresentable {
         let section: QuestionSection = try request.extractModel()
         try section.save()
-        return section
+        return try section.makeResponse()
     }
     
     func delete(_ request: Request, section: QuestionSection) throws -> ResponseRepresentable {

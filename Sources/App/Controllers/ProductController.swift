@@ -34,7 +34,7 @@ struct Expander: QueryInitializable {
         expandKeyPaths = node.string?.components(separatedBy: ",") ?? []
     }
     
-    func expand<T: Model>(for models: [T], owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> [Node] {
+    func expand<T: Model>(for models: [T], owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> [Node] where T: NodeConvertible {
         return try models.map { (model: T) -> Node in
             var valueMappings = try expandKeyPaths.map { relation in
                 return try mappings(relation, model)?.makeNode(in: emptyContext) ?? Node.null
@@ -49,7 +49,7 @@ struct Expander: QueryInitializable {
         }
     }
     
-    func expand<T: Model>(for model: T, owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> Node {
+    func expand<T: Model>(for model: T, owner key: String, mappings: @escaping (String, T) throws -> (NodeRepresentable?)) throws -> Node where T: NodeConvertible {
         var valueMappings = try expandKeyPaths.map { relation in
             return try mappings(relation, model)?.makeNode(in: emptyContext) ?? Node.null
         }
@@ -135,13 +135,13 @@ final class ProductController: ResourceRepresentable {
             }).makeResponse()
         }
         
-        return product
+        return try product.makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
         let _ = try request.maker()
         var result: [String : Node] = [:]
-        
+    
         let product: Product = try request.extractModel(injecting: request.makerInjectable())
         try product.save()
 
@@ -166,7 +166,8 @@ final class ProductController: ResourceRepresentable {
         if let pictureNode: [Node] = try node.extract("pictures") {
 
             let pictures = try pictureNode.map { (object: Node) -> ProductPicture in
-                let picture: ProductPicture = try ProductPicture(node: object, in: ParentContext(parent_id: product_id))
+                let context = ParentContext(parent_id: product_id)
+                let picture: ProductPicture = try ProductPicture(node: Node(object.permit(ProductPicture.permitted).wrapped, in: context))
                 try picture.save()
                 return picture
             }

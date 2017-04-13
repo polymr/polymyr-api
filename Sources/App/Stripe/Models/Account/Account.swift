@@ -55,16 +55,14 @@ public final class DateOfBirth: NodeConvertible {
     public let month: Int?
     public let year: Int?
 
-
-
     public required init(node: Node) throws {
-        day = try node.extract("day")
-        month = try node.extract("month")
-        year = try node.extract("year")
+        day = try? node.extract("day")
+        month = try? node.extract("month")
+        year = try? node.extract("year")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [:]).add(objects: [
+        return try Node.object([:]).add(objects: [
             "day" : day,
             "month" : month,
             "year" : year
@@ -79,13 +77,13 @@ public final class TermsOfServiceAgreement: NodeConvertible {
     public let user_agent: String?
 
     public required init(node: Node) throws {
-        date = try node.extract("date")
-        ip = try node.extract("ip")
-        user_agent = try node.extract("user_agent")
+        date = try? node.extract("date")
+        ip = try? node.extract("ip")
+        user_agent = try? node.extract("user_agent")
     }
 
     public func makeNode(in context: Context?) throws -> Node {
-        return try Node(node: [:]).add(objects: [
+        return try Node.object([:]).add(objects: [
             "date" : date,
             "ip" : ip,
             "user_agent" : user_agent
@@ -181,31 +179,31 @@ public final class StripeAccount: NodeConvertible {
         }
         
         id = try node.extract("id")
-        business_logo = try node.extract("business_logo")
-        business_name = try node.extract("business_name")
-        business_url = try node.extract("business_url")
+        business_logo = try? node.extract("business_logo")
+        business_name = try? node.extract("business_name")
+        business_url = try? node.extract("business_url")
         charges_enabled = try node.extract("charges_enabled")
         country = try node.extract("country")
         debit_negative_balances = try node.extract("debit_negative_balances")
         decline_charge_on = try node.extract("decline_charge_on")
         default_currency = try node.extract("default_currency")
         details_submitted = try node.extract("details_submitted")
-        display_name = try node.extract("display_name")
+        display_name = try? node.extract("display_name")
         email = try node.extract("email")
         external_accounts = try node.extractList("external_accounts")
         legal_entity = try node.extract("legal_entity")
         managed = try node.extract("managed")
-        product_description = try node.extract("product_description")
-        statement_descriptor = try node.extract("statement_descriptor")
-        support_email = try node.extract("support_email")
-        support_phone = try node.extract("support_phone")
+        product_description = try? node.extract("product_description")
+        statement_descriptor = try? node.extract("statement_descriptor")
+        support_email = try? node.extract("support_email")
+        support_phone = try? node.extract("support_phone")
         timezone = try node.extract("timezone")
         tos_acceptance = try node.extract("tos_acceptance")
         transfer_schedule = try node.extract("transfer_schedule")
-        transfer_statement_descriptor = try node.extract("transfer_statement_descriptor")
+        transfer_statement_descriptor = try? node.extract("transfer_statement_descriptor")
         transfers_enabled = try node.extract("transfers_enabled")
         verification = try node.extract("verification")
-        keys = try node.extract("keys")
+        keys = try? node.extract("keys")
         metadata = try node.extract("metadata")
     }
 

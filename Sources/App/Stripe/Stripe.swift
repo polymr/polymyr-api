@@ -47,7 +47,7 @@ public final class Stripe {
         return try base.post("tokens", query: ["customer" : customer, "card" : card], token: account)
     }
 
-    public func createNormalAccount(email: String, source: String, local_id: Int?, on account: String = token) throws -> StripeCustomer {
+    public func createNormalAccount(email: String, source: String, local_id: Int?, on account: String = secret) throws -> StripeCustomer {
         let defaultQuery = ["source" : source]
         let query = local_id.flatMap { merge(query: defaultQuery, with: ["id" : "\($0)"]) } ?? defaultQuery
 
@@ -56,13 +56,11 @@ public final class Stripe {
 
     public func createManagedAccount(email: String, local_id: Int?) throws -> StripeAccount {
         let defaultQuery: [String: NodeRepresentable] = ["managed" : true, "country" : "US", "email" : email, "legal_entity[type]" : "company"]
-        print(defaultQuery)
         let query = local_id.flatMap { merge(query: defaultQuery, with: ["id" : "\($0)"]) } ?? defaultQuery
-        print(query)
         return try base.post("accounts", query: query, token: Stripe.secret)
     }
 
-    public func associate(source: String, withStripe id: String, under secretKey: String = Stripe.token) throws -> Card {
+    public func associate(source: String, withStripe id: String, under secretKey: String = Stripe.secret) throws -> Card {
         return try base.post("customers/\(id)/sources", query: ["source" : source], token: secretKey)
     }
 
@@ -89,7 +87,7 @@ public final class Stripe {
         return subscription
     }
     
-    public func charge(source: String, for price: Double, withFee percent: Double, under account: String = token) throws -> Charge {
+    public func charge(source: String, for price: Double, withFee percent: Double, under account: String = Stripe.token) throws -> Charge {
         return try base.post("charges", query: ["amount" : Int(price * 100), "currency" : "USD", "application_fee" : Int(price * percent * 100), "source" : source], token: account)
     }
     
@@ -97,7 +95,7 @@ public final class Stripe {
         return try base.post("coupons", query: ["duration": Duration.once.rawValue, "id" : code, "percent_off" : 5, "max_redemptions" : 1])
     }
 
-    public func paymentInformation(for customer: String, under account: String = token) throws -> [Card] {
+    public func paymentInformation(for customer: String, under account: String = Stripe.secret) throws -> [Card] {
         return try base.get_list("customers/\(customer)/sources", query: ["object" : "card"], token: account)
     }
 

@@ -48,23 +48,23 @@ public final class StripeSubscription: NodeConvertible {
         }
         
         id = try node.extract("id")
-        application_fee_percent = try node.extract("application_fee_percent")
+        application_fee_percent = try? node.extract("application_fee_percent")
         cancel_at_period_end = try node.extract("cancel_at_period_end")
-        canceled_at = try node.extract("canceled_at")
+        canceled_at = try? node.extract("canceled_at")
         created = try node.extract("created")
         current_period_end = try node.extract("current_period_end")
         current_period_start = try node.extract("current_period_start")
         customer = try node.extract("customer")
-        discount = try node.extract("discount")
-        ended_at = try node.extract("ended_at")
+        discount = try? node.extract("discount")
+        ended_at = try? node.extract("ended_at")
         livemode = try node.extract("livemode")
         plan = try node.extract("plan")
         quantity = try node.extract("quantity")
         start = try node.extract("start")
         status = try node.extract("status")
-        tax_percent = try node.extract("tax_percent")
-        trial_end = try node.extract("trial_end")
-        trial_start = try node.extract("trial_start")
+        tax_percent = try? node.extract("tax_percent")
+        trial_end = try? node.extract("trial_end")
+        trial_start = try? node.extract("trial_start")
     }
     
     public func makeNode(in context: Context?) throws -> Node {

@@ -27,8 +27,8 @@ public final class IdentityVerification: NodeConvertible {
     public let fields_needed: [String]
     
     public required init(node: Node) throws {
-        disabled_reason = try node.extract("disabled_reason")
-        due_by = try node.extract("due_by")
+        disabled_reason = try? node.extract("disabled_reason")
+        due_by = try? node.extract("due_by")
         fields_needed = try node.extract("fields_needed")
     }
     
