@@ -73,7 +73,6 @@ protocol JWTInitializable {
 
 final class AuthenticationCollection {
     
-    typealias Wrapped = HTTP.Responder
     typealias AuthenticationSubject = Entity & Authenticatable & JWTInitializable & NodeConvertible & Persistable
 
     var keys: [String : String] = [:]
@@ -93,6 +92,7 @@ final class AuthenticationCollection {
                 throw AuthenticationError.notAuthenticated
             }
 
+            // TODO : remove me
             if subject.hasPrefix("__force__") {
                 let actual = subject.replacingOccurrences(of: "__force__", with: "")
                 return try self.authenticateUserFor(subject: actual, with: request, create: false).makeResponse()
