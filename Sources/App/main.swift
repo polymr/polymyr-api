@@ -36,6 +36,10 @@ drop.group(middleware: [PersistMiddleware(Customer.self), PersistMiddleware(Make
     persistable.resource("tags", TagController())
 
     StripeCollection().build(persistable)
+    
+    persistable.get("search") { request in
+        return try Product.makeQuery().all().map { $0.name }.makeResponse()
+    }
 }
 
 do {
