@@ -8,6 +8,7 @@
     "cache" : "mysql-cache",
     "middleware" : [
         "file",
-        "fluent-sessions"
+        "fluent-sessions",
+        "error"
     ]
 }

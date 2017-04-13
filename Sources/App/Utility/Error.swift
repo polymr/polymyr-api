@@ -28,6 +28,6 @@ enum ModelError: Error, CustomStringConvertible {
 extension Abort {
 
     static func custom(status: Status, message: String) -> Abort {
-        return Abort(status, metadata: "message")
+        return Abort(status, reason: message)
     }
 }

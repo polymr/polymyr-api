@@ -24,6 +24,40 @@ func merge<K: Hashable, V>(keys: [K], with values: [V]) -> [K: V] {
     return dictionary
 }
 
+enum Sort: String, TypesafeOptionsParameter {
+    
+    case alpha
+    case price
+    case new
+    case none
+    
+    static let key = "sort"
+    static let values = [Sort.alpha.rawValue, Sort.new.rawValue, Sort.price.rawValue, Sort.none.rawValue]
+    static let defaultValue: Sort? = Sort.none
+    
+    var field: String {
+        switch self {
+        case .alpha:
+            return "name"
+        case .price:
+            return "fullPrice"
+        case .new:
+            // TODO : hacky
+            return "id"
+        case .none:
+            return ""
+        }
+    }
+    
+    func modify<T : Entity>(_ query: Query<T>) throws -> Query<T> {
+        if self == .none {
+            return query
+        }
+        
+        return try query.sort(field, .ascending)
+    }
+}
+
 struct Expander: QueryInitializable {
     
     static var key: String = "expand"
@@ -85,13 +119,15 @@ final class ProductController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
         
+        let sort = try request.extract() as Sort
+        
         let products = try { () -> [Product] in
             if let maker = request.query?["maker"]?.bool, maker {
                 let maker = try request.maker()
-                return try maker.products().all()
+                return try sort.modify(maker.products().makeQuery()).all()
             }
             
-            return try Product.all()
+            return try sort.modify(Product.makeQuery()).all()
         }()
         
         if let expander: Expander = try request.extract() {

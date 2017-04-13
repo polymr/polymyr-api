@@ -14,7 +14,7 @@ final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanit
 
     let storage = Storage()
     
-    static var permitted: [String] = ["name", "fullPrice", "shortDescription", "longDescription", "maker_id"]
+    static var permitted: [String] = ["name", "fullPrice", "shortDescription", "longDescription", "maker_id", "created"]
     
     var id: Identifier?
     var exists = false
@@ -23,6 +23,7 @@ final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanit
     let fullPrice: Double
     let shortDescription: String
     let longDescription: String
+    let created: Date
     
     let maker_id: Identifier
     
@@ -33,6 +34,7 @@ final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanit
         fullPrice = try node.extract("fullPrice")
         shortDescription = try node.extract("shortDescription")
         longDescription = try node.extract("longDescription")
+        created = (try? node.extract("created")) ?? Date()
         
         maker_id = try node.extract("maker_id")
     }
@@ -42,7 +44,8 @@ final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanit
             "name" : .string(name),
             "fullPrice" : .number(.double(fullPrice)),
             "shortDescription" : .string(shortDescription),
-            "longDescription" : .string(longDescription)
+            "longDescription" : .string(longDescription),
+            "created" : .date(created)
         ]).add(objects: [
             "id" : id,
             "maker_id" : maker_id
@@ -56,6 +59,7 @@ final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanit
             product.double("fullPrice")
             product.string("shortDescription")
             product.string("longDescription")
+            product.string("created")
             product.parent(idKey: "maker_id", idType: .int)
         }
     }
