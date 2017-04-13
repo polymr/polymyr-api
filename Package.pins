@@ -11,7 +11,7 @@
       "package": "AuthProvider",
       "reason": null,
       "repositoryURL": "https://github.com/hhanesand/auth-provider.git",
-      "version": "1.0.0-beta.2"
+      "version": "1.0.0-beta.3"
     },
     {
       "package": "BCrypt",
@@ -65,19 +65,19 @@
       "package": "Engine",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/engine.git",
-      "version": "2.0.0-beta.1"
+      "version": "2.0.0-beta.2"
     },
     {
       "package": "Fluent",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/fluent.git",
-      "version": "2.0.0-beta.11"
+      "version": "2.0.0-beta.19"
     },
     {
       "package": "FluentProvider",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/fluent-provider.git",
-      "version": "1.0.0-beta.7"
+      "version": "1.0.0-beta.10"
     },
     {
       "package": "JSON",
@@ -113,7 +113,7 @@
       "package": "MySQLDriver",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/mysql-driver.git",
-      "version": "2.0.0-beta.8"
+      "version": "2.0.0-beta.10"
     },
     {
       "package": "MySQLProvider",
@@ -167,7 +167,7 @@
       "package": "Vapor",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/vapor.git",
-      "version": "2.0.0-beta.4"
+      "version": "2.0.0-beta.8"
     }
   ],
   "version": 1
