@@ -37,7 +37,7 @@ final class Tag: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizab
     
     static func prepare(_ database: Database) throws {
         try database.create(Tag.self) { tag in
-            tag.id(for: Tag.self)
+            tag.id()
             tag.string("name")
         }
     }

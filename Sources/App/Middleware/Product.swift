@@ -51,7 +51,7 @@ final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanit
     
     static func prepare(_ database: Database) throws {
         try database.create(Product.self) { product in
-            product.id(for: Product.self)
+            product.id()
             product.string("name")
             product.double("fullPrice")
             product.string("shortDescription")

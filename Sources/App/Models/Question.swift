@@ -57,7 +57,7 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     
     static func prepare(_ database: Database) throws {
         try database.create(Question.self) { question in
-            question.id(for: Question.self)
+            question.id()
             question.string("text")
             question.string("qualifiers")
             question.parent(idKey: "campaign_id", idType: .int)

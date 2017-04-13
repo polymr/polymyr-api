@@ -57,7 +57,7 @@ final class Campaign: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     
     static func prepare(_ database: Database) throws {
         try database.create(Campaign.self) { campaign in
-            campaign.id(for: Campaign.self)
+            campaign.id()
             campaign.int("units")
             campaign.int("purchasedUnits")
             campaign.string("endDate")

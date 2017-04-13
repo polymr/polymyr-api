@@ -60,7 +60,7 @@ final class Answer: Model, Preparation, JSONConvertible, NodeConvertible, Saniti
     
     static func prepare(_ database: Database) throws {
         try database.create(Answer.self) { answer in
-            answer.id(for: Answer.self)
+            answer.id()
             answer.string("text", optional: true)
             answer.string("ratings", optional: true)
             answer.parent(idKey: "question_id", idType: .int)

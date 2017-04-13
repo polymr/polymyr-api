@@ -56,7 +56,7 @@ final class MakerPicture: Picture {
 
     class func prepare(_ database: Database) throws {
         try database.create(MakerPicture.self) { picture in
-            picture.id(for: CustomerPicture.self)
+            picture.id()
             picture.string("url")
             picture.parent(idKey: "maker_id", idType: .int)
         }
@@ -107,7 +107,7 @@ final class CustomerPicture: Picture {
 
     class func prepare(_ database: Database) throws {
         try database.create(CustomerPicture.self) { picture in
-            picture.id(for: CustomerPicture.self)
+            picture.id()
             picture.string("url")
             picture.parent(idKey: "customer_id", idType: .int)
         }
@@ -158,7 +158,7 @@ final class ProductPicture: Picture {
     
     class func prepare(_ database: Database) throws {
         try database.create(ProductPicture.self) { picture in
-            picture.id(for: ProductPicture.self)
+            picture.id()
             picture.string("url")
             picture.int("type")
             picture.parent(idKey: "product_id", idType: .int)

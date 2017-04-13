@@ -86,7 +86,7 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     
     static func prepare(_ database: Database) throws {
         try database.create(Customer.self) { customer in
-            customer.id(for: Campaign.self)
+            customer.id()
             customer.string("name")
             customer.string("stripe_id", optional: true)
             customer.string("email")
@@ -139,7 +139,7 @@ final class CustomerSessionToken: Model, Preparation, JSONConvertible, NodeConve
 
     static func prepare(_ database: Database) throws {
         try database.create(CustomerSessionToken.self) { session in
-            session.id(for: CustomerSessionToken.self)
+            session.id()
             session.parent(idKey: "customer_id", idType: .int)
             session.string("token")
         }

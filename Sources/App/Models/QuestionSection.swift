@@ -55,7 +55,7 @@ final class QuestionSection: Model, Preparation, JSONConvertible, NodeConvertibl
     
     static func prepare(_ database: Database) throws {
         try database.create(QuestionSection.self) { questionSection in
-            questionSection.id(for: Question.self)
+            questionSection.id()
             questionSection.string("name")
             questionSection.string("description")
             questionSection.string("suggestions")

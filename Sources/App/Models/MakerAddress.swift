@@ -52,7 +52,7 @@ final class MakerAddress: Model, Preparation, JSONConvertible, NodeConvertible, 
     
     static func prepare(_ database: Database) throws {
         try database.create(MakerAddress.self) { shipping in
-            shipping.id(for: MakerAddress.self)
+            shipping.id()
             shipping.string("address")
             shipping.string("apartment", optional: true)
             shipping.string("city")

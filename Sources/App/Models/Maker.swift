@@ -156,7 +156,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     
     static func prepare(_ database: Database) throws {
         try database.create(Maker.self) { maker in
-            maker.id(for: Maker.self)
+            maker.id()
             maker.string("email")
             maker.string("businessName")
             maker.string("publicWebsite")
@@ -272,7 +272,7 @@ final class MakerSessionToken: Model, Preparation, JSONConvertible, NodeConverti
 
     static func prepare(_ database: Database) throws {
         try database.create(MakerSessionToken.self) { session in
-            session.id(for: MakerSessionToken.self)
+            session.id()
             session.parent(idKey: "maker_id", idType: .int)
             session.string("token")
         }

@@ -74,7 +74,7 @@ final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     
     static func prepare(_ database: Database) throws {
         try database.create(Order.self) { order in
-            order.id(for: Order.self)
+            order.id()
             order.string("card")
             order.string("charge_id")
             order.bool("fulfilled", default: false)

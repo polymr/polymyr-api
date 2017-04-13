@@ -71,7 +71,7 @@ final class CustomerAddress: Model, Preparation, JSONConvertible, NodeConvertibl
     
     static func prepare(_ database: Database) throws {
         try database.create(CustomerAddress.self) { shipping in
-            shipping.id(for: CustomerAddress.self)
+            shipping.id()
             shipping.string("address")
             shipping.string("apartment", optional: true)
             shipping.string("city")
