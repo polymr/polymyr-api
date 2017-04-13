@@ -79,7 +79,7 @@ final class AuthenticationCollection {
     
     func build(_ builder: RouteBuilder) {
 
-        builder.grouped(PasswordAuthenticationMiddleware(Maker.self)).get("login") { request in
+        builder.grouped(PasswordAuthenticationMiddleware(Maker.self)).post("login") { request in
             return try request.auth.assertAuthenticated(Maker.self).makeResponse()
         }
 
