@@ -36,7 +36,6 @@ extension Request {
         }
         
         let model = try M(node: json)
-        try model.save()
         try model.postValidate()
         
         return model
@@ -55,7 +54,7 @@ extension Request {
             throw Abort.badRequest
         }
         
-        var modelJSON = try model.makeNode(in: emptyContext)
+        var modelJSON = try model.makeNode(in: rowContext)
         json.forEach { modelJSON[$0.key] = Node($0.value) }
         
         let model = try M(node: modelJSON)

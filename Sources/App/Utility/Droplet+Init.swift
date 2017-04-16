@@ -49,7 +49,6 @@ extension Droplet {
                                   Maker.self,
                                   CustomerAddress.self,
                                   Customer.self,
-                                  CustomerSessionToken.self,
                                   StripeMakerCustomer.self,
                                   MakerAddress.self,
                                   Campaign.self,

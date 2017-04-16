@@ -108,7 +108,7 @@ public final class Stripe {
     }
     
     public func transfers(for secretKey: String) throws -> [Transfer] {
-        return try base.get_list("https://api.stripe.com/v1/transfers", token: secretKey)
+        return try base.get_list("transfers", token: secretKey)
     }
 
     public func delete(payment: String, from customer: String) throws -> JSON {

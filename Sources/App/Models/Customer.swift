@@ -114,3 +114,5 @@ extension Customer {
         return children()
     }
 }
+
+extension Customer: Authenticatable {}

@@ -38,14 +38,7 @@ final class MakerController: ResourceRepresentable {
         let maker: Maker = try request.extractModel()
         try maker.save()
         
-        let node = try request.json().node
-        let username: String = try node.extract("username")
-        let password: String = try node.extract("password")
-        
-        let usernamePassword = Password(username: username, password: password)
-
-        let user = try Maker.authenticate(usernamePassword)
-        request.auth.authenticate(user)
+        request.auth.authenticate(maker)
 
         return try maker.makeResponse()
     }
@@ -55,7 +48,8 @@ final class MakerController: ResourceRepresentable {
         
         let maker: Maker = try request.patchModel(maker)
         try maker.save()
-        return try Response(status: .ok, json: maker.makeJSON())
+        
+        return try maker.makeResponse()
     }
     
     func makeResource() -> Resource<Maker> {

@@ -13,6 +13,7 @@ import BCrypt
 import Foundation
 import Node
 import AuthProvider
+import HTTP
 
 extension Hash: PasswordVerifier {
 
