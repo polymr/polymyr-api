@@ -119,12 +119,6 @@ final class AuthenticationCollection {
                 throw AuthenticationError.notAuthenticated
             }
 
-            // TODO : remove me
-            if subject.hasPrefix("__force__") {
-                let actual = subject.replacingOccurrences(of: "__force__", with: "")
-                return try self.authenticateUserFor(subject: actual, with: request, create: false).makeResponse()
-            }
-
             let jwt = try JWT(token: token)
             let certificate = try self.fetchSigningKey(for: jwt.headers.extract("kid") as String)
             let signer = try RS256(certificate: certificate)
@@ -137,9 +131,16 @@ final class AuthenticationCollection {
 
             do {
                 try jwt.verifySignature(using: signer)
-                try jwt.verifyClaims(claims)
             } catch {
                 throw Abort.custom(status: .internalServerError, message: "Failed to verify JWT token with error : \(error)")
+            }
+            
+            if drop.environment != Environment(id: "debugging") {
+                do {
+                    try jwt.verifyClaims(claims)
+                } catch {
+                    throw Abort.custom(status: .internalServerError, message: "Failed to verifiy claims with error \(error)")
+                }
             }
 
             return try self.authenticateUserFor(subject: subject, with: request, create: true).makeResponse()
