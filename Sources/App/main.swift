@@ -15,9 +15,9 @@ import AuthProvider
 
 let drop = Droplet.create()
 
-AuthenticationCollection().build(drop)
-
 drop.group(middleware: [PersistMiddleware(Customer.self), PersistMiddleware(Maker.self)]) { persistable in
+    
+    AuthenticationCollection().build(persistable)
 
     persistable.resource("makers", MakerController())
     persistable.picture(base: "makers", slug: "makers_id", picture: PictureController<MakerPicture, Maker>())
