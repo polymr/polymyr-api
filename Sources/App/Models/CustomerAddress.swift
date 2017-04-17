@@ -80,7 +80,7 @@ final class CustomerAddress: Model, Preparation, JSONConvertible, NodeConvertibl
             shipping.string("firstName")
             shipping.string("lastName")
             shipping.string("phoneNumber", optional: true)
-            shipping.parent(idKey: "customer_id", idType: .int)
+            shipping.parent(Customer.self)
         }
     }
     

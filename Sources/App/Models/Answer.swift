@@ -63,9 +63,9 @@ final class Answer: Model, Preparation, JSONConvertible, NodeConvertible, Saniti
             answer.id()
             answer.string("text", optional: true)
             answer.string("ratings", optional: true)
-            answer.parent(idKey: "question_id", idType: .int)
-            answer.parent(idKey: "order_id", idType: .int)
-            answer.parent(idKey: "campaign_id", idType: .int)
+            answer.parent(Question.self)
+            answer.parent(Order.self)
+            answer.parent(Campaign.self)
         }
     }
     

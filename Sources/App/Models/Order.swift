@@ -78,11 +78,11 @@ final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             order.string("card")
             order.string("charge_id")
             order.bool("fulfilled", default: false)
-            order.parent(idKey: "campaign_id", idType: .int)
-            order.parent(idKey: "product_id", idType: .int)
-            order.parent(idKey: "maker_id", idType: .int)
-            order.parent(idKey: "customer_id", idType: .int)
-            order.parent(idKey: "customeraddress_id", idType: .int)
+            order.parent(Campaign.self)
+            order.parent(Product.self)
+            order.parent(Maker.self)
+            order.parent(Customer.self)
+            order.parent(CustomerAddress.self)
         }
     }
     

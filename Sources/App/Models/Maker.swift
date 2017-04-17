@@ -158,7 +158,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             maker.string("contactName")
             maker.string("contactPhone")
             maker.string("contactEmail")
-            maker.parent(idKey: "address_id", idType: .int, optional: true)
+            maker.parent(MakerAddress.self)
             
             maker.string("location")
             maker.string("createdOn")

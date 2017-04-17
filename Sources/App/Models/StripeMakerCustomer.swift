@@ -57,8 +57,8 @@ final class StripeMakerCustomer: Model, JSONConvertible, NodeConvertible, Prepar
     static func prepare(_ database: Database) throws {
         try database.create(StripeMakerCustomer.self) { stripeMakerCustomer in
             stripeMakerCustomer.id()
-            stripeMakerCustomer.parent(idKey: "customer_id", idType: .int)
-            stripeMakerCustomer.parent(idKey: "maker_id", idType: .int)
+            stripeMakerCustomer.parent(Customer.self)
+            stripeMakerCustomer.parent(Maker.self)
             stripeMakerCustomer.string("stripeCustomerId")
         }
     }

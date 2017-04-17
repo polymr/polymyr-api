@@ -58,7 +58,7 @@ final class MakerPicture: Picture {
         try database.create(MakerPicture.self) { picture in
             picture.id()
             picture.string("url")
-            picture.parent(idKey: "maker_id", idType: .int)
+            picture.parent(Maker.self)
         }
     }
 
@@ -109,7 +109,7 @@ final class CustomerPicture: Picture {
         try database.create(CustomerPicture.self) { picture in
             picture.id()
             picture.string("url")
-            picture.parent(idKey: "customer_id", idType: .int)
+            picture.parent(Customer.self)
         }
     }
 
@@ -161,7 +161,7 @@ final class ProductPicture: Picture {
             picture.id()
             picture.string("url")
             picture.int("type")
-            picture.parent(idKey: "product_id", idType: .int)
+            picture.parent(Product.self)
         }
     }
 

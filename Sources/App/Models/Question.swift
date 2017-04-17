@@ -60,8 +60,8 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
             question.id()
             question.string("text")
             question.string("qualifiers")
-            question.parent(idKey: "campaign_id", idType: .int)
-            question.parent(idKey: "section_id", idType: .int)
+            question.parent(Campaign.self)
+            question.parent(QuestionSection.self)
         }
     }
     

@@ -60,7 +60,7 @@ final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanit
             product.string("shortDescription")
             product.string("longDescription")
             product.string("created")
-            product.parent(idKey: "maker_id", idType: .int)
+            product.parent(Maker.self)
         }
     }
     

@@ -91,7 +91,7 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
             customer.string("stripe_id", optional: true)
             customer.string("email")
             customer.string("sub_id", optional: true)
-            customer.parent(idKey: "default_shipping_id", idType: .int, optional: true)
+            customer.parent(CustomerAddress.self)
         }
     }
     
