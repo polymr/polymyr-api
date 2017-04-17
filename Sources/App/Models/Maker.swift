@@ -82,7 +82,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
         password = try? node.extract("password")
 
         if let password = try? node.extract("password") as String {
-            self.hash = try Hash.make(message: password.makeBytes(), with: Salt()).string()
+            self.hash = try drop.hash.make(password.makeBytes()).string()
         } else {
             self.hash = try node.extract("hash") as String
         }
