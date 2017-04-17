@@ -107,7 +107,15 @@ final class AuthenticationCollection {
     func build(_ builder: RouteBuilder) {
 
         builder.grouped(PasswordAuthenticationMiddleware(Maker.self)).post("login") { request in
-            return try request.auth.assertAuthenticated(Maker.self).makeResponse()
+            guard let maker = request.auth.authenticated(Maker.self) else {
+                if drop.environment == Environment(id: "debugging") {
+                    throw Abort.custom(status: .badRequest, message: "Could not fetch authenticated user.")
+                } else {
+                    throw AuthenticationError.notAuthenticated
+                }
+            }
+            
+            return try maker.makeResponse()
         }
 
         builder.post("authentication") { request in
