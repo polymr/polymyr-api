@@ -242,8 +242,7 @@ extension BCryptHasher: PasswordVerifier {
         do {
             return try self.check(password, matchesHash: matchesHash)
         } catch {
-            print(error)
-            throw error
+            throw Abort.custom(status: .unauthorized, message: "error matching hash \(error)")
         }
     }
 }
