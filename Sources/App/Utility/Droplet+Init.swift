@@ -38,7 +38,7 @@ extension Droplet {
     internal static func create() -> Droplet {
 
         do {
-            let environment = CommandLine.environment ?? Environment(id: "debugging")
+            let environment = Environment(id: "debugging")
             let drop = try Droplet(environment: environment)
 
             try drop.addProvider(AuthProvider.Provider.self)
