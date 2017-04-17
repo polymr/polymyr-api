@@ -109,7 +109,7 @@ final class AuthenticationCollection {
         builder.grouped(PasswordAuthenticationMiddleware(Maker.self)).post("login") { request in
             guard let maker = request.auth.authenticated(Maker.self) else {
                 if drop.environment == Environment(id: "debugging") {
-                    throw Abort.custom(status: .badRequest, message: "Could not fetch authenticated user.")
+                    throw Abort.custom(status: .badRequest, message: "Could not fetch authenticated user. \(request.storage.description)")
                 } else {
                     throw AuthenticationError.notAuthenticated
                 }

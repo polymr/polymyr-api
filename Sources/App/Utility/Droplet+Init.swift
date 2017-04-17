@@ -60,12 +60,12 @@ extension Droplet {
                                   QuestionSection.self,
                                   Question.self,
                                   Order.self,
+                                  Tag.self,
                                   Pivot<Tag, Product>.self,
                                   MakerPicture.self,
                                   CustomerPicture.self,
                                   ProductPicture.self,
-                                  MySQLCache.MySQLCacheEntity.self,
-                                  Tag.self] as [Preparation.Type]
+                                  MySQLCache.MySQLCacheEntity.self] as [Preparation.Type]
 
             return drop
 
