@@ -15,13 +15,6 @@ import Node
 import AuthProvider
 import HTTP
 
-extension Hash: PasswordVerifier {
-
-    public func verify(password: String, matchesHash: String) throws -> Bool {
-        return try Hash.verify(message: password, matches: matchesHash.makeBytes())
-    }
-}
-
 enum ApplicationState: String, NodeConvertible {
     
     case none = "none"
@@ -243,10 +236,15 @@ extension Maker {
     }
 }
 
-struct MakerPasswordVerifier: PasswordVerifier {
-
-    func verify(password: String, matchesHash: String) throws -> Bool {
-        return try Hash.verify(message: password, matches: matchesHash.makeBytes())
+extension BCryptHasher: PasswordVerifier {
+    
+    public func verify(password: String, matchesHash: String) throws -> Bool {
+        do {
+            return try self.check(password, matchesHash: matchesHash)
+        } catch {
+            print(error)
+            throw error
+        }
     }
 }
 
@@ -261,6 +259,6 @@ extension Maker: PasswordAuthenticatable {
     }
 
     public static var passwordVerifier: PasswordVerifier? {
-        return MakerPasswordVerifier()
+        return BCryptHasher()
     }
 }

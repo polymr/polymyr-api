@@ -71,6 +71,11 @@ final class CustomerController {
     
     func create(_ request: Request) throws -> ResponseRepresentable {
         let customer: Customer = try request.extractModel()
+        
+        if try Customer.makeQuery().filter("email", customer.email).count() > 0 {
+            throw Abort.custom(status: .badRequest, message: "Username is taken.")
+        }
+        
         try customer.save()
         return try customer.makeResponse()
     }

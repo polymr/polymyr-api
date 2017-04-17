@@ -44,6 +44,10 @@ extension Droplet {
             try drop.addProvider(AuthProvider.Provider.self)
             try drop.addProvider(MySQLProvider.Provider.self)
             try drop.addProvider(FluentCacheProvider.self)
+            
+            drop.database?.log = { query in
+                print("query : \(query)")
+            }
 
             drop.preparations += [Product.self,
                                   Maker.self,
