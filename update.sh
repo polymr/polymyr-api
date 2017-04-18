@@ -60,7 +60,7 @@ else
 	echo "\n>>>> vapor build --release=false --fetch=false --verbose"
 	vapor build --release=false --fetch=false --verbose
 
-	if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- polymyrd.service.txt)" ]; then
+	if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- dev-polymyrd.service.txt)" ]; then
     	echo "    \n>>>> Detected changes in development server configuration files!"
 		reset_development_server
 	fi
