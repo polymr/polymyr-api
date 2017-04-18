@@ -18,9 +18,7 @@ DIR="$(dirname "${BASH_SOURCE[0]}")"
 cd "$DIR" || exit
 
 if [ "$(git rev-parse --abbrev-ref HEAD)" = "master" ]; then
-	echo "1" >> "./test.txt"
-	./.build/release/App --env="release" & echo $! > "$pidFile"
+	./.build/release/App --env="production" & echo $! > "$pidFile"
 else
-	echo "2" >> "./test.txt"
 	./.build/release/App --env="development" & echo $! > "$pidFile"
 fi
