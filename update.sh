@@ -16,7 +16,7 @@ reset_production_server() {
 	sudo systemctl daemon-reload
 }
 
-reset_production_server() {
+reset_development_server() {
 
 	local prodServiceFileName="dev-polymyrd.service.txt"
 	local prodServiceName="dev-polymyrd.service"
@@ -62,10 +62,10 @@ else
 
 	if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- polymyrd.service.txt)" ]; then
     	echo "    \n>>>> Detected changes in development server configuration files!"
-		reset_production_server
+		reset_development_server
 	fi
 
-	echo "\n>>>> sudo systemctl restart polymyrd.service"
+	echo "\n>>>> sudo systemctl restart dev-polymyrd.service"
 	sudo systemctl restart dev-polymyrd.service
 fi
 
