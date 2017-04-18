@@ -2,16 +2,9 @@
 
 while getopts "e:f:d:" opt; do
     case $opt in
-      e) environment="$OPTARG"
-      ;;
       f) pidFile="$OPTARG"
     esac
 done
-
-if [ -z "$environment" ]; then
-    printf "No environment was provided. Provde one with -e."
-    exit
-fi
 
 if [ -z "$pidFile" ]; then
     printf "No pidFile was provided. Provide one with -f."
@@ -23,4 +16,9 @@ sudo touch "$pidFile"
 
 DIR="$(dirname "${BASH_SOURCE[0]}")"
 cd "$DIR" || exit
-./.build/release/App --env="$environment" & echo $! > "$pidFile"
+
+if [ "$(git rev-parse --abbrev-ref HEAD)" == "master" ]; then
+	./.build/release/App --env="release" & echo $! > "$pidFile"
+else
+	./.build/release/App --env="development" & echo $! > "$pidFile"
+fi

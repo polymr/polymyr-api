@@ -29,8 +29,13 @@ if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- nginx/)" ]; then
 	sudo systemctl restart nginx
 fi
 
-echo "\n>>>> vapor build --release=true --fetch=false --verbose"
-vapor build --release=true --fetch=false --verbose
+if [ "$(git rev-parse --abbrev-ref HEAD)" == "master" ]; then
+	echo "\n>>>> vapor build --release=true --fetch=false --verbose"
+	vapor build --release=true --fetch=false --verbose
+else
+	echo "\n>>>> vapor build --release=false --fetch=false --verbose"
+	vapor build --release=false --fetch=false --verbose
+fi
 
 if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- polymyrd.service.txt)" ]; then
     echo "    \n>>>> Detected changes in production server configuration files!"

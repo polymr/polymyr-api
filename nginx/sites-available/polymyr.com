@@ -5,7 +5,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    server_name polymyr.com www.polymyr.com api.polymyr.com www.api.polymyr.com static.polymyr.com www.static.polymyr.com;
+    server_name polymyr.com www.polymyr.com api.polymyr.com www.api.polymyr.com static.polymyr.com www.static.polymyr.com beta.polymyr.com www.beta.polymyr.com;
 
     location ^~ /.well-known/acme-challenge/ {
         default_type "text/plain";
