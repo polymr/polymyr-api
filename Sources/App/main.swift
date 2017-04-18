@@ -12,8 +12,16 @@ import FluentProvider
 import Node
 import HTTP
 import AuthProvider
+import Foundation
 
 let drop = Droplet.create()
+
+let formatter = DateFormatter()
+formatter.locale = Locale(identifier: "en_US_POSIX")
+formatter.timeZone = TimeZone(secondsFromGMT: 0)
+formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXXXX"
+
+Date.incomingDateFormatters.append(formatter)
 
 drop.group(middleware: [PersistMiddleware(Customer.self), PersistMiddleware(Maker.self)]) { persistable in
     
