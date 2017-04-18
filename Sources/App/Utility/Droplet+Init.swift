@@ -38,8 +38,7 @@ extension Droplet {
     internal static func create() -> Droplet {
 
         do {
-            let environment = Environment(id: "debugging")
-            let drop = try Droplet(environment: environment)
+            let drop = try Droplet()
 
             try drop.addProvider(AuthProvider.Provider.self)
             try drop.addProvider(MySQLProvider.Provider.self)

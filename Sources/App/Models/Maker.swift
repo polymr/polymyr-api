@@ -259,7 +259,7 @@ extension Maker: PasswordAuthenticatable {
     
     public static func authenticate(_ creds: Password) throws -> Maker {
         guard let match = try self.makeQuery().filter(usernameKey, creds.username).first() else {
-            if drop.environment == Environment(id: "debugging") {
+            if drop.environment == .development {
                 throw Abort.custom(status: .badRequest, message: "Could not find user with username \(creds.username).")
             } else {
                 throw AuthenticationError.invalidCredentials
@@ -267,7 +267,7 @@ extension Maker: PasswordAuthenticatable {
         }
         
         guard let hash = match.hashedPassword else {
-            if drop.environment == Environment(id: "debugging") {
+            if drop.environment == .development {
                 throw Abort.custom(status: .badRequest, message: "No hashed password for user with username \(creds.username).")
             } else {
                 throw AuthenticationError.invalidCredentials
@@ -275,7 +275,7 @@ extension Maker: PasswordAuthenticatable {
         }
         
         guard let passwordVerifier = passwordVerifier else {
-            if drop.environment == Environment(id: "debugging") {
+            if drop.environment == .development {
                 throw Abort.custom(status: .badRequest, message: "No password hasher for \(self).")
             } else {
                 throw AuthenticationError.invalidCredentials
@@ -284,14 +284,14 @@ extension Maker: PasswordAuthenticatable {
         
         do {
             guard try passwordVerifier.verify(password: creds.password, matchesHash: hash) else {
-                if drop.environment == Environment(id: "debugging") {
+                if drop.environment == .development {
                     throw Abort.custom(status: .badRequest, message: "Password \(creds.password) does not match hash : \(hash)")
                 } else {
                     throw AuthenticationError.invalidCredentials
                 }
             }
         } catch {
-            if drop.environment == Environment(id: "debugging") {
+            if drop.environment == .development {
                 throw Abort.custom(status: .badRequest, message: "Error checking hash : \(error).")
             } else {
                 throw AuthenticationError.invalidCredentials

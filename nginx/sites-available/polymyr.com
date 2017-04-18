@@ -65,6 +65,23 @@ server {
     }
 }
 
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    include snippets/ssl-api.polymyr.com.conf;
+    include snippets/ssl-params.conf;
+
+    root /home/hakon/polymyr/polymyr-development-api/;
+
+    server_name beta.polymyr.com www.beta.polymyr.com;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://127.0.0.1:8081;
+    }
+}
+
 proxy_cache_path /data/nginx/cache levels=1:2 keys_zone=static:10m inactive=60m use_temp_path=off max_size=4g;
 
 server {
