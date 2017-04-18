@@ -17,7 +17,7 @@ sudo touch "$pidFile"
 DIR="$(dirname "${BASH_SOURCE[0]}")"
 cd "$DIR" || exit
 
-if [ "$(git rev-parse --abbrev-ref HEAD)" == "master" ]; then
+if [ "$(git rev-parse --abbrev-ref HEAD)" = "master" ]; then
 	./.build/release/App --env="release" & echo $! > "$pidFile"
 else
 	./.build/release/App --env="development" & echo $! > "$pidFile"
