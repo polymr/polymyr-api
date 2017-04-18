@@ -17,7 +17,7 @@ final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
 
     let storage = Storage()
     
-    static var permitted: [String] = ["campaign_id", "product_id", "maker_id", "customer_id", "customeraddress_id", "card"]
+    static var permitted: [String] = ["campaign_id", "product_id", "maker_id", "customer_id", "customer_address_id", "card"]
     
     var id: Identifier?
     var exists = false
@@ -27,7 +27,7 @@ final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     var maker_id: Identifier
     
     let customer_id: Identifier
-    let customeraddress_id: Identifier
+    let customer_address_id: Identifier
     
     var charge_id: String?
     let card: String
@@ -41,7 +41,7 @@ final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
         charge_id = try? node.extract("charge_id")
         
         product_id = try node.extract("product_id")
-        customeraddress_id = try node.extract("customeraddress_id")
+        customer_address_id = try node.extract("customer_address_id")
         customer_id = try node.extract("customer_id")
 
         fulfilled = (try? node.extract("fulfilled")) ?? false
@@ -67,7 +67,7 @@ final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             "product_id" : product_id,
             "maker_id" : maker_id,
             "customer_id" : customer_id,
-            "customeraddress_id" : customeraddress_id,
+            "customer_address_id" : customer_address_id,
             "charge_id" : charge_id
         ])
     }

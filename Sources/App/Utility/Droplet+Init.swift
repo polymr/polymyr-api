@@ -49,23 +49,30 @@ extension Droplet {
                 print("query : \(query)")
             }
 
-            drop.preparations += [Product.self,
-                                  Maker.self,
-                                  CustomerAddress.self,
-                                  Customer.self,
-                                  StripeMakerCustomer.self,
-                                  MakerAddress.self,
-                                  Campaign.self,
-                                  Answer.self,
-                                  QuestionSection.self,
-                                  Question.self,
-                                  Order.self,
-                                  Tag.self,
-                                  Pivot<Tag, Product>.self,
-                                  MakerPicture.self,
-                                  CustomerPicture.self,
-                                  ProductPicture.self,
-                                  MySQLCache.MySQLCacheEntity.self] as [Preparation.Type]
+            drop.preparations += [
+                MakerAddress.self,
+                Maker.self,
+                MakerPicture.self,
+                
+                Customer.self,
+                CustomerAddress.self,
+                CustomerPicture.self,
+                StripeMakerCustomer.self,
+                
+                Product.self,
+                ProductPicture.self,
+                Tag.self,
+                Pivot<Tag, Product>.self,
+                
+                Campaign.self,
+                Order.self,
+
+                QuestionSection.self,
+                Question.self,
+                Answer.self,
+                
+                MySQLCache.MySQLCacheEntity.self
+            ] as [Preparation.Type]
 
             return drop
 

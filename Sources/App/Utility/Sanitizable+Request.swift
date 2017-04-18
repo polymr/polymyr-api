@@ -36,7 +36,6 @@ extension Request {
         }
         
         let model = try M(node: json)
-        try model.postValidate()
         
         return model
     }
@@ -60,7 +59,6 @@ extension Request {
         let model = try M(node: modelJSON)
         model.exists = true
         
-        try model.postValidate()
         return model
     }
 }

@@ -37,9 +37,7 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     let name: String
     let email: String
 
-    var default_shipping_id: Identifier?
     var stripe_id: String?
-    
     var sub_id: String?
 
     init(subject: String, request: Request) throws {
@@ -55,7 +53,6 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     
     init(node: Node) throws {
         id = try? node.extract("id")
-        default_shipping_id = try? node.extract("default_shipping_id")
         
         // Name and email are always mandatory
         email = try node.extract("email")
@@ -71,17 +68,8 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
         ]).add(objects: [
             "id" : id,
             "stripe_id" : stripe_id,
-            "default_shipping_id" : default_shipping_id,
             "sub_id" : sub_id
         ])
-    }
-    
-    func postValidate() throws {
-        if default_shipping_id != nil {
-            guard (try? defaultShipping().first()) ?? nil != nil else {
-                throw ModelError.missingLink(from: Customer.self, to: CustomerAddress.self, id: default_shipping_id?.int ?? -1)
-            }
-        }
     }
     
     static func prepare(_ database: Database) throws {
@@ -91,7 +79,6 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
             customer.string("stripe_id", optional: true)
             customer.string("email")
             customer.string("sub_id", optional: true)
-            customer.parent(CustomerAddress.self)
         }
     }
     
@@ -101,10 +88,6 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
 }
 
 extension Customer {
-
-    func defaultShipping() -> Parent<Customer, CustomerAddress> {
-        return parent(id: default_shipping_id)
-    }
     
     func shippingAddresses() -> Children<Customer, CustomerAddress> {
         return children()

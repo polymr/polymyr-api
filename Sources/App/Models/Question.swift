@@ -15,7 +15,7 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
 
     let storage = Storage()
     
-    static var permitted: [String] = ["text", "qualifiers", "campaign_id", "section_id"]
+    static var permitted: [String] = ["text", "qualifiers", "campaign_id", "question_section_id"]
     
     var id: Identifier?
     var exists = false
@@ -25,7 +25,7 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     let qualifiers: [String]?
     
     let campaign_id: Identifier
-    let section_id: Identifier
+    let question_section_id: Identifier
     
     init(node: Node) throws {
         id = try? node.extract("id")
@@ -33,7 +33,7 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
         qualifiers = try? node.extract("qualifiers")
         
         campaign_id = try node.extract("campaign_id")
-        section_id = try node.extract("section_id")
+        question_section_id = try node.extract("question_section_id")
     }
     
     convenience init(row: Row) throws {
@@ -48,7 +48,7 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     func makeNode(in context: Context?) throws -> Node {
         return try Node.object([:]).add(objects: [
             "campaign_id" : campaign_id,
-            "section_id" : section_id,
+            "question_section_id" : question_section_id,
             "id" : id,
             "text" : text,
             "qualifiers" : serialize(qualifiers, in: context) as Node

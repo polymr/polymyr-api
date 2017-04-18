@@ -62,13 +62,7 @@ final class CustomerAddress: Model, Preparation, JSONConvertible, NodeConvertibl
             "customer_id" : customer_id
         ])
     }
-    
-    func postValidate() throws {
-        guard (try? customer().first()) ?? nil != nil else {
-            throw ModelError.missingLink(from: CustomerAddress.self, to: Customer.self, id: customer_id.int)
-        }
-    }
-    
+
     static func prepare(_ database: Database) throws {
         try database.create(CustomerAddress.self) { shipping in
             shipping.id()

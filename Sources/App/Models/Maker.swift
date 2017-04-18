@@ -40,7 +40,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
 
     let storage = Storage()
     
-    static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "stripe_id", "keys", "missingFields", "needsIdentityUpload", "address_id", "password"]
+    static var permitted: [String] = ["email", "businessName", "publicWebsite", "contactName", "contactPhone", "contactEmail", "location", "createdOn", "cut", "username", "stripe_id", "keys", "missingFields", "needsIdentityUpload", "maker_address_id", "password"]
     
     var id: Identifier?
     var exists = false
@@ -52,7 +52,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
     let contactName: String
     let contactPhone: String
     let contactEmail: String
-    let address_id: Identifier?
+    let maker_address_id: Identifier?
     
     let location: String
     let createdOn: Date
@@ -94,7 +94,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
         contactName = try node.extract("contactName")
         contactPhone = try node.extract("contactPhone")
         contactEmail = try node.extract("contactEmail")
-        address_id = try? node.extract("address_id")
+        maker_address_id = try? node.extract("maker_address_id")
         
         location = try node.extract("location")
         createdOn = (try? node.extract("createdOn")) ?? Date()
@@ -137,15 +137,11 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
              "stripe_id" : stripe_id,
              "publishableKey" : keys?.publishable,
              "secretKey" : keys?.secret,
-             "address_id" : address_id,
+             "maker_address_id" : maker_address_id,
              "sub_id" : sub_id,
              "createdOn" : Node.date(createdOn).string,
              "password" : (context?.isRow ?? false) ? password : nil
         ])
-    }
-    
-    func postValidate() throws {
-        // TODO
     }
     
     static func prepare(_ database: Database) throws {
@@ -158,7 +154,7 @@ final class Maker: Model, Preparation, JSONConvertible, NodeConvertible, Sanitiz
             maker.string("contactName")
             maker.string("contactPhone")
             maker.string("contactEmail")
-            maker.parent(MakerAddress.self)
+            maker.parent(MakerAddress.self, optional: true)
             
             maker.string("location")
             maker.string("createdOn")
@@ -228,7 +224,7 @@ extension Maker {
     }
     
     func address() -> Parent<Maker, MakerAddress> {
-        return parent(id: address_id)
+        return parent(id: maker_address_id)
     }
 
     func orders() -> Children<Maker, Order> {
