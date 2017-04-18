@@ -27,9 +27,7 @@ extension Request {
     }
 
     public func extractModel<M: Model>(injecting: Node) throws -> M where M: Sanitizable & NodeConvertible {
-        guard var json = self.json?.permit(M.permitted) else {
-            throw Abort.badRequest
-        }
+        var json = try self.json().permit(M.permitted)
         
         injecting.object?.forEach { key, value in
             json[key] = JSON(value)

@@ -28,6 +28,11 @@ final class TagController: ResourceRepresentable {
     }
     
     func delete(_ request: Request, tag: Tag) throws -> ResponseRepresentable {
+        for product in try tag.products().all() {
+            try tag.products().remove(product)
+            try product.tags().remove(tag)
+        }
+        
         try tag.delete()
         return Response(status: .noContent)
     }

@@ -49,7 +49,7 @@ final class Tag: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizab
 
 extension Tag {
     
-    func products() -> Siblings<Tag, Product, Pivot<Product, Tag>> {
+    func products() -> Siblings<Tag, Product, Pivot<Tag, Product>> {
         return siblings()
     }
 }

@@ -77,6 +77,8 @@ final class CustomerController {
         }
         
         try customer.save()
+        
+        request.auth.authenticate(customer)
         return try customer.makeResponse()
     }
     
