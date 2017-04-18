@@ -44,7 +44,13 @@ final class MakerController: ResourceRepresentable {
         try maker.save()
         
         request.auth.authenticate(maker)
-
+        
+        let account = try Stripe.shared.createManagedAccount(email: maker.contactEmail, local_id: maker.id?.int)
+        
+        maker.stripe_id = account.id
+        maker.keys = account.keys
+        try maker.save()
+    
         return try maker.makeResponse()
     }
 

@@ -148,17 +148,6 @@ class StripeCollection: EmptyInitializable {
                     return try Stripe.shared.disputes().makeNode(in: emptyContext).makeResponse()
                 }
 
-                maker.post("create") { request in
-                    let maker = try request.maker()
-                    let account = try Stripe.shared.createManagedAccount(email: maker.contactEmail, local_id: maker.id?.int)
-                    
-                    maker.stripe_id = account.id
-                    maker.keys = account.keys
-                    try maker.save()
-                    
-                    return try maker.makeResponse()
-                }
-
                 maker.post("acceptedtos", String.init(stringLiteral:)) { request, ip in
                     let maker = try request.maker()
 
