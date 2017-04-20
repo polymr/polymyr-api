@@ -41,8 +41,15 @@ if [ "$(git diff --name-only $CURRENT_GIT_SHA HEAD -- nginx/)" ]; then
 	echo "    \n>>>> sudo cp -ru nginx/* /etc/nginx/"
 	sudo cp -ru nginx/* /etc/nginx/
 
-	echo "    >>>> sudo systemctl restart nginx"
-	sudo systemctl restart nginx
+	nginx_config_test="$(sudo nginx -t)"
+	test_string="test is successful"
+	if [ -z "${nginx_config_test##*$test_string*}" ]; then
+		echo "    >>>> sudo systemctl restart nginx"
+		sudo systemctl restart nginx
+	else
+		echo "\nSyntax error in Nginx configuration..."
+		echo "$nginx_config_test"
+	fi
 fi
 
 if [ "$(git rev-parse --abbrev-ref HEAD)" = "master" ]; then
