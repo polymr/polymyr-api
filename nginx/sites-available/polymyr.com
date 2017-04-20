@@ -69,7 +69,7 @@ server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
 
-    include snippets/ssl-api.polymyr.com.conf;
+    include snippets/ssl-beta.polymyr.com.conf;
     include snippets/ssl-params.conf;
 
     root /home/hakon/polymyr/polymyr-development-api;
