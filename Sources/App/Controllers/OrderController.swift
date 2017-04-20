@@ -14,7 +14,6 @@ import FluentProvider
 extension Stripe {
     
     func order(customer: Customer, product: Product, maker: Maker, campaign: Campaign, card: String) throws -> Charge {
-        print("here3")
         let price = product.fullPrice
         let reward = campaign.amountOff
         let fee = maker.cut
@@ -29,9 +28,7 @@ extension Stripe {
             throw Abort.custom(status: .badRequest, message: "Missing vendor keys")
         }
 
-        print("here1")
         let token = try Stripe.shared.createToken(for: stripe_id, representing: card, on: secret)
-        print("here2")
         return try Stripe.shared.charge(source: token.id, for: price, withFee: feePercentage, under: secret)
     }
 }
