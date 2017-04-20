@@ -72,7 +72,7 @@ server {
     include snippets/ssl-api.polymyr.com.conf;
     include snippets/ssl-params.conf;
 
-    root /home/hakon/polymyr/polymyr-development-api/;
+    root /home/hakon/polymyr/polymyr-development-api;
 
     server_name beta.polymyr.com www.beta.polymyr.com;
 
