@@ -46,22 +46,21 @@ final class CustomerController {
     func detail(_ request: Request) throws -> ResponseRepresentable {
         let customer = try request.customer()
         
-        if let expander: Expander = try request.extract() {
-            return try expander.expand(for: customer, owner: "customer", mappings: { (key, product) -> (NodeRepresentable?) in
+        if let expander: Expander<Customer> = try request.extract() {
+            return try expander.expand(for: customer, mappings: { (key, customers, identifier) -> [NodeRepresentable] in
                 switch key {
                 case "cards":
-                    guard let stripe_id = customer.stripe_id else {
+                    guard let stripe_id = customers[0].stripe_id else {
                         throw Abort.custom(status: .badRequest, message: "No stripe id")
                     }
                     
-                    return try Stripe.shared.paymentInformation(for: stripe_id).makeNode(in: jsonContext)
+                    return try [Stripe.shared.paymentInformation(for: stripe_id)]
                     
                 case "shipping":
-                    return try customer.shippingAddresses().all().makeNode(in: jsonContext)
+                    return try [customers[0].shippingAddresses().all().makeNode(in: jsonContext)]
                     
                 default:
-                    drop.log.warning("Could not find expansion for \(key) on ProductController.")
-                    return nil
+                    throw Abort.custom(status: .badRequest, message: "Could not find expansion for \(key) on \(type(of: self)).")
                 }
             }).makeResponse()
         }
