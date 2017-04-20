@@ -33,8 +33,8 @@ public final class Stripe {
 
     public static let shared = Stripe()
 
-    static var token = "pk_test_8CLhJ9ky8vCfyVwFm2CZfXdc"
-    static var secret = "sk_test_6zSrUMIQfOCUorVvFMS2LEzn"
+    static var token = "pk_test_lGLXGH2jjEx7KFtPmAYz39VA"
+    static var secret = "sk_test_WceGrEBqnYpjCYF6exFBXvnf"
     
     fileprivate let base = HTTPClient(urlString: "https://api.stripe.com/v1/")
     fileprivate let uploads = HTTPClient(urlString: "https://uploads.stripe.com/v1/")
