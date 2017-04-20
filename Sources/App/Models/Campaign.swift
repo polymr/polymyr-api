@@ -62,7 +62,7 @@ final class Campaign: Model, Preparation, JSONConvertible, NodeConvertible, Sani
             campaign.int("purchasedUnits")
             campaign.string("endDate")
             campaign.double("amountOff")
-            campaign.parent(Product.self)
+            campaign.parent(Product.self, unique: true)
             campaign.parent(Maker.self)
         }
     }
