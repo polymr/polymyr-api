@@ -219,12 +219,12 @@ final class AuthenticationCollection {
 
         switch type {
         case .customer:
-            let customer = try getAuthenticationSubject(subject: subject, create: create) as Customer
+            let customer = try getAuthenticationSubject(subject: subject, request: request, create: create) as Customer
             try request.auth.authenticate(customer, persist: true)
             return customer
 
         case .maker:
-            let maker = try getAuthenticationSubject(subject: subject, create: create) as Maker
+            let maker = try getAuthenticationSubject(subject: subject, request: request, create: create) as Maker
             try request.auth.authenticate(maker, persist: true)
             return maker
 

@@ -47,7 +47,7 @@ final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sani
             throw Abort.custom(status: .badRequest, message: "Missing json body...")
         }
 
-        self.name = try providerData.extract("name")
+        self.name = try providerData.extract("displayName")
         self.email = try providerData.extract("email")
     }
     
