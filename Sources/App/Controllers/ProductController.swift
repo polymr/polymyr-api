@@ -130,11 +130,20 @@ final class ProductController: ResourceRepresentable {
             return try sort.modify(Product.makeQuery()).all()
         }()
         
+        if products.count == 0 {
+            return try Node.array([]).makeResponse()
+        }
+        
         if let expander: Expander<Product> = try request.extract() {
             return try expander.expand(for: products) { (key, products, identifiers) -> [NodeRepresentable] in
                 switch key {
                 case "campaign":
-                    return try Campaign.makeQuery().filter(.subset(Product.foreignIdKey, .in, identifiers)).all()
+                    let campaigns = try Campaign.makeQuery().filter(.subset(Product.foreignIdKey, .in, identifiers)).all()
+                    
+                    return try identifiers.map { id in
+                        try campaigns.filter { try $0.product_id == id.converted(in: emptyContext) }
+                    }
+                    
                 case "tags":
                     return try products.map {
                         try $0.tags().all().makeNode(in: jsonContext)
