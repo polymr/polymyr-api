@@ -40,7 +40,7 @@ final class OrderController: ResourceRepresentable {
 
         switch type {
         case .customer:
-            return try request.customer().orders().all().makeJSON()
+            return try request.customer().orders().all().makeResponse()
         case .maker:
             var query = try request.maker().orders().makeQuery()
 
@@ -48,9 +48,9 @@ final class OrderController: ResourceRepresentable {
                 query = try query.filter("fulfilled", fulfilled)
             }
 
-            return try request.maker().orders().all().makeJSON()
+            return try request.maker().orders().all().makeResponse()
         case .anonymous:
-            return try Order.all().makeJSON()
+            return try Order.all().makeResponse()
         }
     }
     
@@ -84,7 +84,7 @@ final class OrderController: ResourceRepresentable {
     func modify(_ request: Request, order: Order) throws -> ResponseRepresentable {
         let order: Order = try request.patchModel(order)
         try order.save()
-        return try Response(status: .ok, json: order.makeJSON())
+        return try order.makeResponse()
     }
     
     func makeResource() -> Resource<Order> {

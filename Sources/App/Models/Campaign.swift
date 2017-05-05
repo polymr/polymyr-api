@@ -12,7 +12,7 @@ import FluentProvider
 import Foundation
 import Node
 
-final class Campaign: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class Campaign: Model, Preparation, NodeConvertible, Sanitizable {
     
     static var permitted: [String] = ["units", "purchasedUnits", "endDate", "amountOff", "product_id", "maker_id"]
 

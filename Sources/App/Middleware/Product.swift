@@ -10,7 +10,7 @@ import Vapor
 import Fluent
 import FluentProvider
 
-final class Product: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class Product: Model, Preparation, NodeConvertible, Sanitizable {
 
     let storage = Storage()
     

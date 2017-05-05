@@ -19,17 +19,19 @@ import Sessions
 
 final class FluentCacheProvider: Vapor.Provider {
 
+    static let repositoryName = "tapcrate-fluent-cache"
+
     public init(config: Config) throws { }
 
-    public func boot(_ drop: Droplet) throws {
-
+    func boot(_ config: Config) throws {
+        let cache = try config.resolveCache()
+        config.addConfigurable(middleware: { _ in SessionsMiddleware(CacheSessions(cache)) }, name: "fluent-sessions")
     }
 
+    func boot(_ droplet: Droplet) throws { }
+
     public func beforeRun(_ drop: Droplet) {
-        if let database = drop.database {
-            drop.addConfigurable(cache: MySQLCache(database), name: "mysql-cache")
-            drop.addConfigurable(middleware: SessionsMiddleware(CacheSessions(drop.cache)), name: "fluent-sessions")
-        }
+
     }
 }
 
@@ -38,17 +40,16 @@ extension Droplet {
     internal static func create() -> Droplet {
 
         do {
-            let drop = try Droplet()
+            let config = try Config()
 
-            try drop.addProvider(AuthProvider.Provider.self)
-            try drop.addProvider(MySQLProvider.Provider.self)
-            try drop.addProvider(FluentCacheProvider.self)
-            
-            drop.database?.log = { query in
-                print("query : \(query)")
-            }
+            try config.addProvider(AuthProvider.Provider.self)
+            try config.addProvider(MySQLProvider.Provider.self)
 
-            drop.preparations += [
+            config.addConfigurable(cache: MySQLCache.init, name: "mysql-cache")
+
+            try config.addProvider(FluentCacheProvider.self)
+
+            config.preparations += [
                 MakerAddress.self,
                 Maker.self,
                 MakerPicture.self,
@@ -72,6 +73,12 @@ extension Droplet {
                 
                 MySQLCache.MySQLCacheEntity.self
             ] as [Preparation.Type]
+
+            let drop = try Droplet(config)
+
+            drop.database?.log = { query in
+                print("query : \(query)")
+            }
 
             return drop
 

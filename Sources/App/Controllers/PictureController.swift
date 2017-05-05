@@ -48,7 +48,7 @@ extension RouteBuilder {
 final class PictureController<PictureType: Picture, OwnerType: Entity> {
     
     func index(_ request: Request, owner: Identifier) throws -> ResponseRepresentable {
-        return try PictureType.pictures(for: owner).all().makeJSON()
+        return try PictureType.pictures(for: owner).all().makeResponse()
     }
 
     func createPicture(from nodeObject: Node, with owner: Identifier) throws -> PictureType {
@@ -68,7 +68,7 @@ final class PictureController<PictureType: Picture, OwnerType: Entity> {
                 try createPicture(from: $0, with: owner).makeNode(in: jsonContext)
             }).makeResponse()
         } else {
-            return try createPicture(from: node, with: owner).makeJSON()
+            return try createPicture(from: node, with: owner).makeResponse()
         }
     }
     

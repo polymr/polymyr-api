@@ -14,7 +14,7 @@ import FluentProvider
 final class SectionController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try QuestionSection.all().makeJSON()
+        return try QuestionSection.all().makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
@@ -31,7 +31,7 @@ final class SectionController: ResourceRepresentable {
     func modify(_ request: Request, section: QuestionSection) throws -> ResponseRepresentable {
         let section: QuestionSection = try request.patchModel(section)
         try section.save()
-        return try Response(status: .ok, json: section.makeJSON())
+        return try section.makeResponse()
     }
     
     func makeResource() -> Resource<QuestionSection> {

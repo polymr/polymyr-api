@@ -14,7 +14,7 @@ import FluentProvider
 final class CampaignController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try Campaign.all().makeJSON()
+        return try Campaign.all().makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
@@ -31,7 +31,7 @@ final class CampaignController: ResourceRepresentable {
     func modify(_ request: Request, campaign: Campaign) throws -> ResponseRepresentable {
         let campaign: Campaign = try request.patchModel(campaign)
         try campaign.save()
-        return try Response(status: .ok, json: campaign.makeJSON())
+        return try campaign.makeResponse()
     }
     
     func makeResource() -> Resource<Campaign> {

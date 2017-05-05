@@ -65,7 +65,7 @@ final class CustomerController {
             }).makeResponse()
         }
     
-        return try customer.makeJSON()
+        return try customer.makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
@@ -86,7 +86,7 @@ final class CustomerController {
         
         let customer: Customer = try request.patchModel(customer)
         try customer.save()
-        return try Response(status: .ok, json: customer.makeJSON())
+        return try customer.makeResponse()
     }
 }
 

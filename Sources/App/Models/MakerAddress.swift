@@ -11,7 +11,7 @@ import Fluent
 import FluentProvider
 import Node
 
-final class MakerAddress: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class MakerAddress: Model, Preparation, NodeConvertible, Sanitizable {
 
     let storage = Storage()
     

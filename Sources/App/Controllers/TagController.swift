@@ -14,11 +14,11 @@ import FluentProvider
 final class TagController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try Tag.all().makeJSON()
+        return try Tag.all().makeResponse()
     }
     
     func show(_ request: Request, tag: Tag) throws -> ResponseRepresentable {
-        return try tag.products().all().makeJSON()
+        return try tag.products().all().makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
@@ -40,7 +40,7 @@ final class TagController: ResourceRepresentable {
     func modify(_ request: Request, tag: Tag) throws -> ResponseRepresentable {
         let tag: Tag = try request.patchModel(tag)
         try tag.save()
-        return try Response(status: .ok, json: tag.makeJSON())
+        return try tag.makeResponse()
     }
     
     func makeResource() -> Resource<Tag> {

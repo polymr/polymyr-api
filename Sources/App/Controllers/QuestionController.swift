@@ -14,7 +14,7 @@ import FluentProvider
 final class QuestionController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try Question.all().makeJSON()
+        return try Question.all().makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {
@@ -31,7 +31,7 @@ final class QuestionController: ResourceRepresentable {
     func modify(_ request: Request, question: Question) throws -> ResponseRepresentable {
         let question: Question = try request.patchModel(question)
         try question.save()
-        return try Response(status: .ok, json: question.makeJSON())
+        return try question.makeResponse()
     }
     
     func makeResource() -> Resource<Question> {

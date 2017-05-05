@@ -26,7 +26,7 @@ final class CustomerAddressController: ResourceRepresentable {
     
     func index(_ request: Request) throws -> ResponseRepresentable {
         let customer = try request.customer()
-        return try customer.shippingAddresses().all().makeJSON()
+        return try customer.shippingAddresses().all().makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {

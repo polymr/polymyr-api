@@ -22,21 +22,11 @@ extension Model where Self: NodeConvertible {
     }
 }
 
-extension Model where Self: NodeConvertible {
+extension NodeRepresentable {
 
-    public init(json: JSON) throws {
-        try self.init(node: Node(json.wrapped, in: nil))
-    }
-
-    public func makeJSON() throws -> JSON {
-        return try JSON(self.makeNode(in: jsonContext).wrapped)
-    }
-}
-
-extension Model where Self: NodeConvertible {
-    
     func makeResponse() throws -> Response {
-        return try Response(status: .ok, json: JSON(self.makeNode(in: jsonContext)))
+        let json: JSON = try makeNode(in: jsonContext).converted()
+        return try Response(status: .ok, json: json)
     }
 }
 
@@ -44,9 +34,9 @@ func serialize<R: StructuredDataWrapper>(_ _array: [Int]?, in _context: Context?
     guard let array = _array else {
         return R(.array([]), in: emptyContext)
     }
-    
+
     if let context = _context, context.isRow {
-        let serialized = try JSON(node: array).serialize().string()
+        let serialized = try JSON(node: array).serialize().makeString()
         return R(.string(serialized), in: emptyContext)
     } else {
         return try R(Node(node: array, in: emptyContext).wrapped, in: emptyContext)
@@ -57,9 +47,9 @@ func serialize<R: StructuredDataWrapper>(_ _array: [String]?, in _context: Conte
     guard let array = _array else {
         return R(.array([]), in: emptyContext)
     }
-    
+
     if let context = _context, context.isRow {
-        let serialized = try JSON(node: array).serialize().string()
+        let serialized = try JSON(node: array).serialize().makeString()
         return R(.string(serialized), in: emptyContext)
     } else {
         return try R(Node(node: array, in: emptyContext).wrapped, in: emptyContext)

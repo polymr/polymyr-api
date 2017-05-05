@@ -11,7 +11,7 @@ import Fluent
 import FluentProvider
 import Node
 
-final class CustomerAddress: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class CustomerAddress: Model, Preparation, NodeConvertible, Sanitizable {
     
     static var permitted: [String] = ["customer_id", "address", "firstName", "lastName", "apartment", "city", "state", "zip", "isDefault", "phoneNumber"]
 

@@ -25,7 +25,7 @@ extension Stripe {
     }
 }
 
-final class Customer: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable, JWTInitializable, SessionPersistable {
+final class Customer: Model, Preparation, NodeConvertible, Sanitizable, JWTInitializable, SessionPersistable {
     
     static var permitted: [String] = ["email", "name", "default_shipping_id"]
 

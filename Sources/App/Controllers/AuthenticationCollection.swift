@@ -108,7 +108,7 @@ final class AuthenticationCollection {
 
         builder.grouped(PasswordAuthenticationMiddleware(Maker.self)).post("login") { request in
             guard let maker = request.auth.authenticated(Maker.self) else {
-                if drop.environment == .development {
+                if drop.config.environment == .development {
                     throw Abort.custom(status: .badRequest, message: "Could not fetch authenticated user. \(request.storage.description)")
                 } else {
                     throw AuthenticationError.notAuthenticated
@@ -127,7 +127,7 @@ final class AuthenticationCollection {
                 throw AuthenticationError.notAuthenticated
             }
             
-            if drop.environment == .development && subject.hasPrefix("__testing__") {
+            if drop.config.environment == .development && subject.hasPrefix("__testing__") {
                 guard let newSubject = subject.replacingOccurrences(of: "__testing__", with: "").int else {
                     throw AuthenticationError.notAuthenticated
                 }
@@ -172,7 +172,7 @@ final class AuthenticationCollection {
                 throw Abort.custom(status: .internalServerError, message: "Failed to verify JWT token with error : \(error)")
             }
             
-            if drop.environment != .development {
+            if drop.config.environment != .development {
                 do {
                     try jwt.verifyClaims(claims)
                 } catch {

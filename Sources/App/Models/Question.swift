@@ -11,7 +11,7 @@ import Fluent
 import FluentProvider
 import Node
 
-final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class Question: Model, Preparation, NodeConvertible, Sanitizable {
 
     let storage = Storage()
     
@@ -38,8 +38,9 @@ final class Question: Model, Preparation, JSONConvertible, NodeConvertible, Sani
     
     convenience init(row: Row) throws {
         var node = row.makeNode(in: rowContext)
-        
-        let parsed = try JSON(serialized: row.extract("qualifiers") as String)
+
+        let bytes: String = try row.extract("qualifiers")
+        let parsed = try JSON(bytes: bytes.makeBytes())
         node["qualifiers"] = parsed.converted(to: Node.self)
         
         try self.init(node: node)

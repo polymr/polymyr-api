@@ -11,7 +11,7 @@ import Fluent
 import FluentProvider
 import Node
 
-protocol Picture: Model, JSONConvertible, NodeConvertible, Sanitizable, Preparation {
+protocol Picture: Model, NodeConvertible, Sanitizable, Preparation {
 
     static func pictures(for owner: Identifier) throws -> Query<Self>
 }

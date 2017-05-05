@@ -25,7 +25,7 @@ public struct StripeHTTPError: AbortError {
 
 func createToken(token: String) throws -> [HeaderKey: String] {
     let base64 = token.bytes.base64Encoded
-    return try ["Authorization" : "Basic \(base64.string())"]
+    return ["Authorization" : "Basic \(base64.makeString())"]
 }
 
 public class HTTPClient {

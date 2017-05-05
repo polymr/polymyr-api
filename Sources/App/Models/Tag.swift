@@ -11,7 +11,7 @@ import Fluent
 import FluentProvider
 import Node
 
-final class Tag: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class Tag: Model, Preparation, NodeConvertible, Sanitizable {
 
     let storage = Storage()
     

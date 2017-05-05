@@ -28,7 +28,7 @@ func save(data: Data, for product: Int) throws -> String {
     
     let descriptionFolder = "Public/descriptions"
 
-    let saveURL = URL(fileURLWithPath: drop.workDir)
+    let saveURL = URL(fileURLWithPath: drop.config.workDir)
                         .appendingPathComponent(descriptionFolder, isDirectory: true)
                         .appendingPathComponent("\(product).json", isDirectory: false)
     

@@ -26,12 +26,12 @@ extension Maker {
 final class MakerController: ResourceRepresentable {
 
     func index(_ request: Request) throws -> ResponseRepresentable {
-        return try request.maker().makeJSON()
+        return try request.maker().makeResponse()
     }
     
     func show(_ request: Request, maker: Maker) throws -> ResponseRepresentable {
         try maker.shouldAllow(request: request)
-        return try maker.makeJSON()
+        return try maker.makeResponse()
     }
     
     func create(_ request: Request) throws -> ResponseRepresentable {

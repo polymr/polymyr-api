@@ -12,7 +12,7 @@ import Vapor
 import FluentProvider
 
 func extractFrom<T: Model>(metadata: Node) throws -> T? {
-    return try metadata[T.entity]?.string.flatMap { try T(from: $0) }
+    return try metadata[T.entity]?.int.flatMap { try T.find($0) }
 }
 
 class StripeWebhooks {

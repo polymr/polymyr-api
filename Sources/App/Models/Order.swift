@@ -13,7 +13,7 @@ import Node
 
 fileprivate let separator = "@@@<<<>>>@@@"
 
-final class Order: Model, Preparation, JSONConvertible, NodeConvertible, Sanitizable {
+final class Order: Model, Preparation, NodeConvertible, Sanitizable {
 
     let storage = Storage()
     

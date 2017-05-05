@@ -11,7 +11,7 @@ import Fluent
 import FluentProvider
 import Node
 
-final class StripeMakerCustomer: Model, JSONConvertible, NodeConvertible, Preparation {
+final class StripeMakerCustomer: Model, NodeConvertible, Preparation {
 
     let storage = Storage()
     
