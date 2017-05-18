@@ -5,7 +5,7 @@
       "package": "Auth",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/auth.git",
-      "version": "1.0.0-beta.1"
+      "version": "1.0.0-beta.2"
     },
     {
       "package": "AuthProvider",

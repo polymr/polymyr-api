@@ -234,9 +234,9 @@ extension Maker {
 
 extension BCryptHasher: PasswordVerifier {
     
-    public func verify(password: String, matchesHash: String) throws -> Bool {
+    public func verify(password: Bytes, matches hash: Bytes) throws -> Bool {
         do {
-            return try self.check(password, matchesHash: matchesHash)
+            return try self.check(password, matchesHash: hash)
         } catch {
             throw Abort.custom(status: .unauthorized, message: "error matching hash \(error)")
         }
@@ -283,7 +283,7 @@ extension Maker: PasswordAuthenticatable {
         }
         
         do {
-            guard try passwordVerifier.verify(password: creds.password, matchesHash: hash) else {
+            guard try passwordVerifier.verify(password: creds.password, matches: hash) else {
                 if drop.config.environment == .development {
                     throw Abort.custom(status: .badRequest, message: "Password \(creds.password) does not match hash : \(hash)")
                 } else {
